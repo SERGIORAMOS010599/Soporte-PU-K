@@ -21,17 +21,21 @@ async function cargarEquipos() {
             const tarjeta = document.createElement('div');
             tarjeta.className = 'tarjeta-gps';
             
-            // Llenamos la tarjeta con los datos reales. 
-            // NOTA: Ajusta 'Marca', 'Modelo' o 'ID' si en tu Excel los encabezados se llaman diferente
+            // Ajuste dinámico de campos por si vienen en mayúsculas o minúsculas
+            const idEquipo = equipo.ID || equipo.Imei || equipo.IMEI || 'N/A';
+            const marca = equipo.Marca || equipo.MARCA || 'SIN MARCA';
+            const modelo = equipo.Modelo || equipo.MODELO || 'N/A';
+            const estado = equipo.Estado || equipo.ESTADO || 'PENDIENTE';
+
             tarjeta.innerHTML = `
-                <div class="estado">PENDIENTE</div>
-                <h3>${equipo.Marca || 'SIN MARCA'}</h3>
-                <p style="color: var(--color-gris); font-size: 0.9em;">${equipo.Modelo || 'N/A'}</p>
-                <p style="font-size: 0.8em;">ID: ${equipo.ID || equipo.Imei || 'N/A'}</p>
+                <div class="estado">${estado}</div>
+                <h3 style="margin: 5px 0;">${marca}</h3>
+                <p style="color: var(--color-gris); margin: 3px 0; font-size: 0.9em;">${modelo}</p>
+                <p style="font-size: 0.8em; margin: 3px 0;">ID: ${idEquipo}</p>
             `;
 
             // Le damos la orden de que al hacer clic, actualice el panel de la derecha
-            tarjeta.onclick = () => mostrarDetalles(equipo);
+            tarjeta.onclick = () => mostrarDetalles(equipo, idEquipo, marca, modelo);
 
             // Inyectamos la tarjeta en la pantalla
             contenedor.appendChild(tarjeta);
@@ -42,11 +46,71 @@ async function cargarEquipos() {
     }
 }
 
-function mostrarDetalles(equipo) {
+function mostrarDetalles(equipo, idEquipo, marca, modelo) {
     // Inyectamos la información del equipo seleccionado en el panel derecho
-    document.getElementById('detalle-id').innerText = equipo.ID || equipo.Imei || 'N/A';
-    document.getElementById('detalle-marca').innerText = equipo.Marca || 'N/A';
-    document.getElementById('detalle-modelo').innerText = equipo.Modelo || 'N/A';
+    document.getElementById('detalle-id').innerText = idEquipo;
+    document.getElementById('detalle-marca').innerText = marca;
+    document.getElementById('detalle-modelo').innerText = modelo;
+    
+    // Guardamos la línea (teléfono) de forma oculta en algún lado para usarla al enviar el SMS
+    // Si tu Excel tiene una columna llamada "Linea" o "Telefono", la guardamos como atributo:
+    document.getElementById('detalle-marca').setAttribute('data-linea', equipo.Linea || equipo.LINEA || '6620000000'); 
+}
+
+
+// ==========================================
+// NUEVA LÓGICA DE BOTONES Y COMANDOS SMS
+// ==========================================
+
+function obtenerComando(marca, accion) {
+    // Convertimos la marca a mayúsculas para no fallar
+    marca = marca.toUpperCase();
+    
+    // 1. Diccionario para equipos SUNTECH
+    if (marca.includes('SUNTECH')) {
+        if (accion === 'apagar') return "SA200CMD;123456;02;Enable1"; // <-- Ejemplo a cambiar
+        if (accion === 'encender') return "SA200CMD;123456;02;Disable1";
+        if (accion === 'reiniciar') return "SA200CMD;123456;03";
+    }
+    
+    // 2. Diccionario para equipos TELTONIKA
+    else if (marca.includes('TELTONIKA')) {
+        if (accion === 'apagar') return "  setdigout 1"; // Los espacios importan en Teltonika
+        if (accion === 'encender') return "  setdigout 0";
+        if (accion === 'reiniciar') return "  cpureset";
+    }
+
+    // 3. Diccionario para equipos JIMI IOT
+    else if (marca.includes('JIMI')) {
+        if (accion === 'apagar') return "RELAY,1#";
+        if (accion === 'encender') return "RELAY,0#";
+        if (accion === 'reiniciar') return "RESET#";
+    }
+
+    // Si la marca no está registrada
+    return "COMANDO_NO_ENCONTRADO";
+}
+
+function enviarSMS(accion) {
+    const marcaElemento = document.getElementById('detalle-marca');
+    const marca = marcaElemento.innerText;
+    const numeroLinea = marcaElemento.getAttribute('data-linea'); 
+    
+    if (marca === "---" || marca === "N/A") {
+        alert("Primero selecciona un equipo de la lista.");
+        return;
+    }
+
+    const comandoTexto = obtenerComando(marca, accion);
+    
+    if (comandoTexto === "COMANDO_NO_ENCONTRADO") {
+        alert(`Aún no configuramos los comandos para la marca: ${marca}`);
+        return;
+    }
+
+    // Armamos el enlace y lo abrimos
+    const enlaceSMS = `sms:${numeroLinea}?body=${encodeURIComponent(comandoTexto)}`;
+    window.open(enlaceSMS, '_self');
 }
 
 // Arrancamos el motor en cuanto carga la página
