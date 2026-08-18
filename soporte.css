@@ -54,23 +54,50 @@ body {
     gap: 15px;
 }
 
-/* Tarjetas */
+/* --- DISEÑO DE TARJETA CALCADO DE APPSHEET --- */
 .tarjeta-gps {
-    background-color: #252525;
-    border: 1px solid var(--borde);
-    border-radius: 8px;
+    background-color: #1e1e1e;
+    border: 1px solid var(--color-naranja); /* Borde naranja de tu imagen */
+    border-radius: 4px;
     padding: 15px;
     cursor: pointer;
-    transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
+    min-height: 220px;
+    transition: background-color 0.2s;
 }
 
-.tarjeta-gps:hover {
-    border-color: var(--color-naranja);
-    background-color: #2a2a2a;
+.tarjeta-gps:hover { background-color: #2a2a2a; }
+
+.tarjeta-unidad { color: var(--color-naranja); font-weight: bold; font-size: 1em; margin-bottom: 2px; text-transform: uppercase;}
+.tarjeta-cliente { color: #a0a0a0; font-size: 0.8em; font-weight: bold; text-transform: uppercase; margin-bottom: 20px; line-height: 1.2; }
+
+.tarjeta-marca { color: #ffffff; font-size: 1.6em; font-weight: bold; margin: 0 0 2px 0; text-transform: uppercase;}
+.tarjeta-modelo { color: #a0a0a0; font-size: 0.9em; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;}
+
+.tarjeta-servicio { color: #ffffff; font-size: 0.85em; font-weight: bold; margin-bottom: 25px; text-transform: uppercase; }
+
+/* Botones inferiores de la tarjeta (Apagar/Encender) */
+.tarjeta-acciones {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.65em;
+    font-weight: bold;
+    margin-top: auto; /* Empuja esto hasta abajo de la tarjeta */
 }
 
+.accion-btn { display: flex; align-items: center; gap: 4px; }
+.accion-btn.rojo { color: #d32f2f; }
+.accion-btn.verde { color: #388e3c; }
+
+/* Los pequeños circulitos al lado del texto */
+.circulo { display: inline-block; width: 6px; height: 6px; border-radius: 50%; border: 2px solid; }
+.accion-btn.rojo .circulo { border-color: #d32f2f; background: transparent; }
+.accion-btn.verde .circulo { border-color: #388e3c; background: transparent; }
+
+/* Los iconos de la derecha */
+.accion-iconos { margin-left: auto; display: flex; gap: 10px; font-size: 1.8em; color: #ffffff; }
 .estado { color: var(--color-naranja); font-weight: 800; font-size: 0.75em; margin-bottom: 5px; }
 .cliente-info { font-size: 0.75em; color: var(--color-gris); margin-bottom: 15px; text-transform: uppercase; }
 .marca-titulo { font-size: 1.5em; font-weight: bold; margin: 0; }
