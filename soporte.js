@@ -73,7 +73,7 @@ class SoporteTecnico {
         document.getElementById('det-marca').innerText = equipo.Marca || 'N/A';
         document.getElementById('det-modelo').innerText = equipo.Modelo || 'N/A';
         document.getElementById('det-cliente').innerText = equipo.Cliente || 'N/A';
-        document.getElementById('det-estado').innerText = equipo.Estado || 'PENDIENTE';
+        document.getElementById('det-Estado del Servicio').innerText = equipo.Estado del Servicio || 'PENDIENTE';
 
         // 3. Guardar datos para comandos SMS
         document.getElementById('det-marca').setAttribute('data-linea', numeroLinea);
