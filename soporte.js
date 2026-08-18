@@ -1,7 +1,7 @@
 class SoporteTecnico {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
-        this.sheetId = '18gsvPp2HSMR0DKIfYfZijnwc_PyNV7ULch-UDEVupV0'; // El ID de tu sheet
+        this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM'; // El ID de tu sheet
         this.equipos = [];
         this.lineasMapa = new Map();
     }
