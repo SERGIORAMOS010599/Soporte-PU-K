@@ -1,69 +1,75 @@
 class SoporteTecnico {
-    constructor(containerId) {
-        this.container = document.getElementById(containerId);
-        this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM';
+    constructor() {
+        this.container = document.getElementById('grid-salidas');
+        this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM'; // Tu Google Sheet
         this.equipos = [];
-        this.loadData();
+        this.iniciar();
     }
 
-    async loadData() {
+    async iniciar() {
         if (!this.container) return;
-        this.container.innerHTML = '<p style="text-align:center; width:100%; color: #ffb74d;">Cargando equipos reales...</p>';
+        this.container.innerHTML = '<p style="text-align:center; color: #ffb74d; padding: 20px;">Conectando con Google Sheets...</p>';
 
         const url = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json`;
 
         try {
             const response = await fetch(url);
             const text = await response.text();
+            
+            // Limpieza del formato nativo de Google
             const json = JSON.parse(text.substring(47).slice(0, -2));
             const rows = json.table.rows;
 
             this.equipos = [];
 
-            rows.forEach((row) => {
-                // Verificamos que la fila tenga datos y que no sea el encabezado
-                if (row && row.c && row.c[3] && row.c[3].v !== 'ID') {
+            // Recorremos las filas, saltando la fila 0 (Tus encabezados)
+            rows.forEach((row, index) => {
+                if (row && row.c && index > 0) {
+                    
+                    // Función auxiliar para leer celdas sin que el código truene si están vacías
+                    const val = (colIndex) => row.c[colIndex] ? row.c[colIndex].v : '';
+
+                    // Mapeo exacto basado en el orden de tus columnas
                     const equipo = {
-                        fechaSalida: row.c[0] ? row.c[0].v : '',
-                        marca: row.c[1] ? row.c[1].v : 'SIN MARCA',
-                        modelo: row.c[2] ? row.c[2].v : 'SIN MODELO',
-                        id: row.c[3] ? row.c[3].v : 'N/A',
-                        imei: row.c[4] ? row.c[4].v : 'N/A',
-                        linea: row.c[5] ? row.c[5].v : 'SIN NÚMERO',
-                        iccid: row.c[6] ? row.c[6].v : 'N/A',
-                        compania: row.c[7] ? row.c[7].v : 'N/A',
-                        estado: row.c[8] ? row.c[8].v : 'N/A',
-                        cliente: row.c[9] ? row.c[9].v : 'SIN CLIENTE',
-                        estadoServicio: row.c[10] ? row.c[10].v : 'PENDIENTE',
-                        unidad: row.c[11] ? row.c[11].v : 'SIN UNIDAD',
-                        marcaModeloUnidad: row.c[12] ? row.c[12].v : 'N/A',
-                        anio: row.c[13] ? row.c[13].v : 'N/A',
-                        numSerie: row.c[14] ? row.c[14].v : 'N/A',
-                        tipoServicio: row.c[15] ? row.c[15].v : 'ESTANDAR'
+                        marca: val(1) || 'SIN MARCA',
+                        modelo: val(2) || 'SIN MODELO',
+                        id: val(3) || 'N/A',
+                        imei: val(4) || 'N/A',
+                        linea: val(5) || 'SIN NÚMERO',
+                        iccid: val(6) || 'N/A',
+                        cliente: val(9) || 'SIN CLIENTE',
+                        estadoServicio: val(10) || 'PENDIENTE',
+                        unidad: val(11) || 'SIN UNIDAD'
                     };
-                    this.equipos.push(equipo);
+
+                    // Solo agregamos a la lista si realmente existe un ID válido
+                    if (equipo.id !== 'N/A' && equipo.id.toString().trim() !== '') {
+                        this.equipos.push(equipo);
+                    }
                 }
             });
 
-            this.render();
+            this.renderizar();
         } catch (error) {
-            console.error("Error cargando la base de datos:", error);
-            this.container.innerHTML = '<p style="text-align:center; width:100%; color:red;">No se pudo conectar con la base de datos de Sheets.</p>';
+            console.error("Error al conectar con Sheets:", error);
+            this.container.innerHTML = '<p style="text-align:center; color:#ff4c4c;">No se pudo cargar la información. Revisa tu conexión.</p>';
         }
     }
 
-    render() {
+    renderizar() {
         this.container.innerHTML = '';
         
         if (this.equipos.length === 0) {
-            this.container.innerHTML = '<p style="text-align:center; width:100%; color:#a0a0a0;">No hay equipos registrados en el Excel.</p>';
+            this.container.innerHTML = '<p style="text-align:center; color:#a0a0a0;">No hay equipos registrados en la base de datos.</p>';
             return;
         }
 
         this.equipos.forEach(eq => {
-            const div = document.createElement('div');
-            div.className = 'tarjeta-gps';
-            div.innerHTML = `
+            const tarjeta = document.createElement('div');
+            tarjeta.className = 'tarjeta-gps';
+            
+            // Estructura limpia de la tarjeta
+            tarjeta.innerHTML = `
                 <div class="tarjeta-unidad">${eq.unidad}</div>
                 <div class="tarjeta-cliente">${eq.cliente} (${eq.id})</div>
                 <h2 class="tarjeta-marca">${eq.marca}</h2>
@@ -74,8 +80,9 @@ class SoporteTecnico {
                     <div class="accion-btn verde" onclick="event.stopPropagation(); appSoporte.enviarSMS('encender', '${eq.linea}')">ENCENDER <span class="circulo"></span></div>
                 </div>
             `;
-            div.onclick = () => this.abrirDetalles(eq);
-            this.container.appendChild(div);
+            
+            tarjeta.onclick = () => this.abrirDetalles(eq);
+            this.container.appendChild(tarjeta);
         });
     }
 
@@ -83,19 +90,25 @@ class SoporteTecnico {
         const panel = document.getElementById('panel-detalles');
         if (!panel) return;
 
-        // Llenamos los datos en el panel lateral
-        document.getElementById('det-titulo').innerText = `${eq.cliente} (${eq.id})`;
-        document.getElementById('det-id').innerText = eq.id;
-        document.getElementById('det-linea').innerText = eq.linea;
-        document.getElementById('det-iccid').innerText = eq.iccid;
-        document.getElementById('det-imei').innerText = eq.imei;
-        document.getElementById('det-marca').innerText = eq.marca;
-        document.getElementById('det-modelo').innerText = eq.modelo;
-        document.getElementById('det-cliente').innerText = eq.cliente;
-        document.getElementById('det-servicio').innerText = eq.estadoServicio;
+        // Función segura para inyectar textos en el panel lateral sin errores
+        const setText = (elementId, text) => {
+            const el = document.getElementById(elementId);
+            if (el) el.innerText = text;
+        };
 
-        // Guardamos la línea para los comandos SMS
-        document.getElementById('det-marca').setAttribute('data-linea', eq.linea);
+        setText('det-titulo', `${eq.cliente} (${eq.id})`);
+        setText('det-id', eq.id);
+        setText('det-linea', eq.linea);
+        setText('det-iccid', eq.iccid);
+        setText('det-imei', eq.imei);
+        setText('det-marca', eq.marca);
+        setText('det-modelo', eq.modelo);
+        setText('det-cliente', eq.cliente);
+        setText('det-servicio', eq.estadoServicio);
+
+        // Guardamos el número en el atributo para los SMS
+        const marcaTag = document.getElementById('det-marca');
+        if (marcaTag) marcaTag.setAttribute('data-linea', eq.linea);
         
         panel.classList.add('abierto');
     }
@@ -106,18 +119,20 @@ class SoporteTecnico {
     }
 
     enviarSMS(accion, lineaDirecta) {
-        const numero = lineaDirecta || document.getElementById('det-marca').getAttribute('data-linea');
+        const marcaTag = document.getElementById('det-marca');
+        const numero = lineaDirecta || (marcaTag ? marcaTag.getAttribute('data-linea') : '');
+        
         if (!numero || numero === 'SIN NÚMERO') {
-            alert("No hay un número de línea vinculado para enviar comandos.");
+            alert("No hay un número de línea vinculado para enviar comandos a este equipo.");
             return;
         }
 
-        // Definimos el comando según la marca si es necesario, o genérico
         const comando = (accion === 'apagar') ? "SA200CMD;123456;02;Enable1" : "SA200CMD;123456;02;Disable1";
         window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
     }
 }
 
+// Instanciamos la clase globalmente cuando el documento esté listo
 document.addEventListener('DOMContentLoaded', () => {
-    window.appSoporte = new SoporteTecnico('grid-salidas');
+    window.appSoporte = new SoporteTecnico();
 });
