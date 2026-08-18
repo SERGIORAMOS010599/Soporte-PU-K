@@ -4,111 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Soporte PU-K</title>
-    <style>
-        /* Paleta de colores basada en tu diseño */
-        :root {
-            --bg-fondo: #121212;
-            --bg-panel: #1e1e1e;
-            --color-texto: #ffffff;
-            --color-naranja: #ffb74d;
-            --color-gris: #a0a0a0;
-            --borde: #333333;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-fondo);
-            color: var(--color-texto);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Columna Izquierda: Lista de Equipos */
-        .columna-lista {
-            width: 35%;
-            background-color: var(--bg-panel);
-            border-right: 2px solid var(--borde);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .encabezado-lista {
-            padding: 20px;
-            border-bottom: 1px solid var(--borde);
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .contenedor-tarjetas {
-            padding: 15px;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-
-        /* Estilo de una tarjeta individual */
-        .tarjeta-gps {
-            background-color: #252525;
-            border: 1px solid var(--borde);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            cursor: pointer;
-            transition: border-color 0.3s;
-        }
-
-        .tarjeta-gps:hover {
-            border-color: var(--color-naranja);
-        }
-
-        .estado {
-            color: var(--color-naranja);
-            font-weight: bold;
-            font-size: 0.8em;
-            margin-bottom: 5px;
-        }
-
-        /* Columna Derecha: Detalles del Equipo */
-        .columna-detalles {
-            width: 65%;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            overflow-y: auto;
-        }
-
-        .titulo-detalles {
-            color: var(--color-naranja);
-            font-size: 2em;
-            margin: 0 0 20px 0;
-        }
-
-        .panel-botones {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            background-color: var(--bg-panel);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid var(--borde);
-        }
-
-        .boton-comando {
-            background-color: transparent;
-            color: var(--color-texto);
-            border: 1px solid var(--color-gris);
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .boton-comando:hover {
-            background-color: #333;
-        }
-    </style>
+    <!-- Aquí conectamos tu archivo CSS externo -->
+    <link rel="stylesheet" href="disenos.css">
 </head>
 <body>
 
@@ -117,7 +14,7 @@
         <div class="encabezado-lista">SOPORTE TÉCNICO</div>
         <div class="contenedor-tarjetas" id="lista-salidas">
             
-            <!-- Ejemplo de una tarjeta estática (luego lo haremos con código) -->
+            <!-- Ejemplo de una tarjeta estática -->
             <div class="tarjeta-gps">
                 <div class="estado">PENDIENTE</div>
                 <h3>SUNTECH</h3>
