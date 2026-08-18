@@ -4,45 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Soporte PU-K</title>
-    <!-- Aquí conectamos tu archivo CSS externo -->
-    <link rel="stylesheet" href="disenos.css">
+    <link rel="stylesheet" href="soporte.css">
 </head>
 <body>
 
-    <!-- Panel Izquierdo -->
-    <div class="columna-lista">
-        <div class="encabezado-lista">SOPORTE TÉCNICO</div>
-        <div class="contenedor-tarjetas" id="lista-salidas">
-            
-            <!-- Ejemplo de una tarjeta estática -->
-            <div class="tarjeta-gps">
-                <div class="estado">PENDIENTE</div>
-                <h3>SUNTECH</h3>
-                <p style="color: var(--color-gris); font-size: 0.9em;">ST4315B</p>
-                <p style="font-size: 0.8em;">ID: 2300003663</p>
+    <div class="barra-superior">
+        SOPORTE TÉCNICO
+    </div>
+
+    <div class="contenedor-principal">
+        
+        <!-- CUADRÍCULA MAESTRA -->
+        <div class="vista-cuadricula">
+            <div id="grid-salidas" class="grid-tarjetas">
+                <!-- Se inyectan con JavaScript -->
+            </div>
+        </div>
+
+        <!-- PANEL DE DETALLES -->
+        <div id="panel-detalles" class="panel-lateral">
+            <div class="encabezado-panel">
+                <h1 class="titulo-detalles" id="det-titulo">CARGANDO...</h1>
+                <button class="btn-cerrar" onclick="appSoporte.cerrarDetalles()">✖</button>
             </div>
 
+            <div class="panel-botones">
+                <button class="btn-accion" onclick="appSoporte.enviarSMS('apagar')">
+                    <div class="icono" style="background-color: #d32f2f;">⏻</div>
+                    APAGAR MOTOR
+                </button>
+                <button class="btn-accion" onclick="appSoporte.enviarSMS('encender')">
+                    <div class="icono" style="background-color: #388e3c;">⏻</div>
+                    ENCENDER MOTOR
+                </button>
+                <button class="btn-accion" onclick="appSoporte.enviarSMS('reiniciar')">
+                    <div class="icono" style="background-color: #fbc02d;">⟳</div>
+                    REINICIAR EQUIPO
+                </button>
+            </div>
+
+            <table class="tabla-info">
+                <tr><td>ID</td><td id="det-id">---</td></tr>
+                <tr><td>Línea</td><td id="det-linea">---</td></tr>
+                <tr><td>ICCID</td><td id="det-iccid">---</td></tr>
+                <tr><td>IMEI</td><td id="det-imei">---</td></tr>
+                <tr><td>Marca</td><td id="det-marca">---</td></tr>
+                <tr><td>Modelo</td><td id="det-modelo">---</td></tr>
+                <tr><td>Cliente</td><td id="det-cliente">---</td></tr>
+                <tr><td>Estado del Servicio</td><td id="det-estado" style="color: #4caf50;">---</td></tr>
+            </table>
         </div>
     </div>
 
-    <!-- Panel Derecho -->
-    <div class="columna-detalles">
-        <h1 class="titulo-detalles">PENDIENTE</h1>
-        
-        <div class="panel-botones">
-            <button class="boton-comando" style="color: #ff4c4c; border-color: #ff4c4c;" onclick="enviarSMS('apagar')">Apagar Motor</button>
-            <button class="boton-comando" style="color: #4caf50; border-color: #4caf50;" onclick="enviarSMS('encender')">Encender Motor</button>
-            <button class="boton-comando" style="color: #ffb74d; border-color: #ffb74d;" onclick="enviarSMS('reiniciar')">Reiniciar</button>
-        </div>
-        
-        <<div style="background-color: var(--bg-panel); padding: 20px; border-radius: 8px; border: 1px solid var(--borde);">
-            <p><strong>ID:</strong> <span id="detalle-id">2300003663</span></p>
-            <p><strong>Marca:</strong> <span id="detalle-marca">SUNTECH</span></p>
-            <p><strong>Modelo:</strong> <span id="detalle-modelo">ST4315B</span></p>
-        </div>
-    </div>
-
-    <!-- Aquí conectamos el cerebro de la página -->
-    <script src="logica.js"></script>
+    <!-- Carga del Cerebro OOP -->
+    <script src="soporte.js"></script>
 </body>
 </html>
