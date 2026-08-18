@@ -8,7 +8,6 @@ class SoporteTecnico {
 
     async iniciar() {
         try {
-            // Descarga secuencial para evitar errores de red
             const resS = await fetch(this.urlSalidas);
             this.equipos = await resS.json();
             
@@ -19,11 +18,11 @@ class SoporteTecnico {
                     const iccid = (l.ICCID || l.Iccid || '').toString().trim();
                     if (iccid) this.lineasMapa.set(iccid, l.Linea || l.LINEA || 'SIN NÚMERO');
                 });
-            } catch (e) { console.warn("Líneas no cargadas, continuando..."); }
+            } catch (e) { console.warn("Líneas no cargadas"); }
 
             this.renderizar();
         } catch (e) {
-            document.body.innerHTML = `<h1 style="color:red; text-align:center;">Error crítico: ${e.message}</h1>`;
+            console.error(e);
         }
     }
 
@@ -36,6 +35,9 @@ class SoporteTecnico {
             const e = {}; 
             for(let k in eq) e[k.trim()] = (typeof eq[k]=='string')?eq[k].trim():eq[k];
             
+            // Usamos "Estado del Servicio" (con espacios) como me indicaste
+            const estadoServicio = e["Estado del Servicio"] || 'PENDIENTE';
+            
             const div = document.createElement('div');
             div.className = 'tarjeta-gps';
             div.innerHTML = `
@@ -43,10 +45,10 @@ class SoporteTecnico {
                 <div class="tarjeta-cliente">${e.Cliente || ''} ${e.ID || ''}</div>
                 <h2 class="tarjeta-marca">${e.Marca || 'N/A'}</h2>
                 <div class="tarjeta-modelo">${e.Modelo || 'N/A'}</div>
-                <div class="tarjeta-servicio">${e["Estado del Servicio"] || 'N/A'}</div>
+                <div class="tarjeta-servicio">${estadoServicio}</div>
                 <div class="tarjeta-acciones">
-                    <div class="accion-btn rojo">APAGAR <span class="circulo"></span></div>
-                    <div class="accion-btn verde">ENCENDER <span class="circulo"></span></div>
+                    <div class="accion-btn rojo" onclick="event.stopPropagation(); appSoporte.enviarSMS('apagar')">APAGAR <span class="circulo"></span></div>
+                    <div class="accion-btn verde" onclick="event.stopPropagation(); appSoporte.enviarSMS('encender')">ENCENDER <span class="circulo"></span></div>
                 </div>
             `;
             div.onclick = () => this.abrir(e);
@@ -56,15 +58,12 @@ class SoporteTecnico {
 
     abrir(e) {
         const panel = document.getElementById('panel-detalles');
-        
-        // 1. Limpieza de nombres de columna (por si acaso traen espacios)
         const equipo = {}; 
         for(let k in e) equipo[k.trim()] = (typeof e[k]=='string')?e[k].trim():e[k];
 
         const iccid = (equipo.ICCID || '').toString().trim();
         const numeroLinea = this.lineasMapa.get(iccid) || 'NO ENCONTRADA';
 
-        // 2. Llenar los elementos (asegúrate de que estos IDs existan en tu index.html)
         document.getElementById('det-titulo').innerText = `${equipo.Cliente || 'SIN CLIENTE'} (${equipo.ID || ''})`;
         document.getElementById('det-id').innerText = equipo.ID || 'N/A';
         document.getElementById('det-linea').innerText = numeroLinea;
@@ -73,11 +72,11 @@ class SoporteTecnico {
         document.getElementById('det-marca').innerText = equipo.Marca || 'N/A';
         document.getElementById('det-modelo').innerText = equipo.Modelo || 'N/A';
         document.getElementById('det-cliente').innerText = equipo.Cliente || 'N/A';
-        document.getElementById('det-servicio').innerText = equipo.servicio || 'PENDIENTE';
-
-        // 3. Guardar datos para comandos SMS
-        document.getElementById('det-marca').setAttribute('data-linea', numeroLinea);
         
+        // CORRECCIÓN AQUÍ: Apuntamos a la columna correcta
+        document.getElementById('det-servicio').innerText = equipo["Estado del Servicio"] || 'PENDIENTE';
+
+        document.getElementById('det-marca').setAttribute('data-linea', numeroLinea);
         panel.classList.add('abierto');
     }
 
