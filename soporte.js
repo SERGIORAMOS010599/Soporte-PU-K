@@ -38,32 +38,31 @@ class SoporteTecnico {
         const contenedor = document.getElementById('grid-salidas');
         contenedor.innerHTML = '';
 
-        this.equipos.forEach(equipo => {
+        // Función para limpiar espacios extra al inicio/final
+        const limpiar = (obj) => {
+            let nuevoObj = {};
+            for (let key in obj) {
+                // Quitamos espacios del nombre de la columna (key) y del valor
+                nuevoObj[key.trim()] = (typeof obj[key] === 'string') ? obj[key].trim() : obj[key];
+            }
+            return nuevoObj;
+        };
+
+        this.equipos.forEach(equipoRaw => {
+            // Limpiamos el objeto apenas llega
+            const equipo = limpiar(equipoRaw);
+            
             const tarjeta = document.createElement('div');
             tarjeta.className = 'tarjeta-gps';
             
-            // BUSCAMOS LOS DATOS USANDO 'ID' COMO REFERENCIA PRINCIPAL
-            // Si tu Excel tiene espacios, usamos estas funciones para limpiar
-            const obtenerDato = (nombres) => {
-                for (let nombre of nombres) {
-                    if (equipo[nombre] !== undefined && equipo[nombre] !== null) return equipo[nombre];
-                }
-                return 'N/A';
-            };
+            // Ahora sí, buscará "UNIDAD" aunque el Excel diga "UNIDAD "
+            const unidad = equipo.UNIDAD || 'SIN UNIDAD';
+            const cliente = equipo.Cliente || 'SIN CLIENTE';
+            const marca = equipo.Marca || 'SIN MARCA';
+            const modelo = equipo.Modelo || 'N/A';
+            const tipoServicio = equipo["Tipo de servicio"] || 'ESTANDAR';
+            const idEquipo = equipo.ID || 'N/A';
 
-            const idEquipo = equipo.ID || equipo.Id || equipo.id || 'SIN ID';
-            
-            // Usamos una lista de posibles nombres para cada campo
-            const unidad = obtenerDato(["UNIDAD", "Unidad", "unidad", " MARCA/MODELO DE LA UNIDAD"]);
-            const cliente = obtenerDato(["Cliente", "CLIENTE", "cliente"]);
-            const marca = obtenerDato(["Marca", "MARCA", "marca"]);
-            const modelo = obtenerDato(["Modelo", "MODELO", "modelo"]);
-            const tipoServicio = obtenerDato(["Tipo de servicio", "Tipo de Servicio", "TIPO DE SERVICIO"]);
-            
-            const estado = equipo.Estado || equipo.ESTADO || 'PENDIENTE';
-            const iccid = equipo.ICCID || equipo.Iccid || equipo.iccid || 'N/A';
-
-            // Inyectamos el HTML
             tarjeta.innerHTML = `
                 <div class="tarjeta-unidad">${unidad}</div>
                 <div class="tarjeta-cliente">${cliente} ${idEquipo}</div>
@@ -83,7 +82,7 @@ class SoporteTecnico {
                 </div>
             `;
 
-            tarjeta.onclick = () => this.mostrarDetalles(equipo, idEquipo, marca, modelo, estado, cliente, iccid);
+            tarjeta.onclick = () => this.mostrarDetalles(equipo, idEquipo, marca, modelo, equipo.Estado, cliente, equipo.ICCID);
             contenedor.appendChild(tarjeta);
         });
     }
