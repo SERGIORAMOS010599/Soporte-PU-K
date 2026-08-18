@@ -43,7 +43,7 @@ class SoporteTecnico {
                 <div class="tarjeta-cliente">${e.Cliente || ''} ${e.ID || ''}</div>
                 <h2 class="tarjeta-marca">${e.Marca || 'N/A'}</h2>
                 <div class="tarjeta-modelo">${e.Modelo || 'N/A'}</div>
-                <div class="tarjeta-servicio">${e["Tipo de servicio"] || 'ESTANDAR'}</div>
+                <div class="tarjeta-servicio">${e["Estado del Servicio"] || 'N/A'}</div>
                 <div class="tarjeta-acciones">
                     <div class="accion-btn rojo">APAGAR <span class="circulo"></span></div>
                     <div class="accion-btn verde">ENCENDER <span class="circulo"></span></div>
@@ -73,7 +73,7 @@ class SoporteTecnico {
         document.getElementById('det-marca').innerText = equipo.Marca || 'N/A';
         document.getElementById('det-modelo').innerText = equipo.Modelo || 'N/A';
         document.getElementById('det-cliente').innerText = equipo.Cliente || 'N/A';
-        document.getElementById('det-Estado del Servicio').innerText = equipo.Estado del Servicio || 'PENDIENTE';
+        document.getElementById('det-servicio').innerText = equipo.servicio || 'PENDIENTE';
 
         // 3. Guardar datos para comandos SMS
         document.getElementById('det-marca').setAttribute('data-linea', numeroLinea);
