@@ -30,11 +30,11 @@
         <h1 class="titulo-detalles">PENDIENTE</h1>
         
         <div class="panel-botones">
-            <button class="boton-comando" style="color: #ff4c4c; border-color: #ff4c4c;">Apagar Motor</button>
-            <button class="boton-comando" style="color: #4caf50; border-color: #4caf50;">Encender Motor</button>
-            <button class="boton-comando" style="color: #ffb74d; border-color: #ffb74d;">Reiniciar</button>
+            <button class="boton-comando" style="color: #ff4c4c; border-color: #ff4c4c;" onclick="enviarSMS('apagar')">Apagar Motor</button>
+            <button class="boton-comando" style="color: #4caf50; border-color: #4caf50;" onclick="enviarSMS('encender')">Encender Motor</button>
+            <button class="boton-comando" style="color: #ffb74d; border-color: #ffb74d;" onclick="enviarSMS('reiniciar')">Reiniciar</button>
         </div>
-
+        
         <<div style="background-color: var(--bg-panel); padding: 20px; border-radius: 8px; border: 1px solid var(--borde);">
             <p><strong>ID:</strong> <span id="detalle-id">2300003663</span></p>
             <p><strong>Marca:</strong> <span id="detalle-marca">SUNTECH</span></p>
