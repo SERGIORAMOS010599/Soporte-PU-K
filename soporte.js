@@ -56,12 +56,27 @@ class SoporteTecnico {
 
     abrir(e) {
         const panel = document.getElementById('panel-detalles');
-        const iccid = (e.ICCID || '').toString().trim();
         
-        document.getElementById('det-titulo').innerText = `${e.Cliente || 'N/A'} (${e.ID || ''})`;
-        document.getElementById('det-linea').innerText = this.lineasMapa.get(iccid) || 'NO ENCONTRADA';
-        document.getElementById('det-marca').innerText = e.Marca || 'N/A';
-        document.getElementById('det-marca').setAttribute('data-linea', this.lineasMapa.get(iccid) || '');
+        // 1. Limpieza de nombres de columna (por si acaso traen espacios)
+        const equipo = {}; 
+        for(let k in e) equipo[k.trim()] = (typeof e[k]=='string')?e[k].trim():e[k];
+
+        const iccid = (equipo.ICCID || '').toString().trim();
+        const numeroLinea = this.lineasMapa.get(iccid) || 'NO ENCONTRADA';
+
+        // 2. Llenar los elementos (asegúrate de que estos IDs existan en tu index.html)
+        document.getElementById('det-titulo').innerText = `${equipo.Cliente || 'SIN CLIENTE'} (${equipo.ID || ''})`;
+        document.getElementById('det-id').innerText = equipo.ID || 'N/A';
+        document.getElementById('det-linea').innerText = numeroLinea;
+        document.getElementById('det-iccid').innerText = iccid || 'N/A';
+        document.getElementById('det-imei').innerText = equipo.IMEI || equipo.Imei || 'N/A';
+        document.getElementById('det-marca').innerText = equipo.Marca || 'N/A';
+        document.getElementById('det-modelo').innerText = equipo.Modelo || 'N/A';
+        document.getElementById('det-cliente').innerText = equipo.Cliente || 'N/A';
+        document.getElementById('det-estado').innerText = equipo.Estado || 'PENDIENTE';
+
+        // 3. Guardar datos para comandos SMS
+        document.getElementById('det-marca').setAttribute('data-linea', numeroLinea);
         
         panel.classList.add('abierto');
     }
