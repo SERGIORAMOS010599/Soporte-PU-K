@@ -42,7 +42,7 @@ class SoporteTecnico {
             tarjeta.className = 'tarjeta-gps';
             
             // EXTRACCIÓN EXACTA CON TUS COLUMNAS
-            const unidad = equipo.UNIDAD || 'SIN UNIDAD';
+            const unidad = equipo.UNIDAD || equipo["UNIDAD "] || equipo.Unidad || equipo.unidad || equipo[" MARCA/MODELO DE LA UNIDAD"] || 'SIN UNIDAD';
             const cliente = equipo.Cliente || 'SIN CLIENTE';
             const marca = equipo.Marca || 'SIN MARCA';
             const modelo = equipo.Modelo || 'N/A';
