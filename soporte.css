@@ -103,24 +103,28 @@ body {
 .marca-titulo { font-size: 1.5em; font-weight: bold; margin: 0; }
 .modelo-sub { font-size: 0.9em; font-weight: bold; color: var(--color-gris); margin: 5px 0 15px 0; }
 
-/* Panel Lateral Deslizable */
+/* Panel Lateral Deslizable Ultra Fluido */
 .panel-lateral {
-    width: 0; 
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 100vh;
     background-color: var(--bg-fondo);
-    border-left: 0px solid var(--borde);
+    border-left: 2px solid var(--borde);
     overflow-y: auto;
     overflow-x: hidden;
-    transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    white-space: nowrap;
+    z-index: 100;
+    padding: 20px;
+    
+    /* Magia de rendimiento: Usamos transform y GPU en lugar de cambiar el ancho */
+    will-change: transform;
+    transform: translateX(100%); /* Oculto fuera de la pantalla a la derecha */
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .panel-lateral.abierto {
-    width: 50%; 
-    border-left: 2px solid var(--borde);
-    padding: 20px;
-    white-space: normal;
+    transform: translateX(0); /* Se desliza instantáneamente hacia la vista */
 }
 
 .encabezado-panel { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
