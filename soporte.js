@@ -10,7 +10,9 @@ class SoporteTecnico {
         if (!this.container) return;
         this.container.innerHTML = '<p style="text-align:center; color: #ffb74d; padding: 20px;">Conectando con Google Sheets...</p>';
 
-        const url = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json`;
+        // AQUÍ ESTÁ LA CORRECCIÓN: Le decimos que lea la pestaña "Salidas"
+        const nombrePestana = 'Salidas';
+        const url = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(nombrePestana)}`;
 
         try {
             const response = await fetch(url);
@@ -135,4 +137,4 @@ class SoporteTecnico {
 // Instanciamos la clase globalmente cuando el documento esté listo
 document.addEventListener('DOMContentLoaded', () => {
     window.appSoporte = new SoporteTecnico();
-});
+});s
