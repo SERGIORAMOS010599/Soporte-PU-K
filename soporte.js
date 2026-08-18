@@ -32,6 +32,7 @@ class SoporteTecnico {
     }
 
     // Método para pintar las tarjetas en pantalla
+// Método para pintar las tarjetas en pantalla
     renderizarCuadricula() {
         const contenedor = document.getElementById('grid-salidas');
         contenedor.innerHTML = '';
@@ -40,21 +41,39 @@ class SoporteTecnico {
             const tarjeta = document.createElement('div');
             tarjeta.className = 'tarjeta-gps';
             
-            const idEquipo = equipo.ID || equipo.Imei || equipo.IMEI || 'N/A';
-            const marca = equipo.Marca || equipo.MARCA || 'SIN MARCA';
-            const modelo = equipo.Modelo || equipo.MODELO || 'N/A';
-            const estado = equipo.Estado || equipo.ESTADO || 'PENDIENTE';
-            const cliente = equipo.Cliente || equipo.CLIENTE || equipo.Tecnico || 'STOCK';
+            // EXTRACCIÓN EXACTA CON TUS COLUMNAS
+            const unidad = equipo.UNIDAD || 'SIN UNIDAD';
+            const cliente = equipo.Cliente || 'SIN CLIENTE';
+            const marca = equipo.Marca || 'SIN MARCA';
+            const modelo = equipo.Modelo || 'N/A';
+            const tipoServicio = equipo["Tipo de servicio"] || 'ESTANDAR';
+            
+            // Extraemos estos para el panel derecho aunque no se vean en la tarjeta
+            const idEquipo = equipo.ID || equipo.Imei || equipo.IMEI || '';
             const iccid = equipo.ICCID || equipo.Iccid || equipo.iccid || 'N/A';
+            const estado = equipo.Estado || equipo.ESTADO || 'PENDIENTE';
 
+            // Inyectamos el HTML calcado de tu imagen
             tarjeta.innerHTML = `
-                <div class="estado">${estado}</div>
-                <div class="cliente-info">${cliente}<br>${idEquipo}</div>
-                <h2 class="marca-titulo">${marca}</h2>
-                <p class="modelo-sub">${modelo}</p>
-                <div style="font-size:0.8em; font-weight:bold;">ESTANDAR</div>
+                <div class="tarjeta-unidad">${unidad}</div>
+                <div class="tarjeta-cliente">${cliente} ${idEquipo}</div>
+                
+                <h2 class="tarjeta-marca">${marca}</h2>
+                <div class="tarjeta-modelo">${modelo}</div>
+                
+                <div class="tarjeta-servicio">${tipoServicio}</div>
+                
+                <div class="tarjeta-acciones">
+                    <div class="accion-btn rojo">APAGAR MOTOR <span class="circulo"></span></div>
+                    <div class="accion-btn verde">ENCENDER MOTOR <span class="circulo"></span></div>
+                    <div class="accion-iconos">
+                        <span>🖥️</span>
+                        <span>❯</span>
+                    </div>
+                </div>
             `;
 
+            // Al hacer clic, enviamos todos los datos al panel lateral
             tarjeta.onclick = () => this.mostrarDetalles(equipo, idEquipo, marca, modelo, estado, cliente, iccid);
             contenedor.appendChild(tarjeta);
         });
