@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soporte PU-K</title>
+    <style>
+        /* Paleta de colores basada en tu diseño */
+        :root {
+            --bg-fondo: #121212;
+            --bg-panel: #1e1e1e;
+            --color-texto: #ffffff;
+            --color-naranja: #ffb74d;
+            --color-gris: #a0a0a0;
+            --borde: #333333;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-fondo);
+            color: var(--color-texto);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Columna Izquierda: Lista de Equipos */
+        .columna-lista {
+            width: 35%;
+            background-color: var(--bg-panel);
+            border-right: 2px solid var(--borde);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .encabezado-lista {
+            padding: 20px;
+            border-bottom: 1px solid var(--borde);
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .contenedor-tarjetas {
+            padding: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        /* Estilo de una tarjeta individual */
+        .tarjeta-gps {
+            background-color: #252525;
+            border: 1px solid var(--borde);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .tarjeta-gps:hover {
+            border-color: var(--color-naranja);
+        }
+
+        .estado {
+            color: var(--color-naranja);
+            font-weight: bold;
+            font-size: 0.8em;
+            margin-bottom: 5px;
+        }
+
+        /* Columna Derecha: Detalles del Equipo */
+        .columna-detalles {
+            width: 65%;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .titulo-detalles {
+            color: var(--color-naranja);
+            font-size: 2em;
+            margin: 0 0 20px 0;
+        }
+
+        .panel-botones {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            background-color: var(--bg-panel);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--borde);
+        }
+
+        .boton-comando {
+            background-color: transparent;
+            color: var(--color-texto);
+            border: 1px solid var(--color-gris);
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .boton-comando:hover {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Panel Izquierdo -->
+    <div class="columna-lista">
+        <div class="encabezado-lista">SOPORTE TÉCNICO</div>
+        <div class="contenedor-tarjetas" id="lista-salidas">
+            
+            <!-- Ejemplo de una tarjeta estática (luego lo haremos con código) -->
+            <div class="tarjeta-gps">
+                <div class="estado">PENDIENTE</div>
+                <h3>SUNTECH</h3>
+                <p style="color: var(--color-gris); font-size: 0.9em;">ST4315B</p>
+                <p style="font-size: 0.8em;">ID: 2300003663</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Panel Derecho -->
+    <div class="columna-detalles">
+        <h1 class="titulo-detalles">PENDIENTE</h1>
+        
+        <div class="panel-botones">
+            <button class="boton-comando" style="color: #ff4c4c; border-color: #ff4c4c;">Apagar Motor</button>
+            <button class="boton-comando" style="color: #4caf50; border-color: #4caf50;">Encender Motor</button>
+            <button class="boton-comando" style="color: #ffb74d; border-color: #ffb74d;">Reiniciar</button>
+        </div>
+
+        <div style="background-color: var(--bg-panel); padding: 20px; border-radius: 8px; border: 1px solid var(--borde);">
+            <p><strong>ID:</strong> <span id="detalle-id">2300003663</span></p>
+            <p><strong>Marca:</strong> <span id="detalle-marca">SUNTECH</span></p>
+            <p><strong>Modelo:</strong> <span id="detalle-modelo">ST4315B</span></p>
+        </div>
+    </div>
+
+</body>
+</html>
