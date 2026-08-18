@@ -35,11 +35,11 @@ class SoporteTecnico {
             const e = {}; 
             for(let k in eq) e[k.trim()] = (typeof eq[k]=='string')?eq[k].trim():eq[k];
             
-            // Usamos "Estado del Servicio" (con espacios) como me indicaste
             const estadoServicio = e["Estado del Servicio"] || 'PENDIENTE';
             
             const div = document.createElement('div');
             div.className = 'tarjeta-gps';
+            // QUITAMOS LOS ONCLICK DE LOS BOTONES DE AQUÍ PARA NO INTERFERIR
             div.innerHTML = `
                 <div class="tarjeta-unidad">${e.UNIDAD || 'SIN UNIDAD'}</div>
                 <div class="tarjeta-cliente">${e.Cliente || ''} ${e.ID || ''}</div>
@@ -47,17 +47,21 @@ class SoporteTecnico {
                 <div class="tarjeta-modelo">${e.Modelo || 'N/A'}</div>
                 <div class="tarjeta-servicio">${estadoServicio}</div>
                 <div class="tarjeta-acciones">
-                    <div class="accion-btn rojo" onclick="event.stopPropagation(); appSoporte.enviarSMS('apagar')">APAGAR <span class="circulo"></span></div>
-                    <div class="accion-btn verde" onclick="event.stopPropagation(); appSoporte.enviarSMS('encender')">ENCENDER <span class="circulo"></span></div>
+                    <div class="accion-btn rojo">APAGAR <span class="circulo"></span></div>
+                    <div class="accion-btn verde">ENCENDER <span class="circulo"></span></div>
                 </div>
             `;
+            // El clic ahora es solo en la tarjeta
             div.onclick = () => this.abrir(e);
             grid.appendChild(div);
         });
     }
 
     abrir(e) {
+        console.log("Abriendo detalles para:", e); // Esto nos dirá en F12 si entra el clic
         const panel = document.getElementById('panel-detalles');
+        if (!panel) return;
+        
         const equipo = {}; 
         for(let k in e) equipo[k.trim()] = (typeof e[k]=='string')?e[k].trim():e[k];
 
@@ -72,8 +76,6 @@ class SoporteTecnico {
         document.getElementById('det-marca').innerText = equipo.Marca || 'N/A';
         document.getElementById('det-modelo').innerText = equipo.Modelo || 'N/A';
         document.getElementById('det-cliente').innerText = equipo.Cliente || 'N/A';
-        
-        // CORRECCIÓN AQUÍ: Apuntamos a la columna correcta
         document.getElementById('det-servicio').innerText = equipo["Estado del Servicio"] || 'PENDIENTE';
 
         document.getElementById('det-marca').setAttribute('data-linea', numeroLinea);
