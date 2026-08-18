@@ -33,6 +33,7 @@ class SoporteTecnico {
 
     // Método para pintar las tarjetas en pantalla
 // Método para pintar las tarjetas en pantalla
+   // Método para pintar las tarjetas en pantalla
     renderizarCuadricula() {
         const contenedor = document.getElementById('grid-salidas');
         contenedor.innerHTML = '';
@@ -41,19 +42,28 @@ class SoporteTecnico {
             const tarjeta = document.createElement('div');
             tarjeta.className = 'tarjeta-gps';
             
-            // EXTRACCIÓN EXACTA CON TUS COLUMNAS
-            const unidad = equipo.UNIDAD || equipo["UNIDAD "] || equipo.Unidad || equipo.unidad || equipo[" MARCA/MODELO DE LA UNIDAD"] || 'SIN UNIDAD';
-            const cliente = equipo.Cliente || 'SIN CLIENTE';
-            const marca = equipo.Marca || 'SIN MARCA';
-            const modelo = equipo.Modelo || 'N/A';
-            const tipoServicio = equipo["Tipo de servicio"] || 'ESTANDAR';
-            
-            // Extraemos estos para el panel derecho aunque no se vean en la tarjeta
-            const idEquipo = equipo.ID || equipo.Imei || equipo.IMEI || '';
-            const iccid = equipo.ICCID || equipo.Iccid || equipo.iccid || 'N/A';
-            const estado = equipo.Estado || equipo.ESTADO || 'PENDIENTE';
+            // BUSCAMOS LOS DATOS USANDO 'ID' COMO REFERENCIA PRINCIPAL
+            // Si tu Excel tiene espacios, usamos estas funciones para limpiar
+            const obtenerDato = (nombres) => {
+                for (let nombre of nombres) {
+                    if (equipo[nombre] !== undefined && equipo[nombre] !== null) return equipo[nombre];
+                }
+                return 'N/A';
+            };
 
-            // Inyectamos el HTML calcado de tu imagen
+            const idEquipo = equipo.ID || equipo.Id || equipo.id || 'SIN ID';
+            
+            // Usamos una lista de posibles nombres para cada campo
+            const unidad = obtenerDato(["UNIDAD", "Unidad", "unidad", " MARCA/MODELO DE LA UNIDAD"]);
+            const cliente = obtenerDato(["Cliente", "CLIENTE", "cliente"]);
+            const marca = obtenerDato(["Marca", "MARCA", "marca"]);
+            const modelo = obtenerDato(["Modelo", "MODELO", "modelo"]);
+            const tipoServicio = obtenerDato(["Tipo de servicio", "Tipo de Servicio", "TIPO DE SERVICIO"]);
+            
+            const estado = equipo.Estado || equipo.ESTADO || 'PENDIENTE';
+            const iccid = equipo.ICCID || equipo.Iccid || equipo.iccid || 'N/A';
+
+            // Inyectamos el HTML
             tarjeta.innerHTML = `
                 <div class="tarjeta-unidad">${unidad}</div>
                 <div class="tarjeta-cliente">${cliente} ${idEquipo}</div>
@@ -73,7 +83,6 @@ class SoporteTecnico {
                 </div>
             `;
 
-            // Al hacer clic, enviamos todos los datos al panel lateral
             tarjeta.onclick = () => this.mostrarDetalles(equipo, idEquipo, marca, modelo, estado, cliente, iccid);
             contenedor.appendChild(tarjeta);
         });
