@@ -1,13 +1,11 @@
 class SoporteTecnico {
     constructor() {
         this.container = document.getElementById('grid-salidas');
-        this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM'; // Tu Google Sheet
+        this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM'; 
         this.equipos = [];
-        this.equipoSeleccionado = null; // Guardará el equipo activo para el modal
+        this.equipoSeleccionado = null; 
         
-        // Memoria Persistente: Recupera lo último que buscaste
         this.busquedaActual = localStorage.getItem('busquedaGlobal') || ''; 
-        
         this.iniciar();
     }
 
@@ -15,25 +13,17 @@ class SoporteTecnico {
         if (!this.container) return;
         this.container.innerHTML = '<p style="text-align:center; color: #ffb74d; padding: 20px;">Conectando con Google Sheets...</p>';
 
-        const nombrePestana = 'Salidas';
-        const url = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(nombrePestana)}`;
+        const url = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Salidas')}`;
 
         try {
             const response = await fetch(url);
             const text = await response.text();
-            
-            // Limpieza del formato nativo de Google
             const json = JSON.parse(text.substring(47).slice(0, -2));
-            const rows = json.table.rows;
-
+            
             this.equipos = [];
-
-            // Recorremos las filas, saltando la fila 0 (Tus encabezados)
-            rows.forEach((row, index) => {
+            json.table.rows.forEach((row, index) => {
                 if (row && row.c && index > 0) {
                     const val = (colIndex) => row.c[colIndex] ? row.c[colIndex].v : '';
-
-                    // Mapeo exacto basado en el orden de tus columnas
                     const equipo = {
                         marca: val(1) || 'SIN MARCA',
                         modelo: val(2) || 'SIN MODELO',
@@ -47,33 +37,31 @@ class SoporteTecnico {
                         tipoServicio: val(15) || 'PENDIENTE DE ASIGNAR'
                     };
 
-                    // Solo agregamos a la lista si realmente existe un ID válido
                     if (equipo.id !== 'N/A' && equipo.id.toString().trim() !== '') {
                         this.equipos.push(equipo);
                     }
                 }
             });
 
-            // Poner el texto en la caja visual si quedó algo en memoria
             const inputBuscador = document.getElementById('buscador-global');
-            if (inputBuscador) inputBuscador.value = this.busquedaActual;
+            if (inputBuscador) {
+                inputBuscador.value = this.busquedaActual;
+                document.getElementById('btn-limpiar-busqueda').style.display = this.busquedaActual ? 'block' : 'none';
+            }
 
             this.renderizar();
         } catch (error) {
             console.error("Error al conectar con Sheets:", error);
-            this.container.innerHTML = '<p style="text-align:center; color:#ff4c4c;">No se pudo cargar la información. Revisa tu conexión.</p>';
+            this.container.innerHTML = '<p style="text-align:center; color:#ff4c4c;">No se pudo cargar la información.</p>';
         }
     }
 
-   buscarGlobal(texto) {
+    buscarGlobal(texto) {
         this.busquedaActual = texto;
         localStorage.setItem('busquedaGlobal', texto); 
-        
-        // Mostrar/Ocultar la X del buscador
         const btnLimpiar = document.getElementById('btn-limpiar-busqueda');
         if (btnLimpiar) btnLimpiar.style.display = texto.length > 0 ? 'block' : 'none';
-
-        this.renderizar();
+        this.renderizar(); 
     }
 
     limpiarBusqueda() {
@@ -85,10 +73,8 @@ class SoporteTecnico {
     renderizar() {
         this.container.innerHTML = '';
         
-        // FILTRADO INTELIGENTE
         const query = this.busquedaActual.toLowerCase().trim();
         const equiposFiltrados = this.equipos.filter(eq => {
-            // Aseguramos convertirlos a texto para que no haya errores si escribes números
             return eq.id.toString().toLowerCase().includes(query) || 
                    eq.imei.toString().toLowerCase().includes(query) || 
                    eq.iccid.toString().toLowerCase().includes(query) || 
@@ -104,8 +90,6 @@ class SoporteTecnico {
         equiposFiltrados.forEach(eq => {
             const tarjeta = document.createElement('div');
             tarjeta.className = 'tarjeta-gps';
-            
-            // Estructura limpia de la tarjeta
             tarjeta.innerHTML = `
                 <div class="tarjeta-unidad">${eq.unidad}</div>
                 <div class="tarjeta-cliente">${eq.cliente} (${eq.id})</div>
@@ -117,7 +101,6 @@ class SoporteTecnico {
                     <div class="accion-btn verde" onclick="event.stopPropagation(); appSoporte.enviarSMS('encender', '${eq.linea}')">ENCENDER <span class="circulo"></span></div>
                 </div>
             `;
-            
             tarjeta.onclick = () => this.abrirDetalles(eq);
             this.container.appendChild(tarjeta);
         });
@@ -126,34 +109,90 @@ class SoporteTecnico {
     abrirDetalles(eq) {
         const panel = document.getElementById('panel-detalles');
         if (!panel) return;
-
         this.equipoSeleccionado = eq;
 
-        const setText = (elementId, text) => {
+        // Función para inyectar el texto y el lápiz de edición
+        const setTextEditable = (elementId, text, campoDB) => {
             const el = document.getElementById(elementId);
-            if (el) el.innerText = text;
+            if (el) el.innerHTML = `${text} <span class="icono-editar" onclick="appSoporte.activarEdicion('${campoDB}', '${elementId}')">✏️</span>`;
         };
 
-        setText('det-titulo', `${eq.cliente} (${eq.id})`);
-        setText('det-id', eq.id);
-        setText('det-linea', eq.linea);
-        setText('det-iccid', eq.iccid);
-        setText('det-imei', eq.imei);
-        setText('det-marca', eq.marca);
-        setText('det-modelo', eq.modelo);
-        setText('det-cliente', eq.cliente);
-        setText('det-servicio', eq.estadoServicio);
-        
-        // El nuevo campo: Tipo de Servicio
-        setText('det-tipo-servicio', eq.tipoServicio); 
+        // El ID no lleva lápiz
+        document.getElementById('det-id').innerText = eq.id; 
 
-        // Guardamos el número en el atributo para los SMS
+        // Título principal (Cliente)
+        const tituloContenedor = document.getElementById('det-titulo-contenedor');
+        if (tituloContenedor) {
+            tituloContenedor.innerHTML = `
+                <h1 class="titulo-detalles" id="det-titulo">${eq.unidad}</h1>
+                <span class="icono-editar" onclick="appSoporte.activarEdicion('unidad', 'det-titulo-contenedor')">✏️</span>
+            `;
+        }
+
+        // Llenado de todos los campos con su lápiz
+        setTextEditable('det-linea', eq.linea, 'linea');
+        setTextEditable('det-iccid', eq.iccid, 'iccid');
+        setTextEditable('det-imei', eq.imei, 'imei');
+        setTextEditable('det-marca', eq.marca, 'marca');
+        setTextEditable('det-modelo', eq.modelo, 'modelo');
+        setTextEditable('det-cliente', eq.cliente, 'cliente');
+        setTextEditable('det-tipo-servicio', eq.tipoServicio, 'tipoServicio');
+        setTextEditable('det-servicio', eq.estadoServicio, 'estadoServicio');
+
         const marcaTag = document.getElementById('det-marca');
         if (marcaTag) marcaTag.setAttribute('data-linea', eq.linea);
         
         panel.classList.add('abierto');
     }
 
+    // --- NUEVO SISTEMA DE EDICIÓN UNIVERSAL ---
+    activarEdicion(campoDB, elementId) {
+        const contenedor = document.getElementById(elementId);
+        const valorActual = this.equipoSeleccionado[campoDB];
+
+        // Inyectamos el input y los botones de Guardar/Cancelar
+        contenedor.innerHTML = `
+            <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
+                <input type="text" id="input-edit-${campoDB}" value="${valorActual}" style="flex-grow: 1; font-size: 0.9rem; padding: 6px; color: #fff; background: #222; border: 1px solid #ffb74d; border-radius: 4px; outline: none;">
+                <button style="background: #388e3c; border: none; color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;" onclick="appSoporte.guardarEdicion('${campoDB}', '${elementId}')">✔</button>
+                <button style="background: #d32f2f; border: none; color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;" onclick="appSoporte.abrirDetalles(appSoporte.equipoSeleccionado)">✖</button>
+            </div>
+        `;
+    }
+
+    async guardarEdicion(campoDB, elementId) {
+        const nuevoValor = document.getElementById(`input-edit-${campoDB}`).value;
+        const idEquipo = this.equipoSeleccionado.id;
+        
+        const contenedor = document.getElementById(elementId);
+        contenedor.innerHTML = `<span style="color: #388e3c; font-weight: bold;">Guardando... ⏳</span>`;
+
+        // 🚨 AQUÍ PON TU URL DE APPS SCRIPT 🚨
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbwUjAXLqi8OnoVJFPD3jd9j0dYzhDSrQaX1kjpUzRQpfehuWnUbLHzWCr09SlPeFGo5/exec'; 
+
+        try {
+            const respuesta = await fetch(scriptUrl, {
+                method: 'POST',
+                body: JSON.stringify({ id: idEquipo, campo: campoDB, nuevoValor: nuevoValor })
+            });
+            const resultado = await response.json();
+            
+            if (resultado.success) {
+                // Actualizamos el dato en la memoria y "refrescamos" la vista
+                this.equipoSeleccionado[campoDB] = nuevoValor; 
+                this.abrirDetalles(this.equipoSeleccionado); 
+                this.renderizar(); 
+            } else {
+                throw new Error("No se encontró el ID");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Error al guardar. Intenta de nuevo.");
+            this.abrirDetalles(this.equipoSeleccionado); // Restaura si falla
+        }
+    }
+
+    // --- CERRAR Y COMANDOS SMS ---
     cerrarDetalles() {
         const panel = document.getElementById('panel-detalles');
         if (panel) panel.classList.remove('abierto');
@@ -172,26 +211,15 @@ class SoporteTecnico {
         window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
     }
 
-    // --- NUEVAS FUNCIONES PARA EL FORMULARIO DE COMANDOS ---
+    // --- MODAL FORMULARIO DE COMANDOS ---
     abrirModalComandos() {
         if (!this.equipoSeleccionado) return;
-        
-        const modal = document.getElementById('modal-comandos');
-        if (!modal) {
-            console.error("No se encontró el modal en el HTML");
-            return;
-        }
-
-        // Auto-llenar los campos con el equipo seleccionado
         document.getElementById('cmd-marca').value = this.equipoSeleccionado.marca;
         document.getElementById('cmd-modelo').value = this.equipoSeleccionado.modelo;
         document.getElementById('cmd-id').value = this.equipoSeleccionado.id;
-        
-        // Reiniciar el área dinámica
         document.getElementById('cmd-tipo').value = "";
         document.getElementById('cmd-seccion-dinamica').style.display = "none";
-        
-        modal.style.display = 'flex';
+        document.getElementById('modal-comandos').style.display = 'flex';
     }
 
     cerrarModalComandos() {
@@ -201,7 +229,6 @@ class SoporteTecnico {
     cambiarTipoComando() {
         const seleccion = document.getElementById('cmd-tipo').value;
         const seccionDinamica = document.getElementById('cmd-seccion-dinamica');
-        
         if (seleccion !== "") {
             seccionDinamica.style.display = "block";
             document.getElementById('cmd-trama').value = ""; 
@@ -209,68 +236,8 @@ class SoporteTecnico {
             seccionDinamica.style.display = "none";
         }
     }
-    abrirVisorWeb(nombre, url) {
-        document.getElementById('iframe-titulo').innerText = nombre;
-        document.getElementById('iframe-visor').src = url;
-        document.getElementById('modal-iframe').style.display = 'flex';
-    }
-
-    cerrarIframe() {
-        document.getElementById('modal-iframe').style.display = 'none';
-        document.getElementById('iframe-visor').src = ""; // Cortar la carga al cerrar
-    }
-    activarEdicionUnidad() {
-        const contenedor = document.getElementById('det-titulo-contenedor');
-        const valorActual = this.equipoSeleccionado.unidad; // O el campo que vayas a editar
-        
-        contenedor.innerHTML = `
-            <input type="text" id="input-edicion-unidad" class="input-edicion" value="${valorActual}">
-            <button class="btn-guardar-edicion" onclick="appSoporte.guardarEdicionUnidad()">Guardar</button>
-            <button class="btn-cancelar" onclick="appSoporte.abrirDetalles(appSoporte.equipoSeleccionado)" style="padding: 5px;">✖</button>
-        `;
-    }
-
-    async guardarEdicionUnidad() {
-        const nuevoValor = document.getElementById('input-edicion-unidad').value;
-        const idEquipo = this.equipoSeleccionado.id;
-        const botonGuardar = document.querySelector('.btn-guardar-edicion');
-        
-        botonGuardar.innerText = "Guardando...";
-        botonGuardar.disabled = true;
-
-        // 🚨 PEGA AQUÍ LA URL DE TU APPS SCRIPT (PASO 1) 🚨
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycbzE-R8fgLZ2DCo67pqmF2oc9rkUZIxrpTt0xSciaKwroYpq-qZ2pG8RiCf65ZjXtArw/exec';
-
-        try {
-            const respuesta = await fetch(scriptUrl, {
-                method: 'POST',
-                body: JSON.stringify({
-                    id: idEquipo,
-                    nuevaUnidad: nuevoValor
-                })
-            });
-
-            const resultado = await respuesta.json();
-            
-            if (resultado.success) {
-                // Actualizamos la memoria local y recargamos
-                this.equipoSeleccionado.unidad = nuevoValor;
-                this.abrirDetalles(this.equipoSeleccionado);
-                this.renderizar(); // Para que se actualice la tarjeta también
-                alert("¡Actualizado en la base de datos exitosamente!");
-            } else {
-                throw new Error("No se encontró el ID en Sheets");
-            }
-        } catch (error) {
-            console.error(error);
-            alert("Error al guardar en la base de datos.");
-            botonGuardar.innerText = "Reintentar";
-            botonGuardar.disabled = false;
-        }
-    }
 }
 
-// Instanciamos la clase globalmente cuando el documento esté listo
 document.addEventListener('DOMContentLoaded', () => {
     window.appSoporte = new SoporteTecnico();
 });
