@@ -165,7 +165,7 @@ class SoporteTecnico {
         };
 
         // 🚨 REEMPLAZA AQUÍ TU URL DE APPS SCRIPT 🚨
-        const scriptUrl = 'PON_TU_NUEVA_URL_AQUI'; 
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbx1xznor_7Oxu7mnD-EXVZM-yuQi712-iJao_XGugEJRtj3CrGtkahMkhb2IAb4LMl7/exec'; 
 
         try {
             const respuesta = await fetch(scriptUrl, {
