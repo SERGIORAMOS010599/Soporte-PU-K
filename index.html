@@ -22,35 +22,36 @@
         
         <!-- CUADRÍCULA MAESTRA -->
         <div class="vista-cuadricula">
-            <div id="grid-salidas" class="grid-tarjetas">
-                <!-- Se inyectan con JavaScript -->
-            </div>
+            <div id="grid-salidas" class="grid-tarjetas"></div>
         </div>
 
         <!-- PANEL DE DETALLES -->
         <div id="panel-detalles" class="panel-lateral">
             <div class="encabezado-panel">
-                <!-- AQUÍ INYECTAMOS EL LÁPIZ DE EDICIÓN (Paso 4.1) -->
+                <!-- TÍTULO Y LÁPIZ MAESTRO -->
                 <div id="det-titulo-contenedor" style="display: flex; align-items: center; gap: 10px;">
                     <h1 class="titulo-detalles" id="det-titulo">CARGANDO...</h1>
-                    <span class="icono-editar" onclick="appSoporte.activarEdicionUnidad()">✏️</span>
+                    <span class="icono-editar" onclick="appSoporte.activarEdicionGeneral()">✏️</span>
                 </div>
                 <button class="btn-cerrar" onclick="appSoporte.cerrarDetalles()">✖</button>
             </div>
 
-            <!-- BOTONES DE ACCIÓN PRINCIPALES -->
+            <!-- BOTONES DE ACCIÓN (INCLUYE ZEEK Y MAPON) -->
             <div class="panel-botones">
                 <button class="btn-accion" onclick="appSoporte.enviarSMS('apagar')">
-                    <div class="icono" style="background-color: #d32f2f;">⏻</div>
-                    APAGAR MOTOR
+                    <div class="icono" style="background-color: #d32f2f;">⏻</div>APAGAR MOTOR
                 </button>
                 <button class="btn-accion" onclick="appSoporte.enviarSMS('encender')">
-                    <div class="icono" style="background-color: #388e3c;">⏻</div>
-                    ENCENDER MOTOR
+                    <div class="icono" style="background-color: #388e3c;">⏻</div>ENCENDER MOTOR
                 </button>
                 <button class="btn-accion" onclick="appSoporte.enviarSMS('reiniciar')">
-                    <div class="icono" style="background-color: #fbc02d;">⟳</div>
-                    REINICIAR EQUIPO
+                    <div class="icono" style="background-color: #fbc02d;">⟳</div>REINICIAR EQUIPO
+                </button>
+                <button class="btn-accion" onclick="window.open('https://soporte.zeekgps.com/ZeekSoporte/', '_blank')">
+                    <div class="icono" style="background-color: #1976d2;">🛠️</div>ZEEK SOPORTE
+                </button>
+                <button class="btn-accion" onclick="window.open('https://mapon.com/partner/gbox_new/', '_blank')">
+                    <div class="icono" style="background-color: #00c853;">📍</div>MAPON SOPORTE
                 </button>
             </div>
             
@@ -64,9 +65,13 @@
                 <tr><td>Cliente</td><td id="det-cliente">---</td></tr>
                 <tr><td>Tipo de servicio</td><td id="det-tipo-servicio" style="text-transform: uppercase; font-weight: bold;">---</td></tr>
                 <tr><td>Estado del Servicio</td><td id="det-servicio">---</td></tr>
+                <!-- NUEVAS COLUMNAS -->
+                <tr><td>Marca/Mod. Unidad</td><td id="det-marcaModeloUnidad">---</td></tr>
+                <tr><td>Año Unidad</td><td id="det-anio">---</td></tr>
+                <tr><td>Nº Serie Unidad</td><td id="det-numSerie">---</td></tr>
             </table>
 
-            <!-- PANEL DE COMANDOS (DENTRO DEL PANEL LATERAL) -->
+            <!-- PANEL DE COMANDOS -->
             <div class="panel-comandos-box">
                 <div class="comandos-header">
                     <h3>Panel de comandos <span class="badge">0</span></h3>
@@ -81,7 +86,7 @@
         </div>
     </div>
 
-    <!-- MODAL: FORMULARIO DE COMANDOS -->
+    <!-- MODAL FORMULARIO DE COMANDOS -->
     <div id="modal-comandos" class="modal-oscuro">
         <div class="modal-comandos-content">
             <div class="modal-cmd-header">
@@ -91,23 +96,10 @@
                     <button class="btn-guardar">Guardar</button>
                 </div>
             </div>
-            
             <div class="modal-cmd-body">
-                <div class="form-grupo">
-                    <label>MARCA</label>
-                    <input type="text" id="cmd-marca" readonly>
-                </div>
-                
-                <div class="form-grupo">
-                    <label>MODELOS</label>
-                    <input type="text" id="cmd-modelo" readonly>
-                </div>
-                
-                <div class="form-grupo">
-                    <label>ID</label>
-                    <input type="text" id="cmd-id" readonly>
-                </div>
-                
+                <div class="form-grupo"><label>MARCA</label><input type="text" id="cmd-marca" readonly></div>
+                <div class="form-grupo"><label>MODELOS</label><input type="text" id="cmd-modelo" readonly></div>
+                <div class="form-grupo"><label>ID</label><input type="text" id="cmd-id" readonly></div>
                 <div class="form-grupo">
                     <label>TIPO DE COMANDO</label>
                     <select id="cmd-tipo" onchange="appSoporte.cambiarTipoComando()">
@@ -116,41 +108,16 @@
                         <option value="fuel">PROGRAMACION FUEL</option>
                         <option value="driving">PROGRAMACION DRIVING</option>
                         <option value="cero">PROGRAMACION DESDE 0</option>
-                        <option value="temp">PROGRAMACION TEMP</option>
-                        <option value="bt">COMANDOS BT</option>
-                        <option value="mapon">MIGRACION MAPON</option>
                     </select>
                 </div>
-
-                <!-- SECCIÓN DINÁMICA (Se muestra al elegir un tipo) -->
                 <div id="cmd-seccion-dinamica" style="display: none;">
-                    <div class="form-grupo">
-                        <label>LINEA DE TRAMA</label>
-                        <input type="text" id="cmd-trama">
-                    </div>
-                    <div class="form-grupo">
-                        <label>COMANDOS</label>
-                        <div class="comando-resultado">NO HAY MAS CODIGOS!! <span class="icono-copiar">📋</span></div>
-                    </div>
+                    <div class="form-grupo"><label>LINEA DE TRAMA</label><input type="text" id="cmd-trama"></div>
+                    <div class="form-grupo"><label>COMANDOS</label><div class="comando-resultado">NO HAY MAS CODIGOS!! 📋</div></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL VISOR WEB (IFRAME) -->
-    <div id="modal-iframe" class="modal-oscuro">
-        <div class="modal-iframe-content">
-            <div class="modal-cmd-header">
-                <h2 id="iframe-titulo" style="color: #6db6ff;">Visor Web</h2>
-                <button class="btn-cancelar" onclick="appSoporte.cerrarIframe()">Cerrar</button>
-            </div>
-            <div style="padding: 10px; background: #fff; height: 70vh;">
-                <iframe id="iframe-visor" src="" style="width: 100%; height: 100%; border: none;"></iframe>
-            </div>
-        </div>
-    </div>  
-
-    <!-- Carga del Cerebro OOP -->
     <script src="soporte.js"></script>
 </body>
 </html>
