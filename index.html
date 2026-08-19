@@ -110,14 +110,26 @@
                         <option value="cero">PROGRAMACION DESDE 0</option>
                     </select>
                 </div>
+                <<!-- SECCIÓN DINÁMICA (Se muestra al elegir un tipo) -->
                 <div id="cmd-seccion-dinamica" style="display: none;">
-                    <div class="form-grupo"><label>LINEA DE TRAMA</label><input type="text" id="cmd-trama"></div>
-                    <div class="form-grupo"><label>COMANDOS</label><div class="comando-resultado">NO HAY MAS CODIGOS!! 📋</div></div>
+                    <div class="form-grupo">
+                        <label>LINEA DE TRAMA</label>
+                        <!-- Agregamos el oninput para que detecte cuando escribes -->
+                        <input type="text" id="cmd-trama" oninput="appSoporte.procesarComando()">
+                    </div>
+                    <div class="form-grupo">
+                        <label>COMANDOS</label>
+                        <!-- Le agregamos el id="cmd-resultado" -->
+                        <div class="comando-resultado" id="cmd-resultado">NO HAY MAS CODIGOS!! 📋</div>
+                    </div>
                 </div>
-            </div>
         </div>
     </div>
 
+    <!-- Carga del Cerebro OOP -->
+    <script src="comandos.js"></script>
     <script src="soporte.js"></script>
+</body>
+</html>
 </body>
 </html>
