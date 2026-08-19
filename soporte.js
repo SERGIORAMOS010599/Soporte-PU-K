@@ -65,11 +65,21 @@ class SoporteTecnico {
         }
     }
 
-    buscarGlobal(texto) {
+   buscarGlobal(texto) {
         this.busquedaActual = texto;
-        // Guardamos en la memoria del navegador
         localStorage.setItem('busquedaGlobal', texto); 
-        this.renderizar(); // Volvemos a pintar las tarjetas filtradas
+        
+        // Mostrar/Ocultar la X del buscador
+        const btnLimpiar = document.getElementById('btn-limpiar-busqueda');
+        if (btnLimpiar) btnLimpiar.style.display = texto.length > 0 ? 'block' : 'none';
+
+        this.renderizar();
+    }
+
+    limpiarBusqueda() {
+        const input = document.getElementById('buscador-global');
+        if (input) input.value = '';
+        this.buscarGlobal('');
     }
 
     renderizar() {
@@ -197,6 +207,65 @@ class SoporteTecnico {
             document.getElementById('cmd-trama').value = ""; 
         } else {
             seccionDinamica.style.display = "none";
+        }
+    }
+    abrirVisorWeb(nombre, url) {
+        document.getElementById('iframe-titulo').innerText = nombre;
+        document.getElementById('iframe-visor').src = url;
+        document.getElementById('modal-iframe').style.display = 'flex';
+    }
+
+    cerrarIframe() {
+        document.getElementById('modal-iframe').style.display = 'none';
+        document.getElementById('iframe-visor').src = ""; // Cortar la carga al cerrar
+    }
+    activarEdicionUnidad() {
+        const contenedor = document.getElementById('det-titulo-contenedor');
+        const valorActual = this.equipoSeleccionado.unidad; // O el campo que vayas a editar
+        
+        contenedor.innerHTML = `
+            <input type="text" id="input-edicion-unidad" class="input-edicion" value="${valorActual}">
+            <button class="btn-guardar-edicion" onclick="appSoporte.guardarEdicionUnidad()">Guardar</button>
+            <button class="btn-cancelar" onclick="appSoporte.abrirDetalles(appSoporte.equipoSeleccionado)" style="padding: 5px;">✖</button>
+        `;
+    }
+
+    async guardarEdicionUnidad() {
+        const nuevoValor = document.getElementById('input-edicion-unidad').value;
+        const idEquipo = this.equipoSeleccionado.id;
+        const botonGuardar = document.querySelector('.btn-guardar-edicion');
+        
+        botonGuardar.innerText = "Guardando...";
+        botonGuardar.disabled = true;
+
+        // 🚨 PEGA AQUÍ LA URL DE TU APPS SCRIPT (PASO 1) 🚨
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbzE-R8fgLZ2DCo67pqmF2oc9rkUZIxrpTt0xSciaKwroYpq-qZ2pG8RiCf65ZjXtArw/exec';
+
+        try {
+            const respuesta = await fetch(scriptUrl, {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: idEquipo,
+                    nuevaUnidad: nuevoValor
+                })
+            });
+
+            const resultado = await respuesta.json();
+            
+            if (resultado.success) {
+                // Actualizamos la memoria local y recargamos
+                this.equipoSeleccionado.unidad = nuevoValor;
+                this.abrirDetalles(this.equipoSeleccionado);
+                this.renderizar(); // Para que se actualice la tarjeta también
+                alert("¡Actualizado en la base de datos exitosamente!");
+            } else {
+                throw new Error("No se encontró el ID en Sheets");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Error al guardar en la base de datos.");
+            botonGuardar.innerText = "Reintentar";
+            botonGuardar.disabled = false;
         }
     }
 }
