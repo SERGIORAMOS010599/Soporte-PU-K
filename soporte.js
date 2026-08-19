@@ -1,11 +1,21 @@
 class SoporteTecnico {
     constructor() {
         this.container = document.getElementById('grid-salidas');
-        this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM'; // Tu Google Sheet
+        this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM'; 
         this.equipos = [];
+        this.equipoSeleccionado = null; // Guardará el equipo activo para el modal
+        
+        // Memoria Persistente: Recupera lo último que buscaste
+        this.busquedaActual = localStorage.getItem('busquedaGlobal') || ''; 
+        
         this.iniciar();
     }
-
+    buscarGlobal(texto) {
+        this.busquedaActual = texto;
+        // Guardamos en la memoria del navegador para que no se borre al cambiar de página
+        localStorage.setItem('busquedaGlobal', texto); 
+        this.renderizar(); // Volvemos a pintar las tarjetas filtradas
+    }
     async iniciar() {
         if (!this.container) return;
         this.container.innerHTML = '<p style="text-align:center; color: #ffb74d; padding: 20px;">Conectando con Google Sheets...</p>';
@@ -41,7 +51,8 @@ class SoporteTecnico {
                         iccid: val(6) || 'N/A',
                         cliente: val(9) || 'SIN CLIENTE',
                         estadoServicio: val(10) || 'PENDIENTE',
-                        unidad: val(11) || 'SIN UNIDAD'
+                        unidad: val(11) || 'SIN UNIDAD',
+                        tipoServicio: val(15) || 'PENDIENTE DE ASIGNAR'
                     };
 
                     // Solo agregamos a la lista si realmente existe un ID válido
@@ -50,6 +61,9 @@ class SoporteTecnico {
                     }
                 }
             });
+           // Poner el texto en la caja visual si quedó algo en memoria
+            const inputBuscador = document.getElementById('buscador-global');
+            if (inputBuscador) inputBuscador.value = this.busquedaActual;
 
             this.renderizar();
         } catch (error) {
@@ -61,28 +75,24 @@ class SoporteTecnico {
     renderizar() {
         this.container.innerHTML = '';
         
-        if (this.equipos.length === 0) {
-            this.container.innerHTML = '<p style="text-align:center; color:#a0a0a0;">No hay equipos registrados en la base de datos.</p>';
+        // FILTRADO INTELIGENTE
+        const query = this.busquedaActual.toLowerCase().trim();
+        const equiposFiltrados = this.equipos.filter(eq => {
+            return eq.id.toLowerCase().includes(query) || 
+                   eq.imei.toLowerCase().includes(query) || 
+                   eq.iccid.toLowerCase().includes(query) || 
+                   eq.cliente.toLowerCase().includes(query) ||
+                   eq.unidad.toLowerCase().includes(query);
+        });
+
+        if (equiposFiltrados.length === 0) {
+            this.container.innerHTML = '<p style="text-align:center; color:#a0a0a0;">No hay resultados para tu búsqueda.</p>';
             return;
         }
 
-        this.equipos.forEach(eq => {
-            const tarjeta = document.createElement('div');
-            tarjeta.className = 'tarjeta-gps';
-            
-            // Estructura limpia de la tarjeta
-            tarjeta.innerHTML = `
-                <div class="tarjeta-unidad">${eq.unidad}</div>
-                <div class="tarjeta-cliente">${eq.cliente} (${eq.id})</div>
-                <h2 class="tarjeta-marca">${eq.marca}</h2>
-                <div class="tarjeta-modelo">${eq.modelo}</div>
-                <div class="tarjeta-servicio">${eq.estadoServicio}</div>
-                <div class="tarjeta-acciones">
-                    <div class="accion-btn rojo" onclick="event.stopPropagation(); appSoporte.enviarSMS('apagar', '${eq.linea}')">APAGAR <span class="circulo"></span></div>
-                    <div class="accion-btn verde" onclick="event.stopPropagation(); appSoporte.enviarSMS('encender', '${eq.linea}')">ENCENDER <span class="circulo"></span></div>
-                </div>
-            `;
-            
+        equiposFiltrados.forEach(eq => {
+            // ... (AQUÍ VA TU CÓDIGO NORMAL PARA DIBUJAR LA TARJETA div.innerHTML = ...)
+            // Y al final:
             tarjeta.onclick = () => this.abrirDetalles(eq);
             this.container.appendChild(tarjeta);
         });
