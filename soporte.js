@@ -102,47 +102,52 @@ class SoporteTecnico {
         const panel = document.getElementById('panel-detalles');
         if (!panel) return;
 
-        // Función segura para inyectar textos en el panel lateral sin errores
+        this.equipoSeleccionado = eq; // Memorizamos qué equipo abriste
+
         const setText = (elementId, text) => {
             const el = document.getElementById(elementId);
             if (el) el.innerText = text;
         };
 
-        setText('det-titulo', `${eq.cliente} (${eq.id})`);
-        setText('det-id', eq.id);
-        setText('det-linea', eq.linea);
-        setText('det-iccid', eq.iccid);
-        setText('det-imei', eq.imei);
-        setText('det-marca', eq.marca);
-        setText('det-modelo', eq.modelo);
-        setText('det-cliente', eq.cliente);
-        setText('det-servicio', eq.estadoServicio);
+        // ... (Tu código actual de setText) ...
+        setText('det-tipo-servicio', eq.tipoServicio); // <--- Inyectamos el nuevo dato
 
-        // Guardamos el número en el atributo para los SMS
-        const marcaTag = document.getElementById('det-marca');
-        if (marcaTag) marcaTag.setAttribute('data-linea', eq.linea);
-        
         panel.classList.add('abierto');
     }
 
-    cerrarDetalles() {
-        const panel = document.getElementById('panel-detalles');
-        if (panel) panel.classList.remove('abierto');
-    }
-
-    enviarSMS(accion, lineaDirecta) {
-        const marcaTag = document.getElementById('det-marca');
-        const numero = lineaDirecta || (marcaTag ? marcaTag.getAttribute('data-linea') : '');
+    // --- NUEVAS FUNCIONES PARA EL FORMULARIO DE COMANDOS ---
+    abrirModalComandos() {
+        if (!this.equipoSeleccionado) return;
         
-        if (!numero || numero === 'SIN NÚMERO') {
-            alert("No hay un número de línea vinculado para enviar comandos a este equipo.");
-            return;
-        }
-
-        const comando = (accion === 'apagar') ? "SA200CMD;123456;02;Enable1" : "SA200CMD;123456;02;Disable1";
-        window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
+        // Auto-llenar los campos con el equipo seleccionado
+        document.getElementById('cmd-marca').value = this.equipoSeleccionado.marca;
+        document.getElementById('cmd-modelo').value = this.equipoSeleccionado.modelo;
+        document.getElementById('cmd-id').value = this.equipoSeleccionado.id;
+        
+        // Reiniciar el área dinámica
+        document.getElementById('cmd-tipo').value = "";
+        document.getElementById('cmd-seccion-dinamica').style.display = "none";
+        
+        document.getElementById('modal-comandos').style.display = 'flex';
     }
-}
+
+    cerrarModalComandos() {
+        document.getElementById('modal-comandos').style.display = 'none';
+    }
+
+    cambiarTipoComando() {
+        const seleccion = document.getElementById('cmd-tipo').value;
+        const seccionDinamica = document.getElementById('cmd-seccion-dinamica');
+        
+        // Si elige una opción válida, mostramos el cuadro para programar
+        if (seleccion !== "") {
+            seccionDinamica.style.display = "block";
+            // Aquí en un futuro pondremos la lógica que me pases para generar los códigos
+            document.getElementById('cmd-trama').value = ""; 
+        } else {
+            seccionDinamica.style.display = "none";
+        }
+    }
 
 // Instanciamos la clase globalmente cuando el documento esté listo
 document.addEventListener('DOMContentLoaded', () => {
