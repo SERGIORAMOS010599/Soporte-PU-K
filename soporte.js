@@ -199,9 +199,82 @@ class SoporteTecnico {
     cerrarDetalles() { document.getElementById('panel-detalles').classList.remove('abierto'); }
     
     enviarSMS(accion, lineaDirecta) {
-        const numero = lineaDirecta || document.getElementById('det-marca').getAttribute('data-linea');
-        if (!numero || numero === 'SIN NÚMERO') return alert("No hay número vinculado.");
-        const comando = (accion === 'apagar') ? "SA200CMD;123456;02;Enable1" : "SA200CMD;123456;02;Disable1";
+        const eq = this.equipoSeleccionado;
+        if (!eq) {
+            alert("Selecciona un equipo primero.");
+            return;
+        }
+
+        const numero = lineaDirecta || eq.linea;
+        if (!numero || numero === 'SIN NÚMERO') {
+            alert("No hay un número de línea vinculado para enviar comandos a este equipo.");
+            return;
+        }
+
+        const marca = eq.marca ? eq.marca.toUpperCase().trim() : '';
+        const modelo = eq.modelo ? eq.modelo.toUpperCase().trim() : '';
+        const id = eq.id;
+        let comando = "";
+
+        // Lógica de Comandos Rápidos
+        switch (accion) {
+            case 'apagar':
+                if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Enable1`;
+                else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Enable1`;
+                else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Enable1`;
+                else if (modelo.startsWith("ST3300") || modelo.startsWith("ST3340") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;01`;
+                else if (marca === "TELTONIKA") comando = "  setdigout 1 0";
+                else if (marca === "RUPTELA") comando = " setio 0,2";
+                else if (marca === "CONCOX" || marca === "JIMI") comando = "RELAY,1#";
+                break;
+                
+            case 'encender':
+                if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Disable1`;
+                else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Disable1`;
+                else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Disable1`;
+                else if (modelo.startsWith("ST330") || modelo.startsWith("ST3340") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;02`;
+                else if (marca === "TELTONIKA") comando = "  setdigout 0 0";
+                else if (marca === "RUPTELA") comando = " setio 1,2";
+                else if (marca === "CONCOX" || marca === "JIMI") comando = "RELAY,0#";
+                break;
+
+            case 'borrar':
+                if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;EraseAll`;
+                else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;EraseAll`;
+                else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;EraseAll`;
+                else if (modelo.startsWith("ST3300") || modelo.startsWith("ST3340") || modelo.startsWith("ST43")) comando = `CMD;${id};05;02`;
+                else if (marca === "RUPTELA") comando = " delrecords";
+                else if (marca === "TELTONIKA") comando = "  deleterecords";
+                break;
+
+            case 'formatear':
+                if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Reset`;
+                else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Reset`;
+                else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Reset`;
+                else if (modelo.startsWith("ST33") || modelo.startsWith("ST43")) comando = `CMD;${id};03;02`;
+                break;
+
+            case 'reiniciar':
+                if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Reboot`;
+                else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Reboot`;
+                else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Reboot`;
+                else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};03;03`;
+                else if (marca === "TELTONIKA") comando = "  cpureset";
+                else if (marca === "RUPTELA") comando = " reset";
+                else if (marca === "CONCOX" || marca === "JIMI") comando = "RESET#";
+                else if (marca === "CALAMP") comando = "!r3,70,0";
+                break;
+
+            case 'configuracion':
+                alert("Aún no me has compartido la fórmula para 'Configuración del Equipo'.");
+                return;
+        }
+
+        if (!comando) {
+            alert(`No hay un comando SMS configurado para esta acción en la marca ${marca} o modelo ${modelo}.`);
+            return;
+        }
+
         window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
     }
 
