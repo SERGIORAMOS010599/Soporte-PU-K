@@ -55,12 +55,80 @@
                 <tr><td>Marca</td><td id="det-marca">---</td></tr>
                 <tr><td>Modelo</td><td id="det-modelo">---</td></tr>
                 <tr><td>Cliente</td><td id="det-cliente">---</td></tr>
+                <tr><td>Tipo de servicio</td><td id="det-tipo-servicio" style="text-transform: uppercase; font-weight: bold;">---</td></tr>
                 <tr><td>Estado del Servicio</td><td id="det-servicio">---</td></tr>
             </table>
+                <!-- PANEL DE COMANDOS (DENTRO DEL PANEL LATERAL) -->
+        <div class="panel-comandos-box">
+            <div class="comandos-header">
+                <h3>Panel de comandos <span class="badge">0</span></h3>
+            </div>
+        <div class="comandos-body">
+            <p>No objetos</p>
+        </div>
+            <div class="comandos-footer">
+                <button class="btn-texto-dorado" onclick="appSoporte.abrirModalComandos()">AGREGAR COMANDO</button>
+            </div>
+        </div>
         </div>
     </div>
 
     <!-- Carga del Cerebro OOP -->
     <script src="soporte.js"></script>
+    <!-- MODAL: FORMULARIO DE COMANDOS -->
+<div id="modal-comandos" class="modal-oscuro">
+    <div class="modal-comandos-content">
+        <div class="modal-cmd-header">
+            <h2>✕ Comandos Form</h2>
+            <div>
+                <button class="btn-cancelar" onclick="appSoporte.cerrarModalComandos()">Cancelar</button>
+                <button class="btn-guardar">Guardar</button>
+            </div>
+        </div>
+        
+        <div class="modal-cmd-body">
+            <div class="form-grupo">
+                <label>MARCA</label>
+                <input type="text" id="cmd-marca" readonly>
+            </div>
+            
+            <div class="form-grupo">
+                <label>MODELOS</label>
+                <input type="text" id="cmd-modelo" readonly>
+            </div>
+            
+            <div class="form-grupo">
+                <label>ID</label>
+                <input type="text" id="cmd-id" readonly>
+            </div>
+            
+            <div class="form-grupo">
+                <label>TIPO DE COMANDO</label>
+                <select id="cmd-tipo" onchange="appSoporte.cambiarTipoComando()">
+                    <option value="">Buscar</option>
+                    <option value="puertos">PUERTOS, IP's y APN'S</option>
+                    <option value="fuel">PROGRAMACION FUEL</option>
+                    <option value="driving">PROGRAMACION DRIVING</option>
+                    <option value="cero">PROGRAMACION DESDE 0</option>
+                    <option value="temp">PROGRAMACION TEMP</option>
+                    <option value="bt">COMANDOS BT</option>
+                    <option value="mapon">MIGRACION MAPON</option>
+                </select>
+            </div>
+
+            <!-- SECCIÓN DINÁMICA (Se muestra al elegir un tipo) -->
+            <div id="cmd-seccion-dinamica" style="display: none;">
+                <div class="form-grupo">
+                    <label>LINEA DE TRAMA</label>
+                    <input type="text" id="cmd-trama">
+                </div>
+                <div class="form-grupo">
+                    <label>COMANDOS</label>
+                    <div class="comando-resultado">NO HAY MAS CODIGOS!! <span class="icono-copiar">📋</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
