@@ -80,6 +80,7 @@ class SoporteTecnico {
         equiposFiltrados.forEach(eq => {
             const tarjeta = document.createElement('div');
             tarjeta.className = 'tarjeta-gps';
+            // Al presionar los botones desde la tarjeta, enviamos el ID específico
             tarjeta.innerHTML = `
                 <div class="tarjeta-unidad">${eq.unidad}</div>
                 <div class="tarjeta-cliente">${eq.cliente} (${eq.id})</div>
@@ -87,8 +88,8 @@ class SoporteTecnico {
                 <div class="tarjeta-modelo">${eq.modelo}</div>
                 <div class="tarjeta-servicio">${eq.estadoServicio}</div>
                 <div class="tarjeta-acciones">
-                    <div class="accion-btn rojo" onclick="event.stopPropagation(); appSoporte.enviarSMS('apagar', '${eq.linea}')">APAGAR <span class="circulo"></span></div>
-                    <div class="accion-btn verde" onclick="event.stopPropagation(); appSoporte.enviarSMS('encender', '${eq.linea}')">ENCENDER <span class="circulo"></span></div>
+                    <div class="accion-btn rojo" onclick="event.stopPropagation(); appSoporte.enviarSMS('apagar', '${eq.id}')">APAGAR <span class="circulo"></span></div>
+                    <div class="accion-btn verde" onclick="event.stopPropagation(); appSoporte.enviarSMS('encender', '${eq.id}')">ENCENDER <span class="circulo"></span></div>
                 </div>
             `;
             tarjeta.onclick = () => this.abrirDetalles(eq);
@@ -100,7 +101,6 @@ class SoporteTecnico {
         document.getElementById('panel-detalles').classList.add('abierto');
         this.equipoSeleccionado = eq;
 
-        // Restaurar HTML Normal
         document.getElementById('det-titulo-contenedor').innerHTML = `
             <h1 class="titulo-detalles" id="det-titulo">${eq.unidad}</h1>
             <span class="icono-editar" onclick="appSoporte.activarEdicionGeneral()">✏️</span>
@@ -123,19 +123,14 @@ class SoporteTecnico {
 
     activarEdicionGeneral() {
         const eq = this.equipoSeleccionado;
-        
-        // Cambiar el título por input
         document.getElementById('det-titulo-contenedor').innerHTML = `
             <input type="text" id="input-edit-unidad" value="${eq.unidad}" class="input-edicion-general" style="font-size: 1.5rem; width: 50%;">
             <button class="btn-guardar-edicion" onclick="appSoporte.guardarEdicionGeneral()">Guardar</button>
             <button class="btn-cancelar" onclick="appSoporte.abrirDetalles(appSoporte.equipoSeleccionado)" style="padding: 5px;">✖</button>
         `;
-
-        // Función para cambiar textos a inputs
         const crearInput = (idHTML, idInput, valor) => {
             document.getElementById(idHTML).innerHTML = `<input type="text" id="${idInput}" value="${valor}" class="input-edicion-general">`;
         };
-
         crearInput('det-linea', 'input-edit-linea', eq.linea);
         crearInput('det-iccid', 'input-edit-iccid', eq.iccid);
         crearInput('det-imei', 'input-edit-imei', eq.imei);
@@ -154,7 +149,6 @@ class SoporteTecnico {
         btn.innerText = "Guardando...";
         btn.disabled = true;
 
-        // Recopilamos todos los datos nuevos
         const updates = {
             unidad: document.getElementById('input-edit-unidad').value,
             linea: document.getElementById('input-edit-linea').value,
@@ -170,18 +164,17 @@ class SoporteTecnico {
             numSerie: document.getElementById('input-edit-numSerie').value,
         };
 
-        // 🚨 PEGA TU URL DE APPS SCRIPT AQUÍ 🚨
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycbx1xznor_7Oxu7mnD-EXVZM-yuQi712-iJao_XGugEJRtj3CrGtkahMkhb2IAb4LMl7/exec'; 
+        // 🚨 REEMPLAZA AQUÍ TU URL DE APPS SCRIPT 🚨
+        const scriptUrl = 'PON_TU_NUEVA_URL_AQUI'; 
 
         try {
             const respuesta = await fetch(scriptUrl, {
                 method: 'POST',
                 body: JSON.stringify({ id: this.equipoSeleccionado.id, updates: updates })
             });
-            const resultado = await respuesta.json(); // <--- EL ERROR ESTABA AQUÍ (decía response en vez de respuesta)
+            const resultado = await respuesta.json();
 
             if (resultado.success) {
-                // Actualizamos el objeto local y cerramos edición
                 Object.assign(this.equipoSeleccionado, updates);
                 this.abrirDetalles(this.equipoSeleccionado);
                 this.renderizar();
@@ -198,14 +191,22 @@ class SoporteTecnico {
 
     cerrarDetalles() { document.getElementById('panel-detalles').classList.remove('abierto'); }
     
-    enviarSMS(accion, lineaDirecta) {
-        const eq = this.equipoSeleccionado;
+    // --- LÓGICA INTELIGENTE PARA LOS BOTONES REDONDOS ---
+    enviarSMS(accion, eqIdDesdeTarjeta) {
+        // Determinamos qué equipo vamos a procesar (si viene desde la cuadrícula o desde el panel abierto)
+        let eq = null;
+        if (eqIdDesdeTarjeta) {
+            eq = this.equipos.find(e => e.id.toString() === eqIdDesdeTarjeta.toString());
+        } else {
+            eq = this.equipoSeleccionado;
+        }
+
         if (!eq) {
             alert("Selecciona un equipo primero.");
             return;
         }
 
-        const numero = lineaDirecta || eq.linea;
+        const numero = eq.linea;
         if (!numero || numero === 'SIN NÚMERO') {
             alert("No hay un número de línea vinculado para enviar comandos a este equipo.");
             return;
@@ -216,7 +217,6 @@ class SoporteTecnico {
         const id = eq.id;
         let comando = "";
 
-        // Lógica de Comandos Rápidos
         switch (accion) {
             case 'apagar':
                 if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Enable1`;
@@ -300,7 +300,7 @@ class SoporteTecnico {
             seccionDinamica.style.display = "none";
         }
     }
-    // --- MAGIA DE GENERACIÓN DE COMANDOS ---
+
     procesarComando() {
         const marca = document.getElementById('cmd-marca').value;
         const modelo = document.getElementById('cmd-modelo').value;
@@ -310,27 +310,22 @@ class SoporteTecnico {
 
         const cajaResultado = document.getElementById('cmd-resultado');
 
-        // Si la trama está vacía, mostramos el mensaje por defecto
         if (trama.trim() === '') {
             cajaResultado.innerHTML = 'ESPERANDO TRAMA...';
             return;
         }
 
-        // Llamamos al archivo externo comandos.js que acabas de crear
         const comandoGenerado = GeneradorComandos.obtenerComando(tipo, marca, modelo, id, trama);
 
-        // Si el resultado es un mensaje de error o instrucciones (contiene palabras clave)
         if (comandoGenerado.includes("Escribe") || comandoGenerado.includes("CODIGO") || comandoGenerado.includes("Ingresa") || comandoGenerado.includes("NO SOPORTADO")) {
             cajaResultado.innerHTML = `<span style="color: #ffb74d; font-size: 0.85rem;">${comandoGenerado}</span>`;
         } else {
-            // Si es un comando VÁLIDO, creamos el enlace directo a SMS
             const numeroLinea = this.equipoSeleccionado.linea;
             let smsLink = "#";
             if (numeroLinea && numeroLinea !== 'SIN NÚMERO') {
                 smsLink = `sms:${numeroLinea}?body=${encodeURIComponent(comandoGenerado)}`;
             }
             
-            // Lo pintamos de azul y le ponemos el botón de copiar
             cajaResultado.innerHTML = `
                 <a href="${smsLink}" style="color: #6db6ff; text-decoration: none; word-break: break-all;" title="Haz clic para enviar SMS">${comandoGenerado}</a> 
                 <span class="icono-copiar" style="cursor:pointer; margin-left: 10px; font-size: 1.2rem;" onclick="navigator.clipboard.writeText('${comandoGenerado}'); alert('¡Comando Copiado!');">📋</span>
