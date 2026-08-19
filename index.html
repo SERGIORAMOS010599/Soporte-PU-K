@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <!-- BARRA DE BÚSQUEDA UNIVERSAL -->
-    <div class="buscador-container">
+    <div class="buscador-container" style="position: relative; max-width: 600px; margin: 0 auto;">
         <input type="text" id="buscador-global" placeholder="Buscar por IMEI, ID, Cliente o Unidad..." oninput="appSoporte.buscarGlobal(this.value)">
+        <span id="btn-limpiar-busqueda" onclick="appSoporte.limpiarBusqueda()">✖</span>
     </div>
 <head>
     <meta charset="UTF-8">
@@ -130,5 +131,17 @@
         </div>
     </div>
 </div>
+            <!-- MODAL VISOR WEB (IFRAME) -->
+<div id="modal-iframe" class="modal-oscuro">
+    <div class="modal-iframe-content">
+        <div class="modal-cmd-header">
+            <h2 id="iframe-titulo" style="color: #6db6ff;">Visor Web</h2>
+            <button class="btn-cancelar" onclick="appSoporte.cerrarIframe()">Cerrar</button>
+        </div>
+        <div style="padding: 10px; background: #fff; height: 70vh;">
+            <iframe id="iframe-visor" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+</div>    
 </body>
 </html>
