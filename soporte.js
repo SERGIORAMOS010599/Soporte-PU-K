@@ -227,6 +227,43 @@ class SoporteTecnico {
             seccionDinamica.style.display = "none";
         }
     }
+    // --- MAGIA DE GENERACIÓN DE COMANDOS ---
+    procesarComando() {
+        const marca = document.getElementById('cmd-marca').value;
+        const modelo = document.getElementById('cmd-modelo').value;
+        const id = document.getElementById('cmd-id').value;
+        const tipo = document.getElementById('cmd-tipo').value;
+        const trama = document.getElementById('cmd-trama').value;
+
+        const cajaResultado = document.getElementById('cmd-resultado');
+
+        // Si la trama está vacía, mostramos el mensaje por defecto
+        if (trama.trim() === '') {
+            cajaResultado.innerHTML = 'ESPERANDO TRAMA...';
+            return;
+        }
+
+        // Llamamos al archivo externo comandos.js que acabas de crear
+        const comandoGenerado = GeneradorComandos.obtenerComando(tipo, marca, modelo, id, trama);
+
+        // Si el resultado es un mensaje de error o instrucciones (contiene palabras clave)
+        if (comandoGenerado.includes("Escribe") || comandoGenerado.includes("CODIGO") || comandoGenerado.includes("Ingresa") || comandoGenerado.includes("NO SOPORTADO")) {
+            cajaResultado.innerHTML = `<span style="color: #ffb74d; font-size: 0.85rem;">${comandoGenerado}</span>`;
+        } else {
+            // Si es un comando VÁLIDO, creamos el enlace directo a SMS
+            const numeroLinea = this.equipoSeleccionado.linea;
+            let smsLink = "#";
+            if (numeroLinea && numeroLinea !== 'SIN NÚMERO') {
+                smsLink = `sms:${numeroLinea}?body=${encodeURIComponent(comandoGenerado)}`;
+            }
+            
+            // Lo pintamos de azul y le ponemos el botón de copiar
+            cajaResultado.innerHTML = `
+                <a href="${smsLink}" style="color: #6db6ff; text-decoration: none; word-break: break-all;" title="Haz clic para enviar SMS">${comandoGenerado}</a> 
+                <span class="icono-copiar" style="cursor:pointer; margin-left: 10px; font-size: 1.2rem;" onclick="navigator.clipboard.writeText('${comandoGenerado}'); alert('¡Comando Copiado!');">📋</span>
+            `;
+        }
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => { window.appSoporte = new SoporteTecnico(); });
