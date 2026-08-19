@@ -35,23 +35,31 @@
                 </div>
                 <button class="btn-cerrar" onclick="appSoporte.cerrarDetalles()">✖</button>
             </div>
-
-            <!-- BOTONES DE ACCIÓN (INCLUYE ZEEK Y MAPON) -->
-            <div class="panel-botones">
+           <!-- BOTONES DE ACCIÓN RÁPIDA -->
+            <div class="panel-botones" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
                 <button class="btn-accion" onclick="appSoporte.enviarSMS('apagar')">
-                    <div class="icono" style="background-color: #d32f2f;">⏻</div>APAGAR MOTOR
+                    <div class="icono" style="background-color: #d32f2f;">⏻</div>APAGAR<br>MOTOR
                 </button>
                 <button class="btn-accion" onclick="appSoporte.enviarSMS('encender')">
-                    <div class="icono" style="background-color: #388e3c;">⏻</div>ENCENDER MOTOR
+                    <div class="icono" style="background-color: #388e3c;">⏻</div>ENCENDER<br>MOTOR
+                </button>
+                <button class="btn-accion" onclick="appSoporte.enviarSMS('configuracion')">
+                    <div class="icono" style="background-color: #ffb74d;">?</div>CONFIGURACION<br>DEL EQUIPO
                 </button>
                 <button class="btn-accion" onclick="appSoporte.enviarSMS('reiniciar')">
-                    <div class="icono" style="background-color: #fbc02d;">⟳</div>REINICIAR EQUIPO
+                    <div class="icono" style="background-color: #f57c00;">⟳</div>REINICIAR<br>EQUIPO
+                </button>
+                <button class="btn-accion" onclick="appSoporte.enviarSMS('borrar')">
+                    <div class="icono" style="background-color: #f57c00;">🗑️</div>BORRADO DE<br>MEMORIA
+                </button>
+                <button class="btn-accion" onclick="appSoporte.enviarSMS('formatear')">
+                    <div class="icono" style="background-color: #d32f2f;">⌫</div>FORMATEAR<br>EQUIPO
                 </button>
                 <button class="btn-accion" onclick="window.open('https://soporte.zeekgps.com/ZeekSoporte/', '_blank')">
-                    <div class="icono" style="background-color: #1976d2;">🛠️</div>ZEEK SOPORTE
+                    <div class="icono" style="background-color: #1976d2;">🛠️</div>ZEEK<br>SOPORTE
                 </button>
                 <button class="btn-accion" onclick="window.open('https://mapon.com/partner/gbox_new/', '_blank')">
-                    <div class="icono" style="background-color: #00c853;">📍</div>MAPON SOPORTE
+                    <div class="icono" style="background-color: #00c853;">📍</div>MAPON<br>SOPORTE
                 </button>
             </div>
             
