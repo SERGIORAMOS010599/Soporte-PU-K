@@ -1,10 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-<!-- BARRA DE BÚSQUEDA UNIVERSAL -->
-    <div class="buscador-container" style="position: relative; max-width: 600px; margin: 0 auto;">
-        <input type="text" id="buscador-global" placeholder="Buscar por IMEI, ID, Cliente o Unidad..." oninput="appSoporte.buscarGlobal(this.value)">
-        <span id="btn-limpiar-busqueda" onclick="appSoporte.limpiarBusqueda()">✖</span>
-    </div>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +7,12 @@
     <link rel="stylesheet" href="soporte.css">
 </head>
 <body>
+
+    <!-- BARRA DE BÚSQUEDA UNIVERSAL -->
+    <div class="buscador-container" style="position: relative; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <input type="text" id="buscador-global" placeholder="Buscar por IMEI, ID, Cliente o Unidad..." oninput="appSoporte.buscarGlobal(this.value)">
+        <span id="btn-limpiar-busqueda" onclick="appSoporte.limpiarBusqueda()">✖</span>
+    </div>
 
     <div class="barra-superior">
         SOPORTE TÉCNICO
@@ -29,10 +30,15 @@
         <!-- PANEL DE DETALLES -->
         <div id="panel-detalles" class="panel-lateral">
             <div class="encabezado-panel">
-                <h1 class="titulo-detalles" id="det-titulo">CARGANDO...</h1>
+                <!-- AQUÍ INYECTAMOS EL LÁPIZ DE EDICIÓN (Paso 4.1) -->
+                <div id="det-titulo-contenedor" style="display: flex; align-items: center; gap: 10px;">
+                    <h1 class="titulo-detalles" id="det-titulo">CARGANDO...</h1>
+                    <span class="icono-editar" onclick="appSoporte.activarEdicionUnidad()">✏️</span>
+                </div>
                 <button class="btn-cerrar" onclick="appSoporte.cerrarDetalles()">✖</button>
             </div>
 
+            <!-- BOTONES DE ACCIÓN PRINCIPALES -->
             <div class="panel-botones">
                 <button class="btn-accion" onclick="appSoporte.enviarSMS('apagar')">
                     <div class="icono" style="background-color: #d32f2f;">⏻</div>
@@ -46,9 +52,18 @@
                     <div class="icono" style="background-color: #fbc02d;">⟳</div>
                     REINICIAR EQUIPO
                 </button>
+                <!-- NUEVOS BOTONES DE VISORES WEB (Paso 4.2) -->
+                <button class="btn-accion" onclick="appSoporte.abrirVisorWeb('Zeek Soporte', 'https://soporte.zeekgps.com/ZeekSoporte/')">
+                    <div class="icono" style="background-color: #1976d2;">🛠️</div>
+                    ZEEK SOPORTE
+                </button>
+                <button class="btn-accion" onclick="appSoporte.abrirVisorWeb('Mapon Soporte', 'https://mapon.com/partner/gbox_new/')">
+                    <div class="icono" style="background-color: #00c853;">📍</div>
+                    MAPON SOPORTE
+                </button>
             </div>
             
-                <table class="tabla-info">
+            <table class="tabla-info">
                 <tr><td>ID</td><td id="det-id">---</td></tr>
                 <tr><td>Línea</td><td id="det-linea">---</td></tr>
                 <tr><td>ICCID</td><td id="det-iccid">---</td></tr>
@@ -59,89 +74,92 @@
                 <tr><td>Tipo de servicio</td><td id="det-tipo-servicio" style="text-transform: uppercase; font-weight: bold;">---</td></tr>
                 <tr><td>Estado del Servicio</td><td id="det-servicio">---</td></tr>
             </table>
-                <!-- PANEL DE COMANDOS (DENTRO DEL PANEL LATERAL) -->
-        <div class="panel-comandos-box">
-            <div class="comandos-header">
-                <h3>Panel de comandos <span class="badge">0</span></h3>
+
+            <!-- PANEL DE COMANDOS (DENTRO DEL PANEL LATERAL) -->
+            <div class="panel-comandos-box">
+                <div class="comandos-header">
+                    <h3>Panel de comandos <span class="badge">0</span></h3>
+                </div>
+                <div class="comandos-body">
+                    <p>No objetos</p>
+                </div>
+                <div class="comandos-footer">
+                    <button class="btn-texto-dorado" onclick="appSoporte.abrirModalComandos()">AGREGAR COMANDO</button>
+                </div>
             </div>
-        <div class="comandos-body">
-            <p>No objetos</p>
-        </div>
-            <div class="comandos-footer">
-                <button class="btn-texto-dorado" onclick="appSoporte.abrirModalComandos()">AGREGAR COMANDO</button>
-            </div>
-        </div>
         </div>
     </div>
+
+    <!-- MODAL: FORMULARIO DE COMANDOS -->
+    <div id="modal-comandos" class="modal-oscuro">
+        <div class="modal-comandos-content">
+            <div class="modal-cmd-header">
+                <h2>✕ Comandos Form</h2>
+                <div>
+                    <button class="btn-cancelar" onclick="appSoporte.cerrarModalComandos()">Cancelar</button>
+                    <button class="btn-guardar">Guardar</button>
+                </div>
+            </div>
+            
+            <div class="modal-cmd-body">
+                <div class="form-grupo">
+                    <label>MARCA</label>
+                    <input type="text" id="cmd-marca" readonly>
+                </div>
+                
+                <div class="form-grupo">
+                    <label>MODELOS</label>
+                    <input type="text" id="cmd-modelo" readonly>
+                </div>
+                
+                <div class="form-grupo">
+                    <label>ID</label>
+                    <input type="text" id="cmd-id" readonly>
+                </div>
+                
+                <div class="form-grupo">
+                    <label>TIPO DE COMANDO</label>
+                    <select id="cmd-tipo" onchange="appSoporte.cambiarTipoComando()">
+                        <option value="">Buscar</option>
+                        <option value="puertos">PUERTOS, IP's y APN'S</option>
+                        <option value="fuel">PROGRAMACION FUEL</option>
+                        <option value="driving">PROGRAMACION DRIVING</option>
+                        <option value="cero">PROGRAMACION DESDE 0</option>
+                        <option value="temp">PROGRAMACION TEMP</option>
+                        <option value="bt">COMANDOS BT</option>
+                        <option value="mapon">MIGRACION MAPON</option>
+                    </select>
+                </div>
+
+                <!-- SECCIÓN DINÁMICA (Se muestra al elegir un tipo) -->
+                <div id="cmd-seccion-dinamica" style="display: none;">
+                    <div class="form-grupo">
+                        <label>LINEA DE TRAMA</label>
+                        <input type="text" id="cmd-trama">
+                    </div>
+                    <div class="form-grupo">
+                        <label>COMANDOS</label>
+                        <div class="comando-resultado">NO HAY MAS CODIGOS!! <span class="icono-copiar">📋</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL VISOR WEB (IFRAME) -->
+    <div id="modal-iframe" class="modal-oscuro">
+        <div class="modal-iframe-content">
+            <div class="modal-cmd-header">
+                <h2 id="iframe-titulo" style="color: #6db6ff;">Visor Web</h2>
+                <button class="btn-cancelar" onclick="appSoporte.cerrarIframe()">Cerrar</button>
+            </div>
+            <div style="padding: 10px; background: #fff; height: 70vh;">
+                <iframe id="iframe-visor" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+        </div>
+    </div>  
 
     <!-- Carga del Cerebro OOP -->
     <script src="soporte.js"></script>
-    <!-- MODAL: FORMULARIO DE COMANDOS -->
-<div id="modal-comandos" class="modal-oscuro">
-    <div class="modal-comandos-content">
-        <div class="modal-cmd-header">
-            <h2>✕ Comandos Form</h2>
-            <div>
-                <button class="btn-cancelar" onclick="appSoporte.cerrarModalComandos()">Cancelar</button>
-                <button class="btn-guardar">Guardar</button>
-            </div>
-        </div>
-        
-        <div class="modal-cmd-body">
-            <div class="form-grupo">
-                <label>MARCA</label>
-                <input type="text" id="cmd-marca" readonly>
-            </div>
-            
-            <div class="form-grupo">
-                <label>MODELOS</label>
-                <input type="text" id="cmd-modelo" readonly>
-            </div>
-            
-            <div class="form-grupo">
-                <label>ID</label>
-                <input type="text" id="cmd-id" readonly>
-            </div>
-            
-            <div class="form-grupo">
-                <label>TIPO DE COMANDO</label>
-                <select id="cmd-tipo" onchange="appSoporte.cambiarTipoComando()">
-                    <option value="">Buscar</option>
-                    <option value="puertos">PUERTOS, IP's y APN'S</option>
-                    <option value="fuel">PROGRAMACION FUEL</option>
-                    <option value="driving">PROGRAMACION DRIVING</option>
-                    <option value="cero">PROGRAMACION DESDE 0</option>
-                    <option value="temp">PROGRAMACION TEMP</option>
-                    <option value="bt">COMANDOS BT</option>
-                    <option value="mapon">MIGRACION MAPON</option>
-                </select>
-            </div>
-
-            <!-- SECCIÓN DINÁMICA (Se muestra al elegir un tipo) -->
-            <div id="cmd-seccion-dinamica" style="display: none;">
-                <div class="form-grupo">
-                    <label>LINEA DE TRAMA</label>
-                    <input type="text" id="cmd-trama">
-                </div>
-                <div class="form-grupo">
-                    <label>COMANDOS</label>
-                    <div class="comando-resultado">NO HAY MAS CODIGOS!! <span class="icono-copiar">📋</span></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-            <!-- MODAL VISOR WEB (IFRAME) -->
-<div id="modal-iframe" class="modal-oscuro">
-    <div class="modal-iframe-content">
-        <div class="modal-cmd-header">
-            <h2 id="iframe-titulo" style="color: #6db6ff;">Visor Web</h2>
-            <button class="btn-cancelar" onclick="appSoporte.cerrarIframe()">Cerrar</button>
-        </div>
-        <div style="padding: 10px; background: #fff; height: 70vh;">
-            <iframe id="iframe-visor" src="" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-    </div>
-</div>    
 </body>
 </html>
