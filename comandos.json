@@ -156,7 +156,7 @@
     "modelo": "UNIVERSAL",
     "titulo": "APN Telcel Corporativo (wwwcorps.itelcel.com)",
     "claves": "apn, telcel, corporativo",
-    "plantilla": "  setparam 2001:wwwcorps.itelcel.com;2002:webgprs;2003:webgprs2002",
+    "plantilla": "  setparam 2001:wwwcorps.itelcel.com;",
     "preguntas": ""
   },
   {
