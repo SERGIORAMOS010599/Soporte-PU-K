@@ -98,7 +98,10 @@ class SoporteTecnico {
         });
     }
 
-    abrirDetalles(eq) {
+   abrirDetalles(eq) {
+        // Le agregamos una clase al body para que "empuje" el contenido
+        document.body.classList.add('con-panel-abierto');
+        
         document.getElementById('panel-detalles').classList.add('abierto');
         this.equipoSeleccionado = eq;
 
@@ -120,6 +123,12 @@ class SoporteTecnico {
         document.getElementById('det-numSerie').innerText = eq.numSerie;
 
         document.getElementById('det-marca').setAttribute('data-linea', eq.linea);
+    }
+
+    cerrarDetalles() { 
+        // Quitamos la clase para que el contenido vuelva a ocupar toda la pantalla
+        document.body.classList.remove('con-panel-abierto');
+        document.getElementById('panel-detalles').classList.remove('abierto'); 
     }
 
     activarEdicionGeneral() {
