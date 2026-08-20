@@ -1,154 +1,237 @@
-[
-  {
-    "marca": "SUNTECH",
-    "modelo": "UNIVERSAL",
-    "titulo": "Cambiar IP / Servidor",
-    "claves": "ip, servidor, mapon, dns",
-    "plantilla": "CMD;{ID};02;01;{VALOR1};{VALOR2}",
-    "preguntas": "Ingresa la IP, Ingresa el Puerto"
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Información de Sistema (getinfo)",
-    "claves": "getinfo, sistema, runtime, estado",
-    "plantilla": "getinfo",
-    "preguntas": ""
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Versión de Firmware y IMEI (getver)",
-    "claves": "getver, version, imei, bt, mac",
-    "plantilla": "getver",
-    "preguntas": ""
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Estado del Módem (getstatus)",
-    "claves": "getstatus, modem, red",
-    "plantilla": "getstatus",
-    "preguntas": ""
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Datos GPS Actuales (getgps)",
-    "claves": "getgps, gps, fecha, hora",
-    "plantilla": "getgps",
-    "preguntas": ""
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Leer Entradas y Salidas (getio)",
-    "claves": "getio, entradas, salidas, analogico, digital",
-    "plantilla": "getio",
-    "preguntas": ""
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Ubicación con Enlace de Google Maps (ggps)",
-    "claves": "ggps, mapa, link, google maps, ubicacion",
-    "plantilla": "ggps",
-    "preguntas": ""
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Reiniciar Dispositivo (cpureset)",
-    "claves": "reiniciar, reboot, cpu, trabado",
-    "plantilla": "  cpureset",
-    "preguntas": ""
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Consultar Parámetro (getparam)",
-    "claves": "getparam, parametro, leer config",
-    "plantilla": "  getparam {VALOR1}",
-    "preguntas": "Ingresa el ID del parámetro (ej. 2004)"
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Configurar Parámetro (setparam)",
-    "claves": "setparam, configurar, ip, servidor, puerto",
-    "plantilla": "  setparam {VALOR1}:{VALOR2}",
-    "preguntas": "Ingresa ID del parámetro, Ingresa el nuevo valor"
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Apagar Motor / Salida",
-    "claves": "apagar, motor, corte, salida, digout",
-    "plantilla": "  setdigout 1 0",
-    "preguntas": ""
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Encender Motor / Salida",
-    "claves": "encender, motor, restaurar, salida",
-    "plantilla": "  setdigout 0 0",
-    "preguntas": ""
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Estado de la Batería (battery)",
-    "claves": "bateria, voltaje, power",
-    "plantilla": "battery",
-    "preguntas": ""
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Cargar Configuración por Defecto (defaultcfg)",
-    "claves": "defaultcfg, reiniciar de fabrica, valores iniciales",
-    "plantilla": "defaultcfg",
-    "preguntas": ""
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Códigos de Error OBD (faultcodes)",
-    "claves": "faultcodes, obd, codigos de falla, escner",
-    "plantilla": "faultcodes",
-    "preguntas": ""
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Borrar Códigos OBD (cleardtc)",
-    "claves": "cleardtc, borrar fallas, limpiar obd",
-    "plantilla": "cleardtc",
-    "preguntas": ""
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Leer Código VIN (getvin)",
-    "claves": "vin, vehiculo, numero de serie",
-    "plantilla": "getvin",
-    "preguntas": ""
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Bloquear Motor por CAN (lvcanblockengine)",
-    "claves": "can, bloquear, motor, can-control",
-    "plantilla": "lvcanblockengine",
-    "preguntas": ""
-  },
-  {
-    "marca": "TELTONIKA",
-    "modelo": "UNIVERSAL",
-    "titulo": "Desbloquear Motor por CAN (lvcanunblockengine)",
-    "claves": "can, desbloquear, motor, can-control",
-    "plantilla": "lvcanunblockengine",
-    "preguntas": ""
-  }
-]
+this.diccionarioComandos = [
+            // --- SUNTECH (COMPLETO) ---
+            {
+                "marca": "SUNTECH",
+                "modelo": "UNIVERSAL",
+                "titulo": "Cambiar IP / Servidor",
+                "claves": "ip, servidor, mapon, dns, puerto",
+                "plantilla": "CMD;{ID};02;01;{VALOR1};{VALOR2}",
+                "preguntas": "Ingresa la IP, Ingresa el Puerto"
+            },
+            {
+                "marca": "SUNTECH",
+                "modelo": "UNIVERSAL",
+                "titulo": "APN de Operador",
+                "claves": "apn, internet, operador, telcel",
+                "plantilla": "CMD;{ID};03;01;{VALOR1};{VALOR2};{VALOR3}",
+                "preguntas": "Ingresa el APN, Usuario APN, Contraseña APN"
+            },
+            {
+                "marca": "SUNTECH",
+                "modelo": "UNIVERSAL",
+                "titulo": "Reiniciar Dispositivo",
+                "claves": "reiniciar, reboot, trabado, apagar",
+                "plantilla": "CMD;{ID};03;03",
+                "preguntas": ""
+            },
+            {
+                "marca": "SUNTECH",
+                "modelo": "UNIVERSAL",
+                "titulo": "Cortar Motor (Salida 1)",
+                "claves": "apagar, motor, corte, bloquear, salida",
+                "plantilla": "CMD;{ID};04;01",
+                "preguntas": ""
+            },
+            {
+                "marca": "SUNTECH",
+                "modelo": "UNIVERSAL",
+                "titulo": "Restaurar Motor (Salida 1)",
+                "claves": "encender, motor, restaurar, desbloquear",
+                "plantilla": "CMD;{ID};04;02",
+                "preguntas": ""
+            },
+            {
+                "marca": "SUNTECH",
+                "modelo": "ST300",
+                "titulo": "Estado General (StatusReq)",
+                "claves": "estado, status, st300, voltaje",
+                "plantilla": "ST300CMD;{ID};StatusReq",
+                "preguntas": ""
+            },
+            {
+                "marca": "SUNTECH",
+                "modelo": "ST300",
+                "titulo": "Forzar Ubicación (LocReq)",
+                "claves": "gps, ubicacion, st300, posicion",
+                "plantilla": "ST300CMD;{ID};LocReq",
+                "preguntas": ""
+            },
+            {
+                "marca": "SUNTECH",
+                "modelo": "ST300",
+                "titulo": "Apagar Motor ST300 / ST340",
+                "claves": "apagar, motor, st300, st340",
+                "plantilla": "ST300CMD;{ID};02;Enable1",
+                "preguntas": ""
+            },
+            {
+                "marca": "SUNTECH",
+                "modelo": "ST300",
+                "titulo": "Encender Motor ST300 / ST340",
+                "claves": "encender, motor, st300, st340",
+                "plantilla": "ST300CMD;{ID};02;Disable1",
+                "preguntas": ""
+            },
+            {
+                "marca": "SUNTECH",
+                "modelo": "ST600",
+                "titulo": "Apagar Motor ST600",
+                "claves": "apagar, motor, st600",
+                "plantilla": "ST600CMD;{ID};02;Enable1",
+                "preguntas": ""
+            },
+            {
+                "marca": "SUNTECH",
+                "modelo": "ST600",
+                "titulo": "Encender Motor ST600",
+                "claves": "encender, motor, st600",
+                "plantilla": "ST600CMD;{ID};02;Disable1",
+                "preguntas": ""
+            },
+
+            // --- TELTONIKA (DOCUMENTACIÓN OFICIAL) ---
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Información de Sistema (getinfo)",
+                "claves": "getinfo, sistema, runtime, estado",
+                "plantilla": "getinfo",
+                "preguntas": ""
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Versión de Firmware y IMEI (getver)",
+                "claves": "getver, version, imei, bt, mac",
+                "plantilla": "getver",
+                "preguntas": ""
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Estado del Módem (getstatus)",
+                "claves": "getstatus, modem, red",
+                "plantilla": "getstatus",
+                "preguntas": ""
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Datos GPS Actuales (getgps)",
+                "claves": "getgps, gps, fecha, hora",
+                "plantilla": "getgps",
+                "preguntas": ""
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Leer Entradas y Salidas (getio)",
+                "claves": "getio, entradas, salidas, analogico, digital",
+                "plantilla": "getio",
+                "preguntas": ""
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Ubicación con Enlace de Google Maps (ggps)",
+                "claves": "ggps, mapa, link, google maps, ubicacion",
+                "plantilla": "ggps",
+                "preguntas": ""
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Reiniciar Dispositivo (cpureset)",
+                "claves": "reiniciar, reboot, cpu, trabado",
+                "plantilla": "  cpureset",
+                "preguntas": ""
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Consultar Parámetro (getparam)",
+                "claves": "getparam, parametro, leer config",
+                "plantilla": "  getparam {VALOR1}",
+                "preguntas": "Ingresa el ID del parámetro (ej. 2004)"
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Configurar Parámetro (setparam)",
+                "claves": "setparam, configurar, ip, servidor, puerto",
+                "plantilla": "  setparam {VALOR1}:{VALOR2}",
+                "preguntas": "Ingresa ID del parámetro, Ingresa el nuevo valor"
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Apagar Motor / Salida",
+                "claves": "apagar, motor, corte, salida, digout",
+                "plantilla": "  setdigout 1 0",
+                "preguntas": ""
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Encender Motor / Salida",
+                "claves": "encender, motor, restaurar, salida",
+                "plantilla": "  setdigout 0 0",
+                "preguntas": ""
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Estado de la Batería (battery)",
+                "claves": "bateria, voltaje, power",
+                "plantilla": "battery",
+                "preguntas": ""
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Cargar Configuración por Defecto (defaultcfg)",
+                "claves": "defaultcfg, reiniciar de fabrica, valores iniciales",
+                "plantilla": "defaultcfg",
+                "preguntas": ""
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Códigos de Error OBD (faultcodes)",
+                "claves": "faultcodes, obd, codigos de falla, escner",
+                "plantilla": "faultcodes",
+                "preguntas": ""
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Borrar Códigos OBD (cleardtc)",
+                "claves": "cleardtc, borrar fallas, limpiar obd",
+                "plantilla": "cleardtc",
+                "preguntas": ""
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Leer Código VIN (getvin)",
+                "claves": "vin, vehiculo, numero de serie",
+                "plantilla": "getvin",
+                "preguntas": ""
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Bloquear Motor por CAN (lvcanblockengine)",
+                "claves": "can, bloquear, motor, can-control",
+                "plantilla": "lvcanblockengine",
+                "preguntas": ""
+            },
+            {
+                "marca": "TELTONIKA",
+                "modelo": "UNIVERSAL",
+                "titulo": "Desbloquear Motor por CAN (lvcanunblockengine)",
+                "claves": "can, desbloquear, motor, can-control",
+                "plantilla": "lvcanunblockengine",
+                "preguntas": ""
+            }
+        ];
