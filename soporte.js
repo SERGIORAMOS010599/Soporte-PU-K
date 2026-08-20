@@ -14,10 +14,12 @@ class SoporteTecnico {
 
     async iniciar() {
         if (!this.container) return;
-        this.container.innerHTML = '<p style="text-align:center; color: #ffb74d; padding: 20px;">Conectando con Google Sheets...</p>';
+        this.container.innerHTML = '<p style="text-align:center; color: #ffb74d;">Cargando sistema...</p>';
         
+        // Tu archivo de inventario original
         const urlInventario = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Salidas')}`;
-        const urlComandos = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Comandos')}`;
+        // TU NUEVA URL RAW DE GITHUB
+        const urlComandos = 'AQUÍ_PEGAS_TU_URL_RAW_DE_GITHUB_DEL_ARCHIVO_JSON'; 
 
         try {
             const [respuestaInv, respuestaCmd] = await Promise.all([
@@ -25,11 +27,8 @@ class SoporteTecnico {
                 fetch(urlComandos)
             ]);
 
-            const textInv = await respuestaInv.text();
-            const textCmd = await respuestaCmd.text();
-
-            const jsonInv = JSON.parse(textInv.substring(47).slice(0, -2));
-            const jsonCmd = JSON.parse(textCmd.substring(47).slice(0, -2));
+            const jsonInv = JSON.parse((await respuestaInv.text()).substring(47).slice(0, -2));
+            this.diccionarioComandos = await respuestaCmd.json(); // ¡Aquí ya es directo!
             
             // 1. PROCESAR INVENTARIO
             this.equipos = [];
