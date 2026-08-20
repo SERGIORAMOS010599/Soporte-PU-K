@@ -9,25 +9,37 @@ class SoporteTecnico {
         
         // LA "BIBLIA TÉCNICA" (DICCIONARIO INTELIGENTE)
         this.diccionarioComandos = [
-            // --- SUNTECH ---
+            // --- SERVIDORES Y BÁSICOS SUNTECH ---
             { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Cambiar IP / Servidor Manual", claves: "ip, servidor, dns", plantilla: "CMD;{ID};02;01;{VALOR1};{VALOR2}", preguntas: "Ingresa la IP, Ingresa el Puerto" },
             { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Configurar a MAPON", claves: "mapon, servidor, ip, tcp", plantilla: "CMD;{ID};02;01;in.fleetapi.com;5729", preguntas: "" },
             { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Configurar a ZEEK PÚBLICO", claves: "zeek, servidor, ip, publico", plantilla: "CMD;{ID};02;01;mobile.zeekgps.com;2404", preguntas: "" },
             { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Configurar a ZEEK PRIVADO", claves: "zeek, servidor, ip, privado", plantilla: "CMD;{ID};02;01;192.168.9.100;2405", preguntas: "" },
+            
+            // --- APNs SUNTECH ---
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN Corporativo (Con Usuario/Pass)", claves: "apn, telcel, corporativo", plantilla: "CMD;{ID};03;01;wwwcorps.itelcel.com;webgprs;webgprs2002", preguntas: "" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN Público (Sin Usuario/Pass)", claves: "apn, telcel, publico, internet", plantilla: "CMD;{ID};03;01;internet.itelcel.com;;", preguntas: "" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN Argus R2 (Privado)", claves: "apn, argus, r2", plantilla: "CMD;{ID};03;01;argus.itelcel.com;;", preguntas: "" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN Argus R9 (Privado)", claves: "apn, argus, r9", plantilla: "CMD;{ID};03;01;argte.itelcel.com;;", preguntas: "" },
+
+            // --- ACCIONES SUNTECH ---
             { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Ignición por Voltaje (12V)", claves: "ignicion, voltaje, 12v", plantilla: "PRG:{ID}#15:13.50,PRG:{ID}#16:13.30", preguntas: "" },
             { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Ignición por Voltaje (24V)", claves: "ignicion, voltaje, 24v", plantilla: "PRG:{ID}#15:25.50,PRG:{ID}#16:25.30", preguntas: "" },
             { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Apagar Motor / Activar Corte", claves: "apagar, motor, corte, bloquear", plantilla: "CMD;{ID};04;01", preguntas: "" },
             { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Encender Motor / Restaurar", claves: "encender, motor, restaurar, desbloquear", plantilla: "CMD;{ID};04;02", preguntas: "" },
             { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Reiniciar Dispositivo", claves: "reiniciar, reboot, apagar", plantilla: "CMD;{ID};03;03", preguntas: "" },
 
-            // --- TELTONIKA ---
+            // --- SERVIDORES Y BÁSICOS TELTONIKA ---
             { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Configurar a MAPON", claves: "mapon, servidor, ip, tcp", plantilla: "  setparam 2004:in.fleetapi.com;2005:5688", preguntas: "" },
             { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Configurar a ZEEK PÚBLICO", claves: "zeek, servidor, ip, publico", plantilla: "  setparam 2004:mobile.zeekgps.com;2005:20513", preguntas: "" },
             { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Configurar a ZEEK PRIVADO", claves: "zeek, servidor, ip, privado", plantilla: "  setparam 2004:192.168.9.100;2005:20512", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Telcel Público", claves: "apn, telcel, publico", plantilla: "  setparam 2001:internet.itelcel.com;2002:webgprs;2003:webgprs2002", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Telcel Corporativo", claves: "apn, telcel, corporativo", plantilla: "  setparam 2001:wwwcorps.itelcel.com;2002:webgprs;2003:webgprs2002", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Privado ARGUS R2", claves: "apn, argus, r2, telcel", plantilla: "  setparam 2001:argus.itelcel.com", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Privado ARGUS R9", claves: "apn, argus, r9, telcel", plantilla: "  setparam 2001:argte.itelcel.com", preguntas: "" },
+            
+            // --- APNs TELTONIKA ---
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Corporativo (Con Usuario/Pass)", claves: "apn, telcel, corporativo", plantilla: "  setparam 2001:wwwcorps.itelcel.com;2002:webgprs;2003:webgprs2002", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Público (Sin Usuario/Pass)", claves: "apn, telcel, publico, internet", plantilla: "  setparam 2001:internet.itelcel.com", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Argus R2 (Privado)", claves: "apn, argus, r2", plantilla: "  setparam 2001:argus.itelcel.com", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Argus R9 (Privado)", claves: "apn, argus, r9", plantilla: "  setparam 2001:argte.itelcel.com", preguntas: "" },
+
+            // --- ACCIONES TELTONIKA ---
             { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Apagar Motor / Corte", claves: "apagar, motor, corte, salida", plantilla: "  setdigout 1 0", preguntas: "" },
             { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Encender Motor / Restaurar", claves: "encender, motor, restaurar, salida", plantilla: "  setdigout 0 0", preguntas: "" },
             { marca: "TELTONIKA", modelo: "FMC125, FMC920", titulo: "Tipo de Ignición (FMC125/FMC920)", claves: "ignicion, voltaje, 101, movimiento", plantilla: "  setparam 101:{VALOR1}", preguntas: "Valor (1=DIN1, 2=DIN2, 4=DIN3, 16=Mov., 32=Voltaje, suma los valores)" },
@@ -163,9 +175,6 @@ class SoporteTecnico {
     // ==========================================
     // IA - MOTOR EJECUTOR Y PROCESAMIENTO DE LENGUAJE
     // ==========================================
-// ==========================================
-    // IA - MOTOR EJECUTOR Y PROCESAMIENTO DE LENGUAJE
-    // ==========================================
     iniciarAsistente() {
         const eq = this.equipoSeleccionado;
         const badgeMarca = document.getElementById('asistente-badge-marca');
@@ -179,25 +188,24 @@ class SoporteTecnico {
             inputBuscador.value = '';
             
             // --- MEJORA DE DISEÑO DE LA BARRA ---
-            inputBuscador.placeholder = "🤖 Ej. quiero cambiar a mapon...";
+            inputBuscador.placeholder = "🤖 Ej. necesito el apn de argus r2...";
             inputBuscador.style.cssText = "width: 100%; padding: 12px 15px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff; font-size: 0.95rem; margin-bottom: 15px; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); transition: all 0.3s ease; box-sizing: border-box;";
             inputBuscador.onfocus = () => inputBuscador.style.border = "1px solid #ffb74d";
             inputBuscador.onblur = () => inputBuscador.style.border = "1px solid #444";
 
             // --- OPTIMIZACIÓN DE VELOCIDAD (DEBOUNCE) ---
-            // Evita que el navegador se trabe al escribir rápido
             inputBuscador.oninput = () => {
                 clearTimeout(this.debounceTimer);
                 this.debounceTimer = setTimeout(() => {
                     this.filtrarAsistente(false);
-                }, 250); // Espera 250ms después de teclear
+                }, 250); 
             };
 
             // IA: Ejecuta la petición al presionar ENTER
             inputBuscador.onkeypress = (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    clearTimeout(this.debounceTimer); // Cancela la espera
+                    clearTimeout(this.debounceTimer); 
                     this.filtrarAsistente(true);
                 }
             };
@@ -222,43 +230,47 @@ class SoporteTecnico {
             return;
         }
 
-        // --- TRADUCTOR DE INTENCIONES ---
+        // --- TRADUCTOR DE INTENCIONES (IA) ---
         let intencion = textoOriginal;
+        
+        // 1. Servidores
         if (textoOriginal.includes('mapon')) intencion = 'mapon';
         else if (textoOriginal.includes('zeek') && textoOriginal.includes('publico')) intencion = 'zeek, publico';
         else if (textoOriginal.includes('zeek') && (textoOriginal.includes('privado') || textoOriginal.includes('priv'))) intencion = 'zeek, privado';
-        else if (textoOriginal.includes('apn') && textoOriginal.includes('corporativo')) intencion = 'apn, corporativo';
-        else if (textoOriginal.includes('apn')) intencion = 'apn';
+        
+        // 2. APNs Inteligentes
+        else if (textoOriginal.includes('apn')) {
+            if (textoOriginal.includes('corporativo') || textoOriginal.includes('corps')) intencion = 'apn, corporativo';
+            else if (textoOriginal.includes('publico') || textoOriginal.includes('internet')) intencion = 'apn, publico';
+            else if (textoOriginal.includes('argus') && textoOriginal.includes('r2')) intencion = 'apn, r2';
+            else if (textoOriginal.includes('argus') && textoOriginal.includes('r9')) intencion = 'apn, r9';
+            else intencion = 'apn'; 
+        }
+        
+        // 3. Acciones generales
         else if (textoOriginal.includes('ignicion') || textoOriginal.includes('voltaje')) intencion = 'ignicion';
         else if (textoOriginal.includes('apagar') || textoOriginal.includes('cortar')) intencion = 'apagar';
         else if (textoOriginal.includes('encender') || textoOriginal.includes('restaurar')) intencion = 'encender';
 
-        // Filtrar coincidencias
+        // Filtramos buscando la intención
         const comandosFiltrados = comandosValidos.filter(cmd => {
             const claves = cmd.claves.split(',').map(c => c.trim().toLowerCase());
             const intencionesArr = intencion.split(',').map(i => i.trim().toLowerCase());
             
-            // Revisa si la intención detectada empata con las palabras clave del comando
             return intencionesArr.every(i => claves.some(c => c.includes(i) || i.includes(c))) || 
                    cmd.titulo.toLowerCase().includes(textoOriginal);
         });
 
         // --- EJECUCIÓN INTELIGENTE ---
         if (ejecutarPeticion && comandosFiltrados.length > 0) {
-            // Selecciona la mejor coincidencia
             const mejorComando = comandosFiltrados[0];
             this.seleccionarComandoAsistente(mejorComando);
-            
-            // Si el comando no necesita más datos, lo genera de inmediato
-            if (mejorComando.preguntas === "") {
-                this.generarComandoFinal();
-            }
+            if (mejorComando.preguntas === "") this.generarComandoFinal();
         } else {
-            // Modo visualización: Solo muestra los botones filtrados
             if (comandosFiltrados.length > 0) {
                 this.mostrarBotonesSugerencia(comandosFiltrados);
             } else {
-                document.getElementById('asistente-sugerencias').innerHTML = '<span style="color:#ffb74d; font-size:0.85em;">No entendí la petición. Intenta ser más directo, ej: "cambiar a mapon" o "apagar".</span>';
+                document.getElementById('asistente-sugerencias').innerHTML = '<span style="color:#ffb74d; font-size:0.85em;">No entendí la petición. Intenta ser más directo, ej: "cambiar apn r2" o "apagar".</span>';
             }
         }
     }
@@ -287,7 +299,7 @@ class SoporteTecnico {
         const contenedorSugerencias = document.getElementById('asistente-sugerencias');
         const contenedor = document.getElementById('asistente-interactivo');
         
-        contenedorSugerencias.innerHTML = ''; // Limpia los botones al elegir uno
+        contenedorSugerencias.innerHTML = ''; 
         contenedor.style.display = 'block';
         contenedor.innerHTML = '';
 
