@@ -85,7 +85,8 @@ class SoporteTecnico {
                         numSerie: val(14) || 'pendiente de asignar',
                         tipoServicio: val(15) || 'PENDIENTE DE ASIGNAR'
                     };
-                    if (equipo.id !== 'N/A' && equipo.id.toString().trim() !== '') this.equipos.push(equipo);
+                    // Protección con String()
+                    if (equipo.id !== 'N/A' && String(equipo.id).trim() !== '') this.equipos.push(equipo);
                 }
             });
 
@@ -118,12 +119,14 @@ class SoporteTecnico {
     renderizar() {
         this.container.innerHTML = '';
         const query = this.busquedaActual.toLowerCase().trim();
+        
+        // Protección con String() en todos los campos a filtrar
         const equiposFiltrados = this.equipos.filter(eq => {
-            return eq.id.toString().toLowerCase().includes(query) || 
-                   eq.imei.toString().toLowerCase().includes(query) || 
-                   eq.iccid.toString().toLowerCase().includes(query) || 
-                   eq.cliente.toString().toLowerCase().includes(query) ||
-                   eq.unidad.toString().toLowerCase().includes(query);
+            return String(eq.id).toLowerCase().includes(query) || 
+                   String(eq.imei).toLowerCase().includes(query) || 
+                   String(eq.iccid).toLowerCase().includes(query) || 
+                   String(eq.cliente).toLowerCase().includes(query) ||
+                   String(eq.unidad).toLowerCase().includes(query);
         });
 
         if (equiposFiltrados.length === 0) return this.container.innerHTML = '<p style="color:#a0a0a0; text-align:center;">Sin resultados.</p>';
@@ -187,13 +190,11 @@ class SoporteTecnico {
         if (inputBuscador) {
             inputBuscador.value = '';
             
-            // --- MEJORA DE DISEÑO DE LA BARRA ---
             inputBuscador.placeholder = "🤖 Ej. necesito el apn de argus r2...";
             inputBuscador.style.cssText = "width: 100%; padding: 12px 15px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff; font-size: 0.95rem; margin-bottom: 15px; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); transition: all 0.3s ease; box-sizing: border-box;";
             inputBuscador.onfocus = () => inputBuscador.style.border = "1px solid #ffb74d";
             inputBuscador.onblur = () => inputBuscador.style.border = "1px solid #444";
 
-            // --- OPTIMIZACIÓN DE VELOCIDAD (DEBOUNCE) ---
             inputBuscador.oninput = () => {
                 clearTimeout(this.debounceTimer);
                 this.debounceTimer = setTimeout(() => {
@@ -201,7 +202,6 @@ class SoporteTecnico {
                 }, 250); 
             };
 
-            // IA: Ejecuta la petición al presionar ENTER
             inputBuscador.onkeypress = (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -233,12 +233,9 @@ class SoporteTecnico {
         // --- TRADUCTOR DE INTENCIONES (IA) ---
         let intencion = textoOriginal;
         
-        // 1. Servidores
         if (textoOriginal.includes('mapon')) intencion = 'mapon';
         else if (textoOriginal.includes('zeek') && textoOriginal.includes('publico')) intencion = 'zeek, publico';
         else if (textoOriginal.includes('zeek') && (textoOriginal.includes('privado') || textoOriginal.includes('priv'))) intencion = 'zeek, privado';
-        
-        // 2. APNs Inteligentes
         else if (textoOriginal.includes('apn')) {
             if (textoOriginal.includes('corporativo') || textoOriginal.includes('corps')) intencion = 'apn, corporativo';
             else if (textoOriginal.includes('publico') || textoOriginal.includes('internet')) intencion = 'apn, publico';
@@ -246,13 +243,10 @@ class SoporteTecnico {
             else if (textoOriginal.includes('argus') && textoOriginal.includes('r9')) intencion = 'apn, r9';
             else intencion = 'apn'; 
         }
-        
-        // 3. Acciones generales
         else if (textoOriginal.includes('ignicion') || textoOriginal.includes('voltaje')) intencion = 'ignicion';
         else if (textoOriginal.includes('apagar') || textoOriginal.includes('cortar')) intencion = 'apagar';
         else if (textoOriginal.includes('encender') || textoOriginal.includes('restaurar')) intencion = 'encender';
 
-        // Filtramos buscando la intención
         const comandosFiltrados = comandosValidos.filter(cmd => {
             const claves = cmd.claves.split(',').map(c => c.trim().toLowerCase());
             const intencionesArr = intencion.split(',').map(i => i.trim().toLowerCase());
@@ -261,7 +255,6 @@ class SoporteTecnico {
                    cmd.titulo.toLowerCase().includes(textoOriginal);
         });
 
-        // --- EJECUCIÓN INTELIGENTE ---
         if (ejecutarPeticion && comandosFiltrados.length > 0) {
             const mejorComando = comandosFiltrados[0];
             this.seleccionarComandoAsistente(mejorComando);
@@ -446,7 +439,8 @@ class SoporteTecnico {
     }
 
     enviarSMS(accion, eqIdDesdeTarjeta) {
-        let eq = this.equipos.find(e => e.id.toString() === eqIdDesdeTarjeta.toString());
+        // Protección con String() en la búsqueda de IDs
+        let eq = this.equipos.find(e => String(e.id) === String(eqIdDesdeTarjeta));
         if (!eq) return;
 
         const numero = eq.linea;
