@@ -266,8 +266,15 @@ class SoporteTecnico {
                 break;
 
             case 'configuracion':
-                alert("Aún no me has compartido la fórmula para 'Configuración del Equipo'.");
-                return;
+                if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;PresetA`;
+                else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;PresetA`;
+                else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;PresetA`;
+                else if (modelo.startsWith("ST3300") || modelo.startsWith("ST3340") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};03;05`;
+                else if (marca === "TELTONIKA") comando = "  getparam 2001:;2002:;2003:;2004:;2005:;2006:;1004:";
+                // Nota: Agregué RUPTELA y REPTELA por si hay algún error de dedo en el Excel
+                else if (marca === "RUPTELA" || marca === "REPTELA") comando = " getapn";
+                else if (marca === "CONCOX" || marca === "JIMI") comando = "GPRSSET#";
+                break;
         }
 
         if (!comando) {
