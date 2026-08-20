@@ -34,6 +34,38 @@
   {
     "marca": "SUNTECH",
     "modelo": "UNIVERSAL",
+    "titulo": "APN Corporativo (Con Usuario/Pass)",
+    "claves": "apn, telcel, corporativo",
+    "plantilla": "CMD;{ID};03;01;wwwcorps.itelcel.com;webgprs;webgprs2002",
+    "preguntas": ""
+  },
+  {
+    "marca": "SUNTECH",
+    "modelo": "UNIVERSAL",
+    "titulo": "APN Público (Sin Usuario/Pass)",
+    "claves": "apn, telcel, publico, internet",
+    "plantilla": "CMD;{ID};03;01;internet.itelcel.com;;",
+    "preguntas": ""
+  },
+  {
+    "marca": "SUNTECH",
+    "modelo": "UNIVERSAL",
+    "titulo": "APN Argus R2 (Privado)",
+    "claves": "apn, argus, r2",
+    "plantilla": "CMD;{ID};03;01;argus.itelcel.com;;",
+    "preguntas": ""
+  },
+  {
+    "marca": "SUNTECH",
+    "modelo": "UNIVERSAL",
+    "titulo": "APN Argus R9 (Privado)",
+    "claves": "apn, argus, r9",
+    "plantilla": "CMD;{ID};03;01;argte.itelcel.com;;",
+    "preguntas": ""
+  },
+  {
+    "marca": "SUNTECH",
+    "modelo": "UNIVERSAL",
     "titulo": "Ignición por Voltaje (Unidades 12V)",
     "claves": "ignicion, voltaje, 12v",
     "plantilla": "PRG:{ID}#15:13.50,PRG:{ID}#16:13.30",
