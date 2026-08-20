@@ -50,7 +50,10 @@ class SoporteTecnico {
         } catch (error) {
             this.container.innerHTML = '<p style="text-align:center; color:#ff4c4c;">Error al cargar datos.</p>';
         }
-        abrirDiagnostico() {
+    } // <-- AQUÍ FALTABA CERRAR LA FUNCIÓN INICIAR
+
+    // --- FUNCIONES DE DIAGNÓSTICO MAPON ---
+    abrirDiagnostico() {
         if (!this.equipoSeleccionado) return alert("Selecciona un equipo primero.");
         document.getElementById('modal-diagnostico').style.display = 'flex';
         // Reseteamos valores al abrir
@@ -71,14 +74,14 @@ class SoporteTecnico {
 
         const imei = this.equipoSeleccionado.imei;
         
-        // 🚨 PEGA AQUÍ LA URL DEL APPS SCRIPT DE MAPON QUE CREASTE EN EL PASO 1 🚨
+        // 🚨 PEGA AQUÍ LA URL DEL APPS SCRIPT DE MAPON 🚨
         const scriptUrl = 'TU_NUEVA_URL_DE_APPS_SCRIPT_AQUI?imei=' + imei;
 
         try {
             const respuesta = await fetch(scriptUrl);
             const resultado = await respuesta.json();
             
-            // Imprimimos la respuesta en consola para ver cómo estructuró Mapon los voltajes
+            // Imprimimos la respuesta en consola
             console.log("Datos directos de Mapon:", resultado);
             
             document.getElementById('diag-ign').innerText = "Mira la consola (F12)";
@@ -91,8 +94,8 @@ class SoporteTecnico {
         btn.innerText = "🔄 Actualizar Telemetría";
         btn.disabled = false;
     }
-    }
 
+    // --- FUNCIONES DEL BUSCADOR ---
     buscarGlobal(texto) {
         this.busquedaActual = texto;
         localStorage.setItem('busquedaGlobal', texto); 
@@ -105,6 +108,7 @@ class SoporteTecnico {
         this.buscarGlobal('');
     }
 
+    // --- RENDERIZADO Y PANTALLAS ---
     renderizar() {
         this.container.innerHTML = '';
         const query = this.busquedaActual.toLowerCase().trim();
@@ -121,7 +125,6 @@ class SoporteTecnico {
         equiposFiltrados.forEach(eq => {
             const tarjeta = document.createElement('div');
             tarjeta.className = 'tarjeta-gps';
-            // Al presionar los botones desde la tarjeta, enviamos el ID específico
             tarjeta.innerHTML = `
                 <div class="tarjeta-unidad">${eq.unidad}</div>
                 <div class="tarjeta-cliente">${eq.cliente} (${eq.id})</div>
@@ -205,7 +208,6 @@ class SoporteTecnico {
             numSerie: document.getElementById('input-edit-numSerie').value,
         };
 
-        // 🚨 REEMPLAZA AQUÍ TU URL DE APPS SCRIPT 🚨
         const scriptUrl = 'https://script.google.com/macros/s/AKfycbzgwP6L_DDx5XXidThkm__ECIEX8uba7tbqTlh-JOWACArOkaoRPDIf80qaVsf7gwGz/exec'; 
 
         try {
