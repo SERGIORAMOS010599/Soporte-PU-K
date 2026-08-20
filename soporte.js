@@ -4,9 +4,38 @@ class SoporteTecnico {
         this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM'; 
         
         this.equipos = [];
-        this.diccionarioComandos = []; // Diccionario dinámico desde Sheets
         this.equipoSeleccionado = null; 
         this.comandoSeleccionado = null; 
+        
+        // DICCIONARIO INTELIGENTE NATIVO (Suntech + Teltonika oficial)
+        this.diccionarioComandos = [
+            // --- SUNTECH UNIVERSAL / ST43 / ST82 ---
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Cambiar IP / Servidor", claves: "ip, servidor, mapon, dns, puerto", plantilla: "CMD;{ID};02;01;{VALOR1};{VALOR2}", preguntas: "Ingresa la IP, Ingresa el Puerto" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN de Operador", claves: "apn, internet, operador, telcel", plantilla: "CMD;{ID};03;01;{VALOR1};{VALOR2};{VALOR3}", preguntas: "Ingresa el APN, Usuario APN, Contraseña APN" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Reiniciar Equipo", claves: "reiniciar, reboot, trabado, apagar", plantilla: "CMD;{ID};03;03", preguntas: "" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Cortar Motor (Activar Salida)", claves: "apagar, motor, corte, bloquear", plantilla: "CMD;{ID};04;01", preguntas: "" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Restaurar Motor (Desactivar Salida)", claves: "encender, motor, restaurar, desbloquear", plantilla: "CMD;{ID};04;02", preguntas: "" },
+            
+            // --- TELTONIKA (DOCUMENTACIÓN OFICIAL) ---
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Información de Sistema (getinfo)", claves: "getinfo, sistema, runtime, estado", plantilla: "getinfo", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Versión de Firmware y IMEI (getver)", claves: "getver, version, imei, bt, mac", plantilla: "getver", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Estado del Módem (getstatus)", claves: "getstatus, modem, red", plantilla: "getstatus", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Datos GPS Actuales (getgps)", claves: "getgps, gps, fecha, hora", plantilla: "getgps", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Leer Entradas y Salidas (getio)", claves: "getio, entradas, salidas, analogico, digital", plantilla: "getio", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Ubicación con Enlace de Google Maps (ggps)", claves: "ggps, mapa, link, google maps, ubicacion", plantilla: "ggps", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Reiniciar Dispositivo (cpureset)", claves: "reiniciar, reboot, cpu, trabado", plantilla: "  cpureset", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Consultar Parámetro (getparam)", claves: "getparam, parametro, leer config", plantilla: "  getparam {VALOR1}", preguntas: "Ingresa el ID del parámetro (ej. 2004)" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Configurar Parámetro (setparam)", claves: "setparam, configurar, ip, servidor, puerto", plantilla: "  setparam {VALOR1}:{VALOR2}", preguntas: "Ingresa ID del parámetro, Ingresa el nuevo valor" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Apagar Motor / Salida", claves: "apagar, motor, corte, salida, digout", plantilla: "  setdigout 1 0", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Encender Motor / Salida", claves: "encender, motor, restaurar, salida", plantilla: "  setdigout 0 0", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Estado de la Batería (battery)", claves: "bateria, voltaje, power", plantilla: "battery", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Cargar Configuración por Defecto (defaultcfg)", claves: "defaultcfg, reiniciar de fabrica, valores iniciales", plantilla: "defaultcfg", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Códigos de Error OBD (faultcodes)", claves: "faultcodes, obd, codigos de falla, escner", plantilla: "faultcodes", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Borrar Códigos OBD (cleardtc)", claves: "cleardtc, borrar fallas, limpiar obd", plantilla: "cleardtc", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Leer Código VIN (getvin)", claves: "vin, vehiculo, numero de serie", plantilla: "getvin", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Bloquear Motor por CAN (lvcanblockengine)", claves: "can, bloquear, motor, can-control", plantilla: "lvcanblockengine", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Desbloquear Motor por CAN (lvcanunblockengine)", claves: "can, desbloquear, motor, can-control", plantilla: "lvcanunblockengine", preguntas: "" }
+        ];
         
         this.busquedaActual = localStorage.getItem('busquedaGlobal') || ''; 
         this.iniciar();
@@ -14,25 +43,17 @@ class SoporteTecnico {
 
     async iniciar() {
         if (!this.container) return;
-        this.container.innerHTML = '<p style="text-align:center; color: #ffb74d;">Cargando sistema...</p>';
+        this.container.innerHTML = '<p style="text-align:center; color: #ffb74d; padding: 20px;">Conectando con Google Sheets...</p>';
         
-        // Tu archivo de inventario original
         const urlInventario = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Salidas')}`;
-        // TU NUEVA URL RAW DE GITHUB
-        const urlComandos = 'AQUÍ_PEGAS_TU_URL_RAW_DE_GITHUB_DEL_ARCHIVO_JSON'; 
 
         try {
-            const [respuestaInv, respuestaCmd] = await Promise.all([
-                fetch(urlInventario),
-                fetch(urlComandos)
-            ]);
-
-            const jsonInv = JSON.parse((await respuestaInv.text()).substring(47).slice(0, -2));
-            this.diccionarioComandos = await respuestaCmd.json(); // ¡Aquí ya es directo!
+            const respuesta = await fetch(urlInventario);
+            const text = await respuesta.text();
+            const json = JSON.parse(text.substring(47).slice(0, -2));
             
-            // 1. PROCESAR INVENTARIO
             this.equipos = [];
-            jsonInv.table.rows.forEach((row, index) => {
+            json.table.rows.forEach((row, index) => {
                 if (row && row.c && index > 0) {
                     const val = (colIndex) => row.c[colIndex] ? row.c[colIndex].v : '';
                     const equipo = {
@@ -54,40 +75,6 @@ class SoporteTecnico {
                 }
             });
 
-            // 2. PROCESAR DICCIONARIO DE COMANDOS (MAPEADO POR NOMBRE DE COLUMNA)
-            this.diccionarioComandos = [];
-            
-            // Mapeamos los encabezados de la Fila 0 para encontrarlos por su nombre exacto
-            const headers = {};
-            if (jsonCmd.table.cols) {
-                jsonCmd.table.cols.forEach((col, idx) => {
-                    if (col && col.label) {
-                        headers[col.label.trim()] = idx;
-                    }
-                });
-            }
-
-            jsonCmd.table.rows.forEach((row, index) => {
-                if (row && row.c && index > 0) {
-                    const getColVal = (nombreCol) => {
-                        const idx = headers[nombreCol];
-                        return (idx !== undefined && row.c[idx] && row.c[idx].v !== undefined) ? row.c[idx].v.toString() : '';
-                    };
-
-                    const titulo = getColVal('Titulo_Accion');
-                    if (titulo !== '') {
-                        this.diccionarioComandos.push({
-                            marca: getColVal('MARCA').toUpperCase().trim(),
-                            modelo: getColVal('MODELO').toUpperCase().trim(),
-                            titulo: titulo,
-                            claves: getColVal('Palabras_Clave').toLowerCase().trim(),
-                            plantilla: getColVal('Plantilla'),
-                            preguntas: getColVal('Preguntar_Usuario')
-                        });
-                    }
-                }
-            });
-
             const inputBuscador = document.getElementById('buscador-global');
             if (inputBuscador) {
                 inputBuscador.value = this.busquedaActual;
@@ -96,7 +83,7 @@ class SoporteTecnico {
             this.renderizar();
         } catch (error) {
             console.error("Error al conectar con Sheets:", error);
-            this.container.innerHTML = '<p style="text-align:center; color:#ff4c4c;">Error al cargar datos de las hojas.</p>';
+            this.container.innerHTML = '<p style="text-align:center; color:#ff4c4c;">Error al cargar inventario.</p>';
         }
     } 
 
