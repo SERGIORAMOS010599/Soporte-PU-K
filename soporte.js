@@ -85,7 +85,6 @@ class SoporteTecnico {
                         numSerie: val(14) || 'pendiente de asignar',
                         tipoServicio: val(15) || 'PENDIENTE DE ASIGNAR'
                     };
-                    // Protección con String()
                     if (equipo.id !== 'N/A' && String(equipo.id).trim() !== '') this.equipos.push(equipo);
                 }
             });
@@ -119,8 +118,6 @@ class SoporteTecnico {
     renderizar() {
         this.container.innerHTML = '';
         const query = this.busquedaActual.toLowerCase().trim();
-        
-        // Protección con String() en todos los campos a filtrar
         const equiposFiltrados = this.equipos.filter(eq => {
             return String(eq.id).toLowerCase().includes(query) || 
                    String(eq.imei).toLowerCase().includes(query) || 
@@ -292,7 +289,7 @@ class SoporteTecnico {
         const contenedorSugerencias = document.getElementById('asistente-sugerencias');
         const contenedor = document.getElementById('asistente-interactivo');
         
-        contenedorSugerencias.innerHTML = ''; 
+        if (contenedorSugerencias) contenedorSugerencias.innerHTML = ''; 
         contenedor.style.display = 'block';
         contenedor.innerHTML = '';
 
@@ -439,13 +436,11 @@ class SoporteTecnico {
     }
 
     enviarSMS(accion, eqIdDesdeTarjeta = null) {
-        // Magia aquí: Si nos mandan el ID (desde la tarjeta general), lo buscamos.
-        // Si no nos mandan ID (desde los botones circulares), usamos el equipo que está abierto.
         let eq = eqIdDesdeTarjeta 
             ? this.equipos.find(e => String(e.id) === String(eqIdDesdeTarjeta)) 
             : this.equipoSeleccionado;
 
-        if (!eq) return; // Si no hay equipo, no hacemos nada
+        if (!eq) return; 
 
         const numero = eq.linea;
         if (!numero || numero === 'SIN NÚMERO') {
@@ -479,16 +474,15 @@ class SoporteTecnico {
 
         // --- EJECUCIÓN O DERIVACIÓN A LA IA ---
         if (comando) {
-            // Si es un comando directo (apagar, encender, reiniciar), abre el SMS
             window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
         } else {
-            // Si es un botón avanzado (Mapon Soporte, Zeek, etc.), se lo pasamos a la IA
             const inputBuscador = document.getElementById('buscador-asistente');
             if (inputBuscador) {
                 inputBuscador.value = accion;
-                this.filtrarAsistente(true); // Fuerza a la IA a resolver la petición
+                this.filtrarAsistente(true); 
             }
         }
     }
+}
 
 document.addEventListener('DOMContentLoaded', () => { window.appSoporte = new SoporteTecnico(); });
