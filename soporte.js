@@ -50,6 +50,47 @@ class SoporteTecnico {
         } catch (error) {
             this.container.innerHTML = '<p style="text-align:center; color:#ff4c4c;">Error al cargar datos.</p>';
         }
+        abrirDiagnostico() {
+        if (!this.equipoSeleccionado) return alert("Selecciona un equipo primero.");
+        document.getElementById('modal-diagnostico').style.display = 'flex';
+        // Reseteamos valores al abrir
+        document.getElementById('diag-ign').innerText = '--';
+        document.getElementById('diag-vol').innerText = '--';
+        document.getElementById('diag-out1').innerText = '--';
+        document.getElementById('diag-coord').innerText = '--';
+    }
+
+    cerrarDiagnostico() {
+        document.getElementById('modal-diagnostico').style.display = 'none';
+    }
+
+    async consultarMapon() {
+        const btn = document.getElementById('btn-actualizar-diag');
+        btn.innerText = "Consultando satélites...";
+        btn.disabled = true;
+
+        const imei = this.equipoSeleccionado.imei;
+        
+        // 🚨 PEGA AQUÍ LA URL DEL APPS SCRIPT DE MAPON QUE CREASTE EN EL PASO 1 🚨
+        const scriptUrl = 'TU_NUEVA_URL_DE_APPS_SCRIPT_AQUI?imei=' + imei;
+
+        try {
+            const respuesta = await fetch(scriptUrl);
+            const resultado = await respuesta.json();
+            
+            // Imprimimos la respuesta en consola para ver cómo estructuró Mapon los voltajes
+            console.log("Datos directos de Mapon:", resultado);
+            
+            document.getElementById('diag-ign').innerText = "Mira la consola (F12)";
+            
+        } catch (error) {
+            console.error(error);
+            alert("Error de conexión con la API de Mapon.");
+        }
+
+        btn.innerText = "🔄 Actualizar Telemetría";
+        btn.disabled = false;
+    }
     }
 
     buscarGlobal(texto) {
