@@ -169,10 +169,28 @@ class SoporteTecnico {
         this.filtrarAsistente(); // Mostrar sugerencias iniciales
     }
 
-    filtrarAsistente() {
+    // ==========================================
+    // IA - ASISTENTE DE CONFIGURACIÓN
+    // ==========================================
+    iniciarAsistente() {
         const eq = this.equipoSeleccionado;
-        const marcaActual = eq.marca.toUpperCase().trim();
-        const textoBusqueda = document.getElementById('buscador-asistente').value.toLowerCase().trim();
+        const badgeMarca = document.getElementById('asistente-badge-marca');
+        if (badgeMarca) badgeMarca.innerText = eq.marca;
+        
+        const inputBuscador = document.getElementById('buscador-asistente');
+        if (inputBuscador) inputBuscador.value = '';
+        
+        const contenedorInteractivo = document.getElementById('asistente-interactivo');
+        if (contenedorInteractivo) contenedorInteractivo.style.display = 'none';
+        
+        this.filtrarAsistente(); // Mostrar sugerencias iniciales
+    }
+
+    filtrarAsistente() {
+        if (!this.equipoSeleccionado) return;
+        const marcaActual = this.equipoSeleccionado.marca.toUpperCase().trim();
+        const inputBuscador = document.getElementById('buscador-asistente');
+        const textoBusqueda = inputBuscador ? inputBuscador.value.toLowerCase().trim() : '';
         
         // Filtramos de la base de datos solo lo que coincida con la marca y la búsqueda
         const comandosFiltrados = this.diccionarioComandos.filter(cmd => {
@@ -182,6 +200,7 @@ class SoporteTecnico {
         });
 
         const contenedorSugerencias = document.getElementById('asistente-sugerencias');
+        if (!contenedorSugerencias) return;
         contenedorSugerencias.innerHTML = '';
 
         if (comandosFiltrados.length === 0) {
@@ -190,7 +209,7 @@ class SoporteTecnico {
         }
 
         // Crear "Chips" o Botones por cada comando encontrado
-        comandosFiltrados.forEach((cmd, indice) => {
+        comandosFiltrados.forEach((cmd) => {
             const btn = document.createElement('button');
             btn.innerText = cmd.titulo;
             btn.style.cssText = 'background: #333; color: #ffb74d; border: 1px solid #555; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 0.85em; transition: 0.2s;';
