@@ -163,6 +163,9 @@ class SoporteTecnico {
     // ==========================================
     // IA - MOTOR EJECUTOR Y PROCESAMIENTO DE LENGUAJE
     // ==========================================
+// ==========================================
+    // IA - MOTOR EJECUTOR Y PROCESAMIENTO DE LENGUAJE
+    // ==========================================
     iniciarAsistente() {
         const eq = this.equipoSeleccionado;
         const badgeMarca = document.getElementById('asistente-badge-marca');
@@ -174,12 +177,27 @@ class SoporteTecnico {
         
         if (inputBuscador) {
             inputBuscador.value = '';
-            // IA: Filtra botones mientras escribe
-            inputBuscador.oninput = () => this.filtrarAsistente(false);
+            
+            // --- MEJORA DE DISEÑO DE LA BARRA ---
+            inputBuscador.placeholder = "🤖 Ej. quiero cambiar a mapon...";
+            inputBuscador.style.cssText = "width: 100%; padding: 12px 15px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff; font-size: 0.95rem; margin-bottom: 15px; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); transition: all 0.3s ease; box-sizing: border-box;";
+            inputBuscador.onfocus = () => inputBuscador.style.border = "1px solid #ffb74d";
+            inputBuscador.onblur = () => inputBuscador.style.border = "1px solid #444";
+
+            // --- OPTIMIZACIÓN DE VELOCIDAD (DEBOUNCE) ---
+            // Evita que el navegador se trabe al escribir rápido
+            inputBuscador.oninput = () => {
+                clearTimeout(this.debounceTimer);
+                this.debounceTimer = setTimeout(() => {
+                    this.filtrarAsistente(false);
+                }, 250); // Espera 250ms después de teclear
+            };
+
             // IA: Ejecuta la petición al presionar ENTER
             inputBuscador.onkeypress = (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
+                    clearTimeout(this.debounceTimer); // Cancela la espera
                     this.filtrarAsistente(true);
                 }
             };
