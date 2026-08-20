@@ -1,0 +1,18 @@
+[
+  {
+    "marca": "SUNTECH",
+    "modelo": "UNIVERSAL",
+    "titulo": "Cambiar IP / Servidor",
+    "claves": "ip, servidor, mapon, dns",
+    "plantilla": "CMD;{ID};02;01;{VALOR1};{VALOR2}",
+    "preguntas": "Ingresa la IP, Ingresa el Puerto"
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Apagar Motor",
+    "claves": "apagar, motor, corte",
+    "plantilla": "  setdigout 1 0",
+    "preguntas": ""
+  }
+]
