@@ -52,91 +52,6 @@ class SoporteTecnico {
         }
     } 
 
-    // --- FUNCIONES DE DIAGNÓSTICO SMS ---
-    abrirDiagnostico() {
-        if (!this.equipoSeleccionado) return alert("Selecciona un equipo primero.");
-        document.getElementById('modal-diagnostico').style.display = 'flex';
-    }
-
-    cerrarDiagnostico() {
-        document.getElementById('modal-diagnostico').style.display = 'none';
-    }
-
-    enviarSmsDiagnostico(tipo) {
-        if (!this.equipoSeleccionado) {
-            alert("Selecciona un equipo primero.");
-            return;
-        }
-
-        const linea = this.equipoSeleccionado.linea;
-        if (!linea || linea === 'SIN NÚMERO') {
-            alert("No hay un número de línea vinculado para enviar comandos a este equipo.");
-            return;
-        }
-
-        const marca = this.equipoSeleccionado.marca ? this.equipoSeleccionado.marca.toUpperCase().trim() : "";
-        const modelo = this.equipoSeleccionado.modelo ? this.equipoSeleccionado.modelo.toString().toUpperCase().trim() : "";
-        
-        // Utilizamos el ID igual que en tus otros comandos SMS
-        const id = this.equipoSeleccionado.id; 
-        let comando = "";
-
-        // ==========================================
-        // 1. EVALUAR COMANDOS PARA TELTONIKA
-        // ==========================================
-        if (marca.includes("TELTONIKA")) {
-            if (tipo === 'estado') comando = "  getstatus";
-            if (tipo === 'gps') comando = "  ggps";
-            if (tipo === 'io') comando = "  getio";
-        } 
-        
-        // ==========================================
-        // 2. EVALUAR COMANDOS PARA SUNTECH
-        // ==========================================
-        else if (marca.includes("SUNTECH")) {
-            let prefijo = "";
-            
-            // A. Modelos universales (3300, 4315, 4310, 4305, 8230)
-            if (["3300", "4315", "4310", "4305", "8230"].some(m => modelo.includes(m))) {
-                prefijo = `CMD:${id}:`;
-            } 
-            // B. Familia SA200
-            else if (modelo.includes("SA200")) {
-                prefijo = `SA200CMD:${id}:`;
-            } 
-            // C. Familia ST300
-            else if (modelo.includes("ST300") || modelo.includes("ST34")) {
-                prefijo = `ST300CMD:${id}:`;
-            } 
-            // D. Familia ST600
-            else if (modelo.includes("ST600")) {
-                prefijo = `ST600CMD:${id}:`;
-            } 
-            // E. Respaldo por defecto
-            else {
-                prefijo = `CMD:${id}:`; 
-            }
-
-            // Inyectamos el sufijo correcto de Suntech
-            if (tipo === 'estado' || tipo === 'io') {
-                comando = `${prefijo}StatusReq`; 
-            } else if (tipo === 'gps') {
-                comando = `${prefijo}LocReq`;
-            }
-        }
-
-        // Validación final si no es una marca registrada en el diagnóstico
-        if (comando === "") {
-            alert(`No hay comandos de diagnóstico rápido registrados para la marca: ${marca}`);
-            return;
-        }
-
-        // ==========================================
-        // 3. ABRIR LA APP DE MENSAJES (Móvil / Enlace Windows)
-        // ==========================================
-        window.open(`sms:${linea}?body=${encodeURIComponent(comando)}`, '_self');
-    }
-
     // --- FUNCIONES DEL BUSCADOR ---
     buscarGlobal(texto) {
         this.busquedaActual = texto;
@@ -276,7 +191,7 @@ class SoporteTecnico {
 
     cerrarDetalles() { document.getElementById('panel-detalles').classList.remove('abierto'); }
     
-    // --- LÓGICA INTELIGENTE PARA LOS BOTONES REDONDOS ---
+    // --- LÓGICA DE BOTONES SMS ---
     enviarSMS(accion, eqIdDesdeTarjeta) {
         let eq = null;
         if (eqIdDesdeTarjeta) {
