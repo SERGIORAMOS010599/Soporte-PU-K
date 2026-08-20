@@ -67,22 +67,21 @@ class SoporteTecnico {
         document.getElementById('modal-diagnostico').style.display = 'none';
     }
 
-    async consultarMapon() {
+async consultarMapon() {
         const btn = document.getElementById('btn-actualizar-diag');
         btn.innerText = "Consultando satélites...";
         btn.disabled = true;
 
         const imei = this.equipoSeleccionado.imei;
         
-        // Fíjate bien en el ?imei= que está justo antes de cerrar la comilla
+        // AQUÍ ESTÁ LA MAGIA: fíjate en el ?imei=
         const scriptUrl = 'https://script.google.com/macros/s/AKfycbzgwP6L_DDx5XXidThkm__ECIEX8uba7tbqTlh-JOWACArOkaoRPDIf80qaVsf7gwGz/exec?imei=' + imei;
+
         try {
             const respuesta = await fetch(scriptUrl);
             const resultado = await respuesta.json();
             
-            // Imprimimos la respuesta en consola
             console.log("Datos directos de Mapon:", resultado);
-            
             document.getElementById('diag-ign').innerText = "Mira la consola (F12)";
             
         } catch (error) {
