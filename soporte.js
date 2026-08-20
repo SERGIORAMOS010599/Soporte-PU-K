@@ -15,13 +15,13 @@ class SoporteTecnico {
 
     async iniciar() {
         if (!this.container) return;
-        this.container.innerHTML = '<p style="text-align:center; color: #ffb74d; padding: 20px;">Conectando con Bases de Datos...</p>';
+        this.container.innerHTML = '<p style="text-align:center; color: #ffb74d; padding: 20px;">Conectando con Google Sheets...</p>';
         
+        // ¡Usamos tu mismo sheetId principal para ambas pestañas!
         const urlInventario = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Salidas')}`;
-        const urlComandos = `https://docs.google.com/spreadsheets/d/${this.sheetComandosId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Comandos')}`;
+        const urlComandos = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Comandos')}`;
 
         try {
-            // Descargamos ambas bases de datos al mismo tiempo para mayor velocidad
             const [respuestaInv, respuestaCmd] = await Promise.all([
                 fetch(urlInventario),
                 fetch(urlComandos)
@@ -32,6 +32,8 @@ class SoporteTecnico {
 
             const jsonInv = JSON.parse(textInv.substring(47).slice(0, -2));
             const jsonCmd = JSON.parse(textCmd.substring(47).slice(0, -2));
+            
+            // ... (el resto del código procesando los datos sigue exactamente igual)
             
             // 1. PROCESAR INVENTARIO
             this.equipos = [];
