@@ -75,7 +75,7 @@ class SoporteTecnico {
         const imei = this.equipoSeleccionado.imei;
         
         // 🚨 PEGA AQUÍ LA URL DEL APPS SCRIPT DE MAPON 🚨
-        const scriptUrl = 'TU_NUEVA_URL_DE_APPS_SCRIPT_AQUI?imei=' + imei;
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbzgwP6L_DDx5XXidThkm__ECIEX8uba7tbqTlh-JOWACArOkaoRPDIf80qaVsf7gwGz/exec' + imei;
 
         try {
             const respuesta = await fetch(scriptUrl);
