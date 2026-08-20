@@ -19,8 +19,8 @@ class SoporteTecnico {
         const urlInventario = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Salidas')}`;
         
         // AQUÍ VA TU ENLACE RAW DE GITHUB (El de comandos.json)
-        const urlComandos = 'AQUÍ_PEGAS_TU_URL_RAW_DE_GITHUB'; 
-
+        const urlComandos = 'https://raw.githubusercontent.com/SERGIORAMOS010599/Soporte-PU-K/refs/heads/main/comandos.json';
+        
         try {
             // Hacemos ambas peticiones al mismo tiempo para mayor velocidad
             const [respuestaInv, respuestaCmd] = await Promise.all([
