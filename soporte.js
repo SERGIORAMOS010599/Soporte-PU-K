@@ -177,55 +177,39 @@ class SoporteTecnico {
 
 filtrarAsistente() {
         if (!this.equipoSeleccionado) return;
-        const marcaActual = this.equipoSeleccionado.marca.toUpperCase().trim();
         const inputBuscador = document.getElementById('buscador-asistente');
-        let textoBusqueda = inputBuscador ? inputBuscador.value.toLowerCase().trim() : '';
+        const textoBusqueda = inputBuscador ? inputBuscador.value.toLowerCase().trim() : '';
         
-        // --- MOTOR DE INTELIGENCIA / LENGUAJE NATURAL ---
-        // Si el usuario escribe una frase de petición larga, traducimos la intención a palabras clave del diccionario
-        if (textoBusqueda.includes('cambiar') || textoBusqueda.includes('poner') || textoBusqueda.includes('configurar') || textoBusqueda.includes('quiero')) {
-            if (textoBusqueda.includes('mapon')) textoBusqueda = 'mapon';
-            else if (textoBusqueda.includes('zeek') && textoBusqueda.includes('publico')) textoBusqueda = 'publico';
-            else if (textoBusqueda.includes('zeek') && textoBusqueda.includes('privado')) textoBusqueda = 'privado';
-            else if (textoBusqueda.includes('apn')) textoBusqueda = 'apn';
-            else if (textoBusqueda.includes('ignicion') || textoBusqueda.includes('voltaje')) textoBusqueda = 'ignicion';
-            else if (textoBusqueda.includes('apagar') || textoBusqueda.includes('cortar')) textoBusqueda = 'apagar';
-        }
-        // -----------------------------------------------
-
-        // Filtramos de la base de datos lo que coincida con la marca y la intención detectada
-        const comandosFiltrados = this.diccionarioComandos.filter(cmd => {
-            const coincideMarca = cmd.marca === marcaActual || cmd.marca === 'UNIVERSAL';
-            const palabrasClaveArr = cmd.claves.split(',').map(c => c.trim());
-            
-            // Verificamos si alguna clave coincide con lo que el técnico escribió o pidió
-            const coincideBusqueda = textoBusqueda === '' || 
-                                     palabrasClaveArr.some(clave => textoBusqueda.includes(clave)) || 
-                                     cmd.titulo.toLowerCase().includes(textoBusqueda);
-
-            return coincideMarca && coincideBusqueda;
-        });
-
-        const contenedorSugerencias = document.getElementById('asistente-sugerencias');
-        if (!contenedorSugerencias) return;
-        contenedorSugerencias.innerHTML = '';
-
-        if (comandosFiltrados.length === 0) {
-            contenedorSugerencias.innerHTML = '<span style="color:#a0a0a0; font-size:0.85em;">No encontré un comando para esa petición. Intenta con palabras clave (ej. mapon, apn, ignicion).</span>';
+        // Si no hay texto, mostramos todo como botones (para consulta rápida)
+        if (textoBusqueda === '') {
+            this.mostrarBotonesSugerencia(this.diccionarioComandos.filter(cmd => this.esComandoValido(cmd)));
             return;
         }
 
-        // Crear botones por cada opción inteligente encontrada
-        comandosFiltrados.forEach((cmd) => {
-            const btn = document.createElement('button');
-            btn.innerText = cmd.titulo;
-            btn.style.cssText = 'background: #333; color: #ffb74d; border: 1px solid #555; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 0.85em; transition: 0.2s;';
-            btn.onmouseover = () => btn.style.background = '#444';
-            btn.onmouseout = () => btn.style.background = '#333';
-            
-            btn.onclick = () => this.seleccionarComandoAsistente(cmd);
-            contenedorSugerencias.appendChild(btn);
+        // --- MOTOR DE INTELIGENCIA EJECUTORA ---
+        // Buscamos el comando que mejor se adapte a la intención
+        const comandoEncontrado = this.diccionarioComandos.find(cmd => {
+            if (!this.esComandoValido(cmd)) return false;
+            // Si el título o las claves coinciden con la petición
+            return cmd.claves.split(',').some(c => textoBusqueda.includes(c.trim())) || 
+                   cmd.titulo.toLowerCase().includes(textoBusqueda);
         });
+
+        if (comandoEncontrado) {
+            // Si lo encuentra, lo ejecuta directamente sin botones
+            this.seleccionarComandoAsistente(comandoEncontrado);
+            // Si el comando no requiere más preguntas (preguntas === ""), lo genera solo
+            if (comandoEncontrado.preguntas === "") {
+                this.generarComandoFinal();
+            }
+        } else {
+            document.getElementById('asistente-sugerencias').innerHTML = '<span style="color:#ffb74d;">No entiendo esa petición. Prueba con "mapon", "apagar motor" o "ignición".</span>';
+        }
+    }
+
+    esComandoValido(cmd) {
+        const marcaActual = this.equipoSeleccionado.marca.toUpperCase().trim();
+        return cmd.marca === marcaActual || cmd.marca === 'UNIVERSAL';
     }
 
     seleccionarComandoAsistente(cmd) {
