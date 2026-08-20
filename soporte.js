@@ -7,34 +7,36 @@ class SoporteTecnico {
         this.equipoSeleccionado = null; 
         this.comandoSeleccionado = null; 
         
-        // DICCIONARIO INTELIGENTE NATIVO (Suntech + Teltonika oficial)
+        // LA "BIBLIA TÉCNICA" (DICCIONARIO INTELIGENTE)
         this.diccionarioComandos = [
-            // --- SUNTECH UNIVERSAL / ST43 / ST82 ---
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Cambiar IP / Servidor", claves: "ip, servidor, mapon, dns, puerto", plantilla: "CMD;{ID};02;01;{VALOR1};{VALOR2}", preguntas: "Ingresa la IP, Ingresa el Puerto" },
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN de Operador", claves: "apn, internet, operador, telcel", plantilla: "CMD;{ID};03;01;{VALOR1};{VALOR2};{VALOR3}", preguntas: "Ingresa el APN, Usuario APN, Contraseña APN" },
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Reiniciar Equipo", claves: "reiniciar, reboot, trabado, apagar", plantilla: "CMD;{ID};03;03", preguntas: "" },
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Cortar Motor (Activar Salida)", claves: "apagar, motor, corte, bloquear", plantilla: "CMD;{ID};04;01", preguntas: "" },
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Restaurar Motor (Desactivar Salida)", claves: "encender, motor, restaurar, desbloquear", plantilla: "CMD;{ID};04;02", preguntas: "" },
-            
-            // --- TELTONIKA (DOCUMENTACIÓN OFICIAL) ---
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Información de Sistema (getinfo)", claves: "getinfo, sistema, runtime, estado", plantilla: "getinfo", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Versión de Firmware y IMEI (getver)", claves: "getver, version, imei, bt, mac", plantilla: "getver", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Estado del Módem (getstatus)", claves: "getstatus, modem, red", plantilla: "getstatus", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Datos GPS Actuales (getgps)", claves: "getgps, gps, fecha, hora", plantilla: "getgps", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Leer Entradas y Salidas (getio)", claves: "getio, entradas, salidas, analogico, digital", plantilla: "getio", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Ubicación con Enlace de Google Maps (ggps)", claves: "ggps, mapa, link, google maps, ubicacion", plantilla: "ggps", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Reiniciar Dispositivo (cpureset)", claves: "reiniciar, reboot, cpu, trabado", plantilla: "  cpureset", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Consultar Parámetro (getparam)", claves: "getparam, parametro, leer config", plantilla: "  getparam {VALOR1}", preguntas: "Ingresa el ID del parámetro (ej. 2004)" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Configurar Parámetro (setparam)", claves: "setparam, configurar, ip, servidor, puerto", plantilla: "  setparam {VALOR1}:{VALOR2}", preguntas: "Ingresa ID del parámetro, Ingresa el nuevo valor" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Apagar Motor / Salida", claves: "apagar, motor, corte, salida, digout", plantilla: "  setdigout 1 0", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Encender Motor / Salida", claves: "encender, motor, restaurar, salida", plantilla: "  setdigout 0 0", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Estado de la Batería (battery)", claves: "bateria, voltaje, power", plantilla: "battery", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Cargar Configuración por Defecto (defaultcfg)", claves: "defaultcfg, reiniciar de fabrica, valores iniciales", plantilla: "defaultcfg", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Códigos de Error OBD (faultcodes)", claves: "faultcodes, obd, codigos de falla, escner", plantilla: "faultcodes", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Borrar Códigos OBD (cleardtc)", claves: "cleardtc, borrar fallas, limpiar obd", plantilla: "cleardtc", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Leer Código VIN (getvin)", claves: "vin, vehiculo, numero de serie", plantilla: "getvin", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Bloquear Motor por CAN (lvcanblockengine)", claves: "can, bloquear, motor, can-control", plantilla: "lvcanblockengine", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Desbloquear Motor por CAN (lvcanunblockengine)", claves: "can, desbloquear, motor, can-control", plantilla: "lvcanunblockengine", preguntas: "" }
+            // --- SUNTECH ---
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Cambiar IP / Servidor Manual", claves: "ip, servidor, dns", plantilla: "CMD;{ID};02;01;{VALOR1};{VALOR2}", preguntas: "Ingresa la IP, Ingresa el Puerto" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Configurar a MAPON", claves: "mapon, servidor, ip, tcp", plantilla: "CMD;{ID};02;01;in.fleetapi.com;5729", preguntas: "" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Configurar a ZEEK PÚBLICO", claves: "zeek, servidor, ip, publico", plantilla: "CMD;{ID};02;01;mobile.zeekgps.com;2404", preguntas: "" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Configurar a ZEEK PRIVADO", claves: "zeek, servidor, ip, privado", plantilla: "CMD;{ID};02;01;192.168.9.100;2405", preguntas: "" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Ignición por Voltaje (12V)", claves: "ignicion, voltaje, 12v", plantilla: "PRG:{ID}#15:13.50,PRG:{ID}#16:13.30", preguntas: "" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Ignición por Voltaje (24V)", claves: "ignicion, voltaje, 24v", plantilla: "PRG:{ID}#15:25.50,PRG:{ID}#16:25.30", preguntas: "" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Apagar Motor / Activar Corte", claves: "apagar, motor, corte, bloquear", plantilla: "CMD;{ID};04;01", preguntas: "" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Encender Motor / Restaurar", claves: "encender, motor, restaurar, desbloquear", plantilla: "CMD;{ID};04;02", preguntas: "" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Reiniciar Dispositivo", claves: "reiniciar, reboot, apagar", plantilla: "CMD;{ID};03;03", preguntas: "" },
+
+            // --- TELTONIKA ---
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Configurar a MAPON", claves: "mapon, servidor, ip, tcp", plantilla: "  setparam 2004:in.fleetapi.com;2005:5688", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Configurar a ZEEK PÚBLICO", claves: "zeek, servidor, ip, publico", plantilla: "  setparam 2004:mobile.zeekgps.com;2005:20513", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Configurar a ZEEK PRIVADO", claves: "zeek, servidor, ip, privado", plantilla: "  setparam 2004:192.168.9.100;2005:20512", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Telcel Público", claves: "apn, telcel, publico", plantilla: "  setparam 2001:internet.itelcel.com;2002:webgprs;2003:webgprs2002", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Telcel Corporativo", claves: "apn, telcel, corporativo", plantilla: "  setparam 2001:wwwcorps.itelcel.com;2002:webgprs;2003:webgprs2002", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Privado ARGUS R2", claves: "apn, argus, r2, telcel", plantilla: "  setparam 2001:argus.itelcel.com", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Privado ARGUS R9", claves: "apn, argus, r9, telcel", plantilla: "  setparam 2001:argte.itelcel.com", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Apagar Motor / Corte", claves: "apagar, motor, corte, salida", plantilla: "  setdigout 1 0", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Encender Motor / Restaurar", claves: "encender, motor, restaurar, salida", plantilla: "  setdigout 0 0", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "FMC125, FMC920", titulo: "Tipo de Ignición (FMC125/FMC920)", claves: "ignicion, voltaje, 101, movimiento", plantilla: "  setparam 101:{VALOR1}", preguntas: "Valor (1=DIN1, 2=DIN2, 4=DIN3, 16=Mov., 32=Voltaje, suma los valores)" },
+            { marca: "TELTONIKA", modelo: "FMC150, FMC003", titulo: "Tipo de Ignición (FMC150/FMC003)", claves: "ignicion, voltaje, 101, can", plantilla: "  setparam 101:{VALOR1}", preguntas: "Valor (1=DIN1, 2=Acel., 4=Volt., 8=RPM, 16=DIN3, 32=CAN, suma valores)" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Variación de Voltaje (Min/Max)", claves: "voltaje, umbral, ignicion, 104, 105", plantilla: "  setparam 104:{VALOR1};105:{VALOR2}", preguntas: "Voltaje Max (ej. 30000), Voltaje Min (ej. 13300)" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Información de Sistema", claves: "getinfo, sistema, runtime, estado", plantilla: "  getinfo", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Datos GPS Actuales", claves: "getgps, gps, fecha, hora", plantilla: "  getgps", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Ubicación en Google Maps", claves: "ggps, mapa, link, google maps", plantilla: "  ggps", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Reiniciar Dispositivo", claves: "reiniciar, reboot, cpu", plantilla: "  cpureset", preguntas: "" }
         ];
         
         this.busquedaActual = localStorage.getItem('busquedaGlobal') || ''; 
@@ -87,7 +89,7 @@ class SoporteTecnico {
         }
     } 
 
-    // --- FUNCIONES DEL BUSCADOR ---
+    // --- FUNCIONES DEL BUSCADOR GLOBAL ---
     buscarGlobal(texto) {
         this.busquedaActual = texto;
         localStorage.setItem('busquedaGlobal', texto); 
@@ -159,7 +161,7 @@ class SoporteTecnico {
     }
 
     // ==========================================
-    // IA - ASISTENTE DE CONFIGURACIÓN
+    // IA - MOTOR EJECUTOR Y PROCESAMIENTO DE LENGUAJE
     // ==========================================
     iniciarAsistente() {
         const eq = this.equipoSeleccionado;
@@ -167,44 +169,23 @@ class SoporteTecnico {
         if (badgeMarca) badgeMarca.innerText = eq.marca;
         
         const inputBuscador = document.getElementById('buscador-asistente');
-        if (inputBuscador) inputBuscador.value = '';
-        
         const contenedorInteractivo = document.getElementById('asistente-interactivo');
         if (contenedorInteractivo) contenedorInteractivo.style.display = 'none';
         
-        this.filtrarAsistente();
-    }
-
-filtrarAsistente() {
-        if (!this.equipoSeleccionado) return;
-        const inputBuscador = document.getElementById('buscador-asistente');
-        const textoBusqueda = inputBuscador ? inputBuscador.value.toLowerCase().trim() : '';
+        if (inputBuscador) {
+            inputBuscador.value = '';
+            // IA: Filtra botones mientras escribe
+            inputBuscador.oninput = () => this.filtrarAsistente(false);
+            // IA: Ejecuta la petición al presionar ENTER
+            inputBuscador.onkeypress = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.filtrarAsistente(true);
+                }
+            };
+        }
         
-        // Si no hay texto, mostramos todo como botones (para consulta rápida)
-        if (textoBusqueda === '') {
-            this.mostrarBotonesSugerencia(this.diccionarioComandos.filter(cmd => this.esComandoValido(cmd)));
-            return;
-        }
-
-        // --- MOTOR DE INTELIGENCIA EJECUTORA ---
-        // Buscamos el comando que mejor se adapte a la intención
-        const comandoEncontrado = this.diccionarioComandos.find(cmd => {
-            if (!this.esComandoValido(cmd)) return false;
-            // Si el título o las claves coinciden con la petición
-            return cmd.claves.split(',').some(c => textoBusqueda.includes(c.trim())) || 
-                   cmd.titulo.toLowerCase().includes(textoBusqueda);
-        });
-
-        if (comandoEncontrado) {
-            // Si lo encuentra, lo ejecuta directamente sin botones
-            this.seleccionarComandoAsistente(comandoEncontrado);
-            // Si el comando no requiere más preguntas (preguntas === ""), lo genera solo
-            if (comandoEncontrado.preguntas === "") {
-                this.generarComandoFinal();
-            }
-        } else {
-            document.getElementById('asistente-sugerencias').innerHTML = '<span style="color:#ffb74d;">No entiendo esa petición. Prueba con "mapon", "apagar motor" o "ignición".</span>';
-        }
+        this.filtrarAsistente(false);
     }
 
     esComandoValido(cmd) {
@@ -212,14 +193,88 @@ filtrarAsistente() {
         return cmd.marca === marcaActual || cmd.marca === 'UNIVERSAL';
     }
 
+    filtrarAsistente(ejecutarPeticion = false) {
+        if (!this.equipoSeleccionado) return;
+        const inputBuscador = document.getElementById('buscador-asistente');
+        const textoOriginal = inputBuscador ? inputBuscador.value.toLowerCase().trim() : '';
+        const comandosValidos = this.diccionarioComandos.filter(cmd => this.esComandoValido(cmd));
+        
+        if (textoOriginal === '') {
+            this.mostrarBotonesSugerencia(comandosValidos);
+            return;
+        }
+
+        // --- TRADUCTOR DE INTENCIONES ---
+        let intencion = textoOriginal;
+        if (textoOriginal.includes('mapon')) intencion = 'mapon';
+        else if (textoOriginal.includes('zeek') && textoOriginal.includes('publico')) intencion = 'zeek, publico';
+        else if (textoOriginal.includes('zeek') && (textoOriginal.includes('privado') || textoOriginal.includes('priv'))) intencion = 'zeek, privado';
+        else if (textoOriginal.includes('apn') && textoOriginal.includes('corporativo')) intencion = 'apn, corporativo';
+        else if (textoOriginal.includes('apn')) intencion = 'apn';
+        else if (textoOriginal.includes('ignicion') || textoOriginal.includes('voltaje')) intencion = 'ignicion';
+        else if (textoOriginal.includes('apagar') || textoOriginal.includes('cortar')) intencion = 'apagar';
+        else if (textoOriginal.includes('encender') || textoOriginal.includes('restaurar')) intencion = 'encender';
+
+        // Filtrar coincidencias
+        const comandosFiltrados = comandosValidos.filter(cmd => {
+            const claves = cmd.claves.split(',').map(c => c.trim().toLowerCase());
+            const intencionesArr = intencion.split(',').map(i => i.trim().toLowerCase());
+            
+            // Revisa si la intención detectada empata con las palabras clave del comando
+            return intencionesArr.every(i => claves.some(c => c.includes(i) || i.includes(c))) || 
+                   cmd.titulo.toLowerCase().includes(textoOriginal);
+        });
+
+        // --- EJECUCIÓN INTELIGENTE ---
+        if (ejecutarPeticion && comandosFiltrados.length > 0) {
+            // Selecciona la mejor coincidencia
+            const mejorComando = comandosFiltrados[0];
+            this.seleccionarComandoAsistente(mejorComando);
+            
+            // Si el comando no necesita más datos, lo genera de inmediato
+            if (mejorComando.preguntas === "") {
+                this.generarComandoFinal();
+            }
+        } else {
+            // Modo visualización: Solo muestra los botones filtrados
+            if (comandosFiltrados.length > 0) {
+                this.mostrarBotonesSugerencia(comandosFiltrados);
+            } else {
+                document.getElementById('asistente-sugerencias').innerHTML = '<span style="color:#ffb74d; font-size:0.85em;">No entendí la petición. Intenta ser más directo, ej: "cambiar a mapon" o "apagar".</span>';
+            }
+        }
+    }
+
+    mostrarBotonesSugerencia(comandosFiltrados) {
+        const contenedorSugerencias = document.getElementById('asistente-sugerencias');
+        if (!contenedorSugerencias) return;
+        contenedorSugerencias.innerHTML = '';
+
+        comandosFiltrados.forEach((cmd) => {
+            const btn = document.createElement('button');
+            btn.innerText = cmd.titulo;
+            btn.style.cssText = 'background: #333; color: #ffb74d; border: 1px solid #555; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 0.85em; transition: 0.2s;';
+            btn.onmouseover = () => btn.style.background = '#444';
+            btn.onmouseout = () => btn.style.background = '#333';
+            btn.onclick = () => {
+                this.seleccionarComandoAsistente(cmd);
+                if (cmd.preguntas === "") this.generarComandoFinal();
+            };
+            contenedorSugerencias.appendChild(btn);
+        });
+    }
+
     seleccionarComandoAsistente(cmd) {
         this.comandoSeleccionado = cmd;
+        const contenedorSugerencias = document.getElementById('asistente-sugerencias');
         const contenedor = document.getElementById('asistente-interactivo');
+        
+        contenedorSugerencias.innerHTML = ''; // Limpia los botones al elegir uno
         contenedor.style.display = 'block';
         contenedor.innerHTML = '';
 
         const titulo = document.createElement('h4');
-        titulo.innerText = `⚙️ ${cmd.titulo}`;
+        titulo.innerText = `⚙️ Ejecutando: ${cmd.titulo}`;
         titulo.style.cssText = 'margin: 0 0 10px 0; color: #fff; font-size: 1rem;';
         contenedor.appendChild(titulo);
 
@@ -238,13 +293,12 @@ filtrarAsistente() {
             const resultado = document.createElement('div');
             resultado.id = 'asistente-resultado-final';
             resultado.style.marginTop = '15px';
-            resultado.innerHTML = '<span style="color:#ffb74d; font-size:0.85em;">Llena los datos para generar el comando...</span>';
+            resultado.innerHTML = '<span style="color:#ffb74d; font-size:0.85em;">Por favor, llena los datos requeridos para generar la trama...</span>';
             contenedor.appendChild(resultado);
         } else {
             const resultado = document.createElement('div');
             resultado.id = 'asistente-resultado-final';
             contenedor.appendChild(resultado);
-            this.generarComandoFinal();
         }
     }
 
