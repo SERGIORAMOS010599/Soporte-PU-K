@@ -5,13 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Soporte PU-K</title>
     <link rel="stylesheet" href="soporte.css">
+    
+    <!-- DETECTOR DE ERRORES EN PANTALLA -->
+    <script>
+        window.onerror = function(msg, url, line) {
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = "background:red; color:white; padding:20px; font-weight:bold; text-align:center; position:fixed; top:0; width:100%; z-index:9999;";
+            errorDiv.innerText = `¡ERROR DETECTADO! Archivo: ${url.split('/').pop()} | Línea: ${line} | Detalle: ${msg}`;
+            document.body.appendChild(errorDiv);
+        };
+    </script>
 </head>
 <body>
 
     <!-- BARRA DE BÚSQUEDA UNIVERSAL -->
     <div class="buscador-container" style="position: relative; max-width: 600px; margin: 0 auto; padding: 20px;">
         <input type="text" id="buscador-global" placeholder="Buscar por IMEI, ID, Cliente o Unidad..." oninput="appSoporte.buscarGlobal(this.value)">
-        <span id="btn-limpiar-busqueda" onclick="appSoporte.limpiarBusqueda()">✖</span>
+        <span id="btn-limpiar-busqueda" onclick="appSoporte.limpiarBusqueda()" style="display: none; position: absolute; right: 30px; top: 35px; cursor: pointer; color: #a0a0a0;">✖</span>
     </div>
 
     <div class="barra-superior">
@@ -35,7 +45,8 @@
                 </div>
                 <button class="btn-cerrar" onclick="appSoporte.cerrarDetalles()">✖</button>
             </div>
-           <!-- BOTONES DE ACCIÓN RÁPIDA -->
+            
+            <!-- BOTONES DE ACCIÓN RÁPIDA -->
             <div class="panel-botones" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
                 <button class="btn-accion" onclick="appSoporte.enviarSMS('apagar')">
                     <div class="icono" style="background-color: #d32f2f;">⏻</div>APAGAR<br>MOTOR
@@ -96,6 +107,7 @@
             </div>
         </div>
     </div>
+
     <!-- MODAL DE DIAGNÓSTICO MAPON -->
     <div id="modal-diagnostico" class="modal-oscuro">
         <div class="modal-comandos-content" style="max-width: 400px; padding: 20px;">
@@ -128,6 +140,7 @@
             </div>
         </div>
     </div>
+
     <!-- MODAL FORMULARIO DE COMANDOS -->
     <div id="modal-comandos" class="modal-oscuro">
         <div class="modal-comandos-content">
@@ -152,26 +165,23 @@
                         <option value="cero">PROGRAMACION DESDE 0</option>
                     </select>
                 </div>
-                <<!-- SECCIÓN DINÁMICA (Se muestra al elegir un tipo) -->
+                <!-- SECCIÓN DINÁMICA (Se muestra al elegir un tipo) -->
                 <div id="cmd-seccion-dinamica" style="display: none;">
                     <div class="form-grupo">
                         <label>LINEA DE TRAMA</label>
-                        <!-- Agregamos el oninput para que detecte cuando escribes -->
                         <input type="text" id="cmd-trama" oninput="appSoporte.procesarComando()">
                     </div>
                     <div class="form-grupo">
                         <label>COMANDOS</label>
-                        <!-- Le agregamos el id="cmd-resultado" -->
                         <div class="comando-resultado" id="cmd-resultado">NO HAY MAS CODIGOS!! 📋</div>
                     </div>
                 </div>
+            </div>
         </div>
     </div>
 
     <!-- Carga del Cerebro OOP -->
     <script src="comandos.js"></script>
     <script src="soporte.js"></script>
-</body>
-</html>
 </body>
 </html>
