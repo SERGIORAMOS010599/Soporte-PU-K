@@ -2,24 +2,40 @@ class SoporteTecnico {
     constructor() {
         this.container = document.getElementById('grid-salidas');
         this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM'; 
+        this.sheetComandosId = '10TSjAqb-o-8fyee54wvIjBmPQ6nwaALrBKHXmj1DwBA'; // Tu nueva BD de Comandos
+        
         this.equipos = [];
+        this.diccionarioComandos = []; // Aquí guardaremos la IA
         this.equipoSeleccionado = null; 
+        this.comandoSeleccionado = null; // Comando actual del asistente
+        
         this.busquedaActual = localStorage.getItem('busquedaGlobal') || ''; 
         this.iniciar();
     }
 
     async iniciar() {
         if (!this.container) return;
-        this.container.innerHTML = '<p style="text-align:center; color: #ffb74d; padding: 20px;">Conectando con Google Sheets...</p>';
-        const url = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Salidas')}`;
+        this.container.innerHTML = '<p style="text-align:center; color: #ffb74d; padding: 20px;">Conectando con Bases de Datos...</p>';
+        
+        const urlInventario = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Salidas')}`;
+        const urlComandos = `https://docs.google.com/spreadsheets/d/${this.sheetComandosId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Comandos')}`;
 
         try {
-            const respuesta = await fetch(url);
-            const text = await respuesta.text();
-            const json = JSON.parse(text.substring(47).slice(0, -2));
+            // Descargamos ambas bases de datos al mismo tiempo para mayor velocidad
+            const [respuestaInv, respuestaCmd] = await Promise.all([
+                fetch(urlInventario),
+                fetch(urlComandos)
+            ]);
+
+            const textInv = await respuestaInv.text();
+            const textCmd = await respuestaCmd.text();
+
+            const jsonInv = JSON.parse(textInv.substring(47).slice(0, -2));
+            const jsonCmd = JSON.parse(textCmd.substring(47).slice(0, -2));
             
+            // 1. PROCESAR INVENTARIO
             this.equipos = [];
-            json.table.rows.forEach((row, index) => {
+            jsonInv.table.rows.forEach((row, index) => {
                 if (row && row.c && index > 0) {
                     const val = (colIndex) => row.c[colIndex] ? row.c[colIndex].v : '';
                     const equipo = {
@@ -41,6 +57,22 @@ class SoporteTecnico {
                 }
             });
 
+            // 2. PROCESAR DICCIONARIO DE COMANDOS
+            this.diccionarioComandos = [];
+            jsonCmd.table.rows.forEach((row, index) => {
+                if (row && row.c && index > 0) {
+                    const val = (colIndex) => row.c[colIndex] ? row.c[colIndex].v : '';
+                    this.diccionarioComandos.push({
+                        marca: val(0).toString().toUpperCase().trim(),
+                        modelo: val(1).toString().toUpperCase().trim(),
+                        titulo: val(2),
+                        claves: val(3).toString().toLowerCase(),
+                        plantilla: val(4),
+                        preguntas: val(5)
+                    });
+                }
+            });
+
             const inputBuscador = document.getElementById('buscador-global');
             if (inputBuscador) {
                 inputBuscador.value = this.busquedaActual;
@@ -48,11 +80,12 @@ class SoporteTecnico {
             }
             this.renderizar();
         } catch (error) {
-            this.container.innerHTML = '<p style="text-align:center; color:#ff4c4c;">Error al cargar datos.</p>';
+            console.error(error);
+            this.container.innerHTML = '<p style="text-align:center; color:#ff4c4c;">Error al cargar bases de datos.</p>';
         }
     } 
 
-    // --- FUNCIONES DEL BUSCADOR ---
+    // --- FUNCIONES DEL BUSCADOR PRINCIPAL ---
     buscarGlobal(texto) {
         this.busquedaActual = texto;
         localStorage.setItem('busquedaGlobal', texto); 
@@ -98,10 +131,8 @@ class SoporteTecnico {
         });
     }
 
-   abrirDetalles(eq) {
-        // Le agregamos una clase al body para que "empuje" el contenido
+    abrirDetalles(eq) {
         document.body.classList.add('con-panel-abierto');
-        
         document.getElementById('panel-detalles').classList.add('abierto');
         this.equipoSeleccionado = eq;
 
@@ -122,11 +153,144 @@ class SoporteTecnico {
         document.getElementById('det-anio').innerText = eq.anio;
         document.getElementById('det-numSerie').innerText = eq.numSerie;
 
-        document.getElementById('det-marca').setAttribute('data-linea', eq.linea);
+        // INICIALIZAR EL ASISTENTE INTELIGENTE
+        this.iniciarAsistente();
     }
 
+    // ==========================================
+    // IA - ASISTENTE DE CONFIGURACIÓN
+    // ==========================================
+    iniciarAsistente() {
+        const eq = this.equipoSeleccionado;
+        document.getElementById('asistente-badge-marca').innerText = eq.marca;
+        document.getElementById('buscador-asistente').value = '';
+        document.getElementById('asistente-interactivo').style.display = 'none';
+        
+        this.filtrarAsistente(); // Mostrar sugerencias iniciales
+    }
+
+    filtrarAsistente() {
+        const eq = this.equipoSeleccionado;
+        const marcaActual = eq.marca.toUpperCase().trim();
+        const textoBusqueda = document.getElementById('buscador-asistente').value.toLowerCase().trim();
+        
+        // Filtramos de la base de datos solo lo que coincida con la marca y la búsqueda
+        const comandosFiltrados = this.diccionarioComandos.filter(cmd => {
+            const coincideMarca = cmd.marca === marcaActual || cmd.marca === 'UNIVERSAL';
+            const coincideBusqueda = textoBusqueda === '' || cmd.claves.includes(textoBusqueda) || cmd.titulo.toLowerCase().includes(textoBusqueda);
+            return coincideMarca && coincideBusqueda;
+        });
+
+        const contenedorSugerencias = document.getElementById('asistente-sugerencias');
+        contenedorSugerencias.innerHTML = '';
+
+        if (comandosFiltrados.length === 0) {
+            contenedorSugerencias.innerHTML = '<span style="color:#a0a0a0; font-size:0.85em;">No hay comandos para esta búsqueda.</span>';
+            return;
+        }
+
+        // Crear "Chips" o Botones por cada comando encontrado
+        comandosFiltrados.forEach((cmd, indice) => {
+            const btn = document.createElement('button');
+            btn.innerText = cmd.titulo;
+            btn.style.cssText = 'background: #333; color: #ffb74d; border: 1px solid #555; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 0.85em; transition: 0.2s;';
+            btn.onmouseover = () => btn.style.background = '#444';
+            btn.onmouseout = () => btn.style.background = '#333';
+            
+            // Al hacer clic, procesar este comando
+            btn.onclick = () => this.seleccionarComandoAsistente(cmd);
+            
+            contenedorSugerencias.appendChild(btn);
+        });
+    }
+
+    seleccionarComandoAsistente(cmd) {
+        this.comandoSeleccionado = cmd;
+        const contenedor = document.getElementById('asistente-interactivo');
+        contenedor.style.display = 'block';
+        contenedor.innerHTML = ''; // Limpiar anterior
+
+        const titulo = document.createElement('h4');
+        titulo.innerText = `⚙️ ${cmd.titulo}`;
+        titulo.style.cssText = 'margin: 0 0 10px 0; color: #fff; font-size: 1rem;';
+        contenedor.appendChild(titulo);
+
+        // Si el comando tiene preguntas, dibujar cajas de texto
+        if (cmd.preguntas && cmd.preguntas.trim() !== '') {
+            const preguntasArray = cmd.preguntas.split(','); // "Ingresa IP, Ingresa Puerto"
+            
+            preguntasArray.forEach((pregunta, index) => {
+                const div = document.createElement('div');
+                div.style.marginBottom = '10px';
+                div.innerHTML = `
+                    <label style="display:block; font-size:0.8em; color:#a0a0a0; margin-bottom:4px;">${pregunta.trim()}</label>
+                    <input type="text" id="asistente-input-${index}" class="input-edicion-general" onkeyup="appSoporte.generarComandoFinal()">
+                `;
+                contenedor.appendChild(div);
+            });
+            
+            // Contenedor para el resultado final
+            const resultado = document.createElement('div');
+            resultado.id = 'asistente-resultado-final';
+            resultado.style.marginTop = '15px';
+            resultado.innerHTML = '<span style="color:#ffb74d; font-size:0.85em;">Llena los datos para generar el comando...</span>';
+            contenedor.appendChild(resultado);
+        } else {
+            // Si no hay preguntas, generar comando directo
+            const resultado = document.createElement('div');
+            resultado.id = 'asistente-resultado-final';
+            contenedor.appendChild(resultado);
+            this.generarComandoFinal(); // Ejecutar directo
+        }
+    }
+
+    generarComandoFinal() {
+        const cmd = this.comandoSeleccionado;
+        if (!cmd) return;
+
+        let tramaFinal = cmd.plantilla;
+        
+        // 1. Reemplazar la etiqueta {ID} por el ID real del equipo
+        // En tu sistema original usabas equipo.id para apagar motores
+        tramaFinal = tramaFinal.replace(/{ID}/g, this.equipoSeleccionado.id);
+        
+        // 2. Reemplazar los {VALOR1}, {VALOR2} si existen
+        if (cmd.preguntas && cmd.preguntas.trim() !== '') {
+            const preguntasArray = cmd.preguntas.split(',');
+            let faltanDatos = false;
+
+            preguntasArray.forEach((_, index) => {
+                const valorInput = document.getElementById(`asistente-input-${index}`).value.trim();
+                if (valorInput === '') faltanDatos = true;
+                // Reemplazamos {VALOR1}, {VALOR2}, etc.
+                tramaFinal = tramaFinal.replace(new RegExp(`{VALOR${index + 1}}`, 'g'), valorInput);
+            });
+
+            if (faltanDatos) {
+                document.getElementById('asistente-resultado-final').innerHTML = '<span style="color:#ffb74d; font-size:0.85em;">Llena todos los datos para continuar.</span>';
+                return;
+            }
+        }
+
+        // 3. Imprimir el Comando Final y el Botón de Enviar SMS
+        const numeroLinea = this.equipoSeleccionado.linea;
+        let enlaceSMS = '#';
+        if (numeroLinea && numeroLinea !== 'SIN NÚMERO') {
+            enlaceSMS = `sms:${numeroLinea}?body=${encodeURIComponent(tramaFinal)}`;
+        }
+
+        document.getElementById('asistente-resultado-final').innerHTML = `
+            <div class="comando-resultado">
+                <a href="${enlaceSMS}" style="color: #6db6ff; text-decoration: none; word-break: break-all; width: 85%;" title="Haz clic para enviar SMS">${tramaFinal}</a> 
+                <span class="icono-copiar" style="cursor:pointer; font-size: 1.2rem;" onclick="navigator.clipboard.writeText('${tramaFinal}'); alert('¡Comando Copiado!');">📋</span>
+            </div>
+        `;
+    }
+
+    // ==========================================
+    // EDICIÓN GENERAL Y UTILIDADES
+    // ==========================================
     cerrarDetalles() { 
-        // Quitamos la clase para que el contenido vuelva a ocupar toda la pantalla
         document.body.classList.remove('con-panel-abierto');
         document.getElementById('panel-detalles').classList.remove('abierto'); 
     }
@@ -198,153 +362,37 @@ class SoporteTecnico {
         }
     }
 
-    cerrarDetalles() { document.getElementById('panel-detalles').classList.remove('abierto'); }
-    
-    // --- LÓGICA DE BOTONES SMS ---
+    // --- COMANDOS SMS EN LOS BOTONES DE LAS TARJETAS (Mantiene tu lógica original) ---
     enviarSMS(accion, eqIdDesdeTarjeta) {
-        let eq = null;
-        if (eqIdDesdeTarjeta) {
-            eq = this.equipos.find(e => e.id.toString() === eqIdDesdeTarjeta.toString());
-        } else {
-            eq = this.equipoSeleccionado;
-        }
-
-        if (!eq) {
-            alert("Selecciona un equipo primero.");
-            return;
-        }
+        let eq = this.equipos.find(e => e.id.toString() === eqIdDesdeTarjeta.toString());
+        if (!eq) return;
 
         const numero = eq.linea;
         if (!numero || numero === 'SIN NÚMERO') {
-            alert("No hay un número de línea vinculado para enviar comandos a este equipo.");
+            alert("No hay un número vinculado.");
             return;
         }
 
-        const marca = eq.marca ? eq.marca.toUpperCase().trim() : '';
-        const modelo = eq.modelo ? eq.modelo.toUpperCase().trim() : '';
+        const marca = eq.marca.toUpperCase().trim();
+        const modelo = eq.modelo.toUpperCase().trim();
         const id = eq.id;
         let comando = "";
 
-        switch (accion) {
-            case 'apagar':
-                if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Enable1`;
-                else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Enable1`;
-                else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Enable1`;
-                else if (modelo.startsWith("ST3300") || modelo.startsWith("ST3340") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;01`;
-                else if (marca === "TELTONIKA") comando = "  setdigout 1 0";
-                else if (marca === "RUPTELA") comando = " setio 0,2";
-                else if (marca === "CONCOX" || marca === "JIMI") comando = "RELAY,1#";
-                break;
-                
-            case 'encender':
-                if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Disable1`;
-                else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Disable1`;
-                else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Disable1`;
-                else if (modelo.startsWith("ST330") || modelo.startsWith("ST3340") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;02`;
-                else if (marca === "TELTONIKA") comando = "  setdigout 0 0";
-                else if (marca === "RUPTELA") comando = " setio 1,2";
-                else if (marca === "CONCOX" || marca === "JIMI") comando = "RELAY,0#";
-                break;
-
-            case 'borrar':
-                if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;EraseAll`;
-                else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;EraseAll`;
-                else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;EraseAll`;
-                else if (modelo.startsWith("ST3300") || modelo.startsWith("ST3340") || modelo.startsWith("ST43")) comando = `CMD;${id};05;02`;
-                else if (marca === "RUPTELA") comando = " delrecords";
-                else if (marca === "TELTONIKA") comando = "  deleterecords";
-                break;
-
-            case 'formatear':
-                if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Reset`;
-                else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Reset`;
-                else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Reset`;
-                else if (modelo.startsWith("ST33") || modelo.startsWith("ST43")) comando = `CMD;${id};03;02`;
-                break;
-
-            case 'reiniciar':
-                if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Reboot`;
-                else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Reboot`;
-                else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Reboot`;
-                else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};03;03`;
-                else if (marca === "TELTONIKA") comando = "  cpureset";
-                else if (marca === "RUPTELA") comando = " reset";
-                else if (marca === "CONCOX" || marca === "JIMI") comando = "RESET#";
-                else if (marca === "CALAMP") comando = "!r3,70,0";
-                break;
-
-            case 'configuracion':
-                if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;PresetA`;
-                else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;PresetA`;
-                else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;PresetA`;
-                else if (modelo.startsWith("ST3300") || modelo.startsWith("ST3340") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};03;05`;
-                else if (marca === "TELTONIKA") comando = "  getparam 2001:;2002:;2003:;2004:;2005:;2006:;1004:";
-                else if (marca === "RUPTELA" || marca === "REPTELA") comando = " getapn";
-                else if (marca === "CONCOX" || marca === "JIMI") comando = "GPRSSET#";
-                break;
+        if (accion === 'apagar') {
+            if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Enable1`;
+            else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Enable1`;
+            else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Enable1`;
+            else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;01`;
+            else if (marca === "TELTONIKA") comando = "  setdigout 1 0";
+        } else if (accion === 'encender') {
+            if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Disable1`;
+            else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Disable1`;
+            else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Disable1`;
+            else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;02`;
+            else if (marca === "TELTONIKA") comando = "  setdigout 0 0";
         }
 
-        if (!comando) {
-            alert(`No hay un comando SMS configurado para esta acción en la marca ${marca} o modelo ${modelo}.`);
-            return;
-        }
-
-        window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
-    }
-
-    abrirModalComandos() {
-        if (!this.equipoSeleccionado) return;
-        document.getElementById('cmd-marca').value = this.equipoSeleccionado.marca;
-        document.getElementById('cmd-modelo').value = this.equipoSeleccionado.modelo;
-        document.getElementById('cmd-id').value = this.equipoSeleccionado.id;
-        document.getElementById('cmd-tipo').value = "";
-        document.getElementById('cmd-seccion-dinamica').style.display = "none";
-        document.getElementById('modal-comandos').style.display = 'flex';
-    }
-
-    cerrarModalComandos() { document.getElementById('modal-comandos').style.display = 'none'; }
-
-    cambiarTipoComando() {
-        const seleccion = document.getElementById('cmd-tipo').value;
-        const seccionDinamica = document.getElementById('cmd-seccion-dinamica');
-        if (seleccion !== "") {
-            seccionDinamica.style.display = "block";
-            document.getElementById('cmd-trama').value = ""; 
-        } else {
-            seccionDinamica.style.display = "none";
-        }
-    }
-
-    procesarComando() {
-        const marca = document.getElementById('cmd-marca').value;
-        const modelo = document.getElementById('cmd-modelo').value;
-        const id = document.getElementById('cmd-id').value;
-        const tipo = document.getElementById('cmd-tipo').value;
-        const trama = document.getElementById('cmd-trama').value;
-
-        const cajaResultado = document.getElementById('cmd-resultado');
-
-        if (trama.trim() === '') {
-            cajaResultado.innerHTML = 'ESPERANDO TRAMA...';
-            return;
-        }
-
-        const comandoGenerado = GeneradorComandos.obtenerComando(tipo, marca, modelo, id, trama);
-
-        if (comandoGenerado.includes("Escribe") || comandoGenerado.includes("CODIGO") || comandoGenerado.includes("Ingresa") || comandoGenerado.includes("NO SOPORTADO")) {
-            cajaResultado.innerHTML = `<span style="color: #ffb74d; font-size: 0.85rem;">${comandoGenerado}</span>`;
-        } else {
-            const numeroLinea = this.equipoSeleccionado.linea;
-            let smsLink = "#";
-            if (numeroLinea && numeroLinea !== 'SIN NÚMERO') {
-                smsLink = `sms:${numeroLinea}?body=${encodeURIComponent(comandoGenerado)}`;
-            }
-            
-            cajaResultado.innerHTML = `
-                <a href="${smsLink}" style="color: #6db6ff; text-decoration: none; word-break: break-all;" title="Haz clic para enviar SMS">${comandoGenerado}</a> 
-                <span class="icono-copiar" style="cursor:pointer; margin-left: 10px; font-size: 1.2rem;" onclick="navigator.clipboard.writeText('${comandoGenerado}'); alert('¡Comando Copiado!');">📋</span>
-            `;
-        }
+        if (comando) window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
     }
 }
 
