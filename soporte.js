@@ -4,52 +4,9 @@ class SoporteTecnico {
         this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM'; 
         
         this.equipos = [];
+        this.diccionarioComandos = []; // Se cargará dinámicamente desde el JSON
         this.equipoSeleccionado = null; 
         this.comandoSeleccionado = null; 
-        
-        // LA "BIBLIA TÉCNICA" (DICCIONARIO INTELIGENTE)
-        this.diccionarioComandos = [
-            // --- SERVIDORES Y BÁSICOS SUNTECH ---
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Cambiar IP / Servidor Manual", claves: "ip, servidor, dns", plantilla: "CMD;{ID};02;01;{VALOR1};{VALOR2}", preguntas: "Ingresa la IP, Ingresa el Puerto" },
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Configurar a MAPON", claves: "mapon, servidor, ip, tcp", plantilla: "CMD;{ID};02;01;in.fleetapi.com;5729", preguntas: "" },
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Configurar a ZEEK PÚBLICO", claves: "zeek, servidor, ip, publico", plantilla: "CMD;{ID};02;01;mobile.zeekgps.com;2404", preguntas: "" },
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Configurar a ZEEK PRIVADO", claves: "zeek, servidor, ip, privado", plantilla: "CMD;{ID};02;01;192.168.9.100;2405", preguntas: "" },
-            
-            // --- APNs SUNTECH ---
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN Corporativo (Con Usuario/Pass)", claves: "apn, telcel, corporativo", plantilla: "CMD;{ID};03;01;wwwcorps.itelcel.com", preguntas: "" },
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN Público (Sin Usuario/Pass)", claves: "apn, telcel, publico, internet", plantilla: "CMD;{ID};03;01;internet.itelcel.com;webgprs;webgprs2002;", preguntas: "" },
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN Argus R2 (Privado)", claves: "apn, argus, r2", plantilla: "CMD;{ID};03;01;argus.itelcel.com;;", preguntas: "" },
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN Argus R9 (Privado)", claves: "apn, argus, r9", plantilla: "CMD;{ID};03;01;argte.itelcel.com;;", preguntas: "" },
-
-            // --- ACCIONES SUNTECH ---
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Ignición por Voltaje (12V)", claves: "ignicion, voltaje, 12v", plantilla: "PRG:{ID}#15:13.50,PRG:{ID}#16:13.30", preguntas: "" },
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Ignición por Voltaje (24V)", claves: "ignicion, voltaje, 24v", plantilla: "PRG:{ID}#15:25.50,PRG:{ID}#16:25.30", preguntas: "" },
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Apagar Motor / Activar Corte", claves: "apagar, motor, corte, bloquear", plantilla: "CMD;{ID};04;01", preguntas: "" },
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Encender Motor / Restaurar", claves: "encender, motor, restaurar, desbloquear", plantilla: "CMD;{ID};04;02", preguntas: "" },
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Reiniciar Dispositivo", claves: "reiniciar, reboot, apagar", plantilla: "CMD;{ID};03;03", preguntas: "" },
-
-            // --- SERVIDORES Y BÁSICOS TELTONIKA ---
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Configurar a MAPON", claves: "mapon, servidor, ip, tcp", plantilla: "  setparam 2004:in.fleetapi.com;2005:5688", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Configurar a ZEEK PÚBLICO", claves: "zeek, servidor, ip, publico", plantilla: "  setparam 2004:mobile.zeekgps.com;2005:20513", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Configurar a ZEEK PRIVADO", claves: "zeek, servidor, ip, privado", plantilla: "  setparam 2004:192.168.9.100;2005:20512", preguntas: "" },
-            
-            // --- APNs TELTONIKA ---
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Corporativo (Con Usuario/Pass)", claves: "apn, telcel, corporativo", plantilla: "  setparam 2001:wwwcorps.itelcel.com;", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Público (Sin Usuario/Pass)", claves: "apn, telcel, publico, internet", plantilla: "  setparam 2001:internet.itelcel.com;2002:webgprs;2003:webgprs2002", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Argus R2 (Privado)", claves: "apn, argus, r2", plantilla: "  setparam 2001:argus.itelcel.com", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Argus R9 (Privado)", claves: "apn, argus, r9", plantilla: "  setparam 2001:argte.itelcel.com", preguntas: "" },
-
-            // --- ACCIONES TELTONIKA ---
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Apagar Motor / Corte", claves: "apagar, motor, corte, salida", plantilla: "  setdigout 1 0", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Encender Motor / Restaurar", claves: "encender, motor, restaurar, salida", plantilla: "  setdigout 0 0", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "FMC125, FMC920", titulo: "Tipo de Ignición (FMC125/FMC920)", claves: "ignicion, voltaje, 101, movimiento", plantilla: "  setparam 101:{VALOR1}", preguntas: "Valor (1=DIN1, 2=DIN2, 4=DIN3, 16=Mov., 32=Voltaje, suma los valores)" },
-            { marca: "TELTONIKA", modelo: "FMC150, FMC003", titulo: "Tipo de Ignición (FMC150/FMC003)", claves: "ignicion, voltaje, 101, can", plantilla: "  setparam 101:{VALOR1}", preguntas: "Valor (1=DIN1, 2=Acel., 4=Volt., 8=RPM, 16=DIN3, 32=CAN, suma valores)" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Variación de Voltaje (Min/Max)", claves: "voltaje, umbral, ignicion, 104, 105", plantilla: "  setparam 104:{VALOR1};105:{VALOR2}", preguntas: "Voltaje Max (ej. 30000), Voltaje Min (ej. 13300)" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Información de Sistema", claves: "getinfo, sistema, runtime, estado", plantilla: "  getinfo", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Datos GPS Actuales", claves: "getgps, gps, fecha, hora", plantilla: "  getgps", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Ubicación en Google Maps", claves: "ggps, mapa, link, google maps", plantilla: "  ggps", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Reiniciar Dispositivo", claves: "reiniciar, reboot, cpu", plantilla: "  cpureset", preguntas: "" }
-        ];
         
         this.busquedaActual = localStorage.getItem('busquedaGlobal') || ''; 
         this.iniciar();
@@ -57,17 +14,28 @@ class SoporteTecnico {
 
     async iniciar() {
         if (!this.container) return;
-        this.container.innerHTML = '<p style="text-align:center; color: #ffb74d; padding: 20px;">Conectando con Google Sheets...</p>';
+        this.container.innerHTML = '<p style="text-align:center; color: #ffb74d; padding: 20px;">Conectando con Google Sheets y GitHub...</p>';
         
         const urlInventario = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Salidas')}`;
+        
+        // AQUÍ VA TU ENLACE RAW DE GITHUB (El de comandos.json)
+        const urlComandos = 'AQUÍ_PEGAS_TU_URL_RAW_DE_GITHUB'; 
 
         try {
-            const respuesta = await fetch(urlInventario);
-            const text = await respuesta.text();
-            const json = JSON.parse(text.substring(47).slice(0, -2));
+            // Hacemos ambas peticiones al mismo tiempo para mayor velocidad
+            const [respuestaInv, respuestaCmd] = await Promise.all([
+                fetch(urlInventario),
+                fetch(urlComandos)
+            ]);
+
+            const textInv = await respuestaInv.text();
+            const jsonInv = JSON.parse(textInv.substring(47).slice(0, -2));
+            
+            // Cargamos tu Biblia Técnica desde el JSON
+            this.diccionarioComandos = await respuestaCmd.json();
             
             this.equipos = [];
-            json.table.rows.forEach((row, index) => {
+            jsonInv.table.rows.forEach((row, index) => {
                 if (row && row.c && index > 0) {
                     const val = (colIndex) => row.c[colIndex] ? row.c[colIndex].v : '';
                     const equipo = {
@@ -85,6 +53,7 @@ class SoporteTecnico {
                         numSerie: val(14) || 'pendiente de asignar',
                         tipoServicio: val(15) || 'PENDIENTE DE ASIGNAR'
                     };
+                    // Protección con String()
                     if (equipo.id !== 'N/A' && String(equipo.id).trim() !== '') this.equipos.push(equipo);
                 }
             });
@@ -96,8 +65,8 @@ class SoporteTecnico {
             }
             this.renderizar();
         } catch (error) {
-            console.error("Error al conectar con Sheets:", error);
-            this.container.innerHTML = '<p style="text-align:center; color:#ff4c4c;">Error al cargar inventario.</p>';
+            console.error("Error al conectar con las bases de datos:", error);
+            this.container.innerHTML = '<p style="text-align:center; color:#ff4c4c;">Error al cargar inventario o comandos.</p>';
         }
     } 
 
