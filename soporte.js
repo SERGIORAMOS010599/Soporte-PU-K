@@ -438,14 +438,18 @@ class SoporteTecnico {
         }
     }
 
-    enviarSMS(accion, eqIdDesdeTarjeta) {
-        // Protección con String() en la búsqueda de IDs
-        let eq = this.equipos.find(e => String(e.id) === String(eqIdDesdeTarjeta));
-        if (!eq) return;
+    enviarSMS(accion, eqIdDesdeTarjeta = null) {
+        // Magia aquí: Si nos mandan el ID (desde la tarjeta general), lo buscamos.
+        // Si no nos mandan ID (desde los botones circulares), usamos el equipo que está abierto.
+        let eq = eqIdDesdeTarjeta 
+            ? this.equipos.find(e => String(e.id) === String(eqIdDesdeTarjeta)) 
+            : this.equipoSeleccionado;
+
+        if (!eq) return; // Si no hay equipo, no hacemos nada
 
         const numero = eq.linea;
         if (!numero || numero === 'SIN NÚMERO') {
-            alert("No hay un número vinculado.");
+            alert("No hay un número vinculado para este equipo.");
             return;
         }
 
@@ -454,6 +458,7 @@ class SoporteTecnico {
         const id = eq.id;
         let comando = "";
 
+        // --- ACCIONES DIRECTAS DE LOS BOTONES ---
         if (accion === 'apagar') {
             if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Enable1`;
             else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Enable1`;
@@ -466,10 +471,24 @@ class SoporteTecnico {
             else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Disable1`;
             else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;02`;
             else if (marca === "TELTONIKA") comando = "  setdigout 0 0";
+        } 
+        else if (accion === 'reiniciar') {
+            if (marca === "SUNTECH") comando = `CMD;${id};03;03`;
+            else if (marca === "TELTONIKA") comando = "  cpureset";
         }
 
-        if (comando) window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
+        // --- EJECUCIÓN O DERIVACIÓN A LA IA ---
+        if (comando) {
+            // Si es un comando directo (apagar, encender, reiniciar), abre el SMS
+            window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
+        } else {
+            // Si es un botón avanzado (Mapon Soporte, Zeek, etc.), se lo pasamos a la IA
+            const inputBuscador = document.getElementById('buscador-asistente');
+            if (inputBuscador) {
+                inputBuscador.value = accion;
+                this.filtrarAsistente(true); // Fuerza a la IA a resolver la petición
+            }
+        }
     }
-}
 
 document.addEventListener('DOMContentLoaded', () => { window.appSoporte = new SoporteTecnico(); });
