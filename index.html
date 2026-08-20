@@ -93,59 +93,67 @@
                 <tr><td>Nº Serie Unidad</td><td id="det-numSerie">---</td></tr>
             </table>
 
-            <!-- PANEL DE COMANDOS -->
+            <!-- ASISTENTE INTELIGENTE DE COMANDOS -->
             <div class="panel-comandos-box">
                 <div class="comandos-header">
-                    <h3>Panel de comandos <span class="badge">0</span></h3>
+                    <h3>🤖 Asistente de Configuración</h3>
+                    <span class="badge" id="asistente-badge-marca">Marca</span>
                 </div>
-                <div class="comandos-body">
-                    <p>No objetos</p>
-                </div>
-                <div class="comandos-footer">
-                    <button class="btn-texto-dorado" onclick="appSoporte.abrirModalComandos()">AGREGAR COMANDO</button>
+                
+                <div class="comandos-body" style="padding: 15px; text-align: left;">
+                    <!-- Buscador del Asistente -->
+                    <input type="text" id="buscador-asistente" placeholder="¿Qué necesitas configurar? (ej. apn, reinicio)" class="input-edicion-general" style="margin-bottom: 15px;" onkeyup="appSoporte.filtrarAsistente()">
+                    
+                    <!-- Aquí aparecerán los botones sugeridos automáticamente -->
+                    <div id="asistente-sugerencias" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
+                        <!-- Generado por JS -->
+                    </div>
+            
+                    <!-- Aquí aparecerán las cajitas de texto si el comando pide datos, o el resultado final -->
+                    <div id="asistente-interactivo" style="border-top: 1px dashed #444; padding-top: 15px; display: none;">
+                        <!-- Generado por JS -->
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
     
     <!-- MODAL FORMULARIO DE COMANDOS -->
-    <div id="modal-comandos" class="modal-oscuro">
-        <div class="modal-comandos-content">
-            <div class="modal-cmd-header">
-                <h2>✕ Comandos Form</h2>
-                <div>
-                    <button class="btn-cancelar" onclick="appSoporte.cerrarModalComandos()">Cancelar</button>
-                    <button class="btn-guardar">Guardar</button>
+            <div id="modal-comandos" class="modal-oscuro">
+                <div class="modal-comandos-content">
+                    <div class="modal-cmd-header">
+                        <h2>✕ Comandos Form</h2>
+                        <div>
+                            <button class="btn-cancelar" onclick="appSoporte.cerrarModalComandos()">Cancelar</button>
+                            <button class="btn-guardar">Guardar</button>
+                        </div>
+                    </div>
+                    <div class="modal-cmd-body">
+                        <div class="form-grupo"><label>MARCA</label><input type="text" id="cmd-marca" readonly></div>
+                        <div class="form-grupo"><label>MODELOS</label><input type="text" id="cmd-modelo" readonly></div>
+                        <div class="form-grupo"><label>ID</label><input type="text" id="cmd-id" readonly></div>
+                        <div class="form-grupo">
+                            <label>TIPO DE COMANDO</label>
+                            <select id="cmd-tipo" onchange="appSoporte.cambiarTipoComando()">
+                                <option value="">Buscar</option>
+                                <option value="puertos">PUERTOS, IP's y APN'S</option>
+                                <option value="fuel">PROGRAMACION FUEL</option>
+                                <option value="driving">PROGRAMACION DRIVING</option>
+                                <option value="cero">PROGRAMACION DESDE 0</option>
+                            </select>
+                        </div>
+                        <!-- SECCIÓN DINÁMICA (Se muestra al elegir un tipo) -->
+                        <div id="cmd-seccion-dinamica" style="display: none;">
+                            <div class="form-grupo">
+                                <label>LINEA DE TRAMA</label>
+                                <input type="text" id="cmd-trama" oninput="appSoporte.procesarComando()">
+                            </div>
+                            <div class="form-grupo">
+                                <label>COMANDOS</label>
+                                <div class="comando-resultado" id="cmd-resultado">NO HAY MAS CODIGOS!! 📋</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="modal-cmd-body">
-                <div class="form-grupo"><label>MARCA</label><input type="text" id="cmd-marca" readonly></div>
-                <div class="form-grupo"><label>MODELOS</label><input type="text" id="cmd-modelo" readonly></div>
-                <div class="form-grupo"><label>ID</label><input type="text" id="cmd-id" readonly></div>
-                <div class="form-grupo">
-                    <label>TIPO DE COMANDO</label>
-                    <select id="cmd-tipo" onchange="appSoporte.cambiarTipoComando()">
-                        <option value="">Buscar</option>
-                        <option value="puertos">PUERTOS, IP's y APN'S</option>
-                        <option value="fuel">PROGRAMACION FUEL</option>
-                        <option value="driving">PROGRAMACION DRIVING</option>
-                        <option value="cero">PROGRAMACION DESDE 0</option>
-                    </select>
-                </div>
-                <!-- SECCIÓN DINÁMICA (Se muestra al elegir un tipo) -->
-                <div id="cmd-seccion-dinamica" style="display: none;">
-                    <div class="form-grupo">
-                        <label>LINEA DE TRAMA</label>
-                        <input type="text" id="cmd-trama" oninput="appSoporte.procesarComando()">
-                    </div>
-                    <div class="form-grupo">
-                        <label>COMANDOS</label>
-                        <div class="comando-resultado" id="cmd-resultado">NO HAY MAS CODIGOS!! 📋</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Carga del Cerebro OOP -->
     <script src="comandos.js"></script>
