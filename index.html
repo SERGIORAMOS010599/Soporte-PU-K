@@ -109,37 +109,31 @@
     </div>
 
     <!-- MODAL DE DIAGNÓSTICO MAPON -->
-    <div id="modal-diagnostico" class="modal-oscuro">
-        <div class="modal-comandos-content" style="max-width: 400px; padding: 20px;">
-            <div class="modal-cmd-header" style="border-bottom: none;">
-                <h2 style="color: #00c853; margin-bottom: 0;">Diagnóstico Mapon</h2>
-                <button class="btn-cancelar" onclick="appSoporte.cerrarDiagnostico()" style="margin: 0;">✖</button>
-            </div>
+    <div id="modal-diagnostico" class="modal-oculto">
+    <div class="modal-contenido">
+        <div class="modal-header">
+            <h3>Diagnóstico por SMS</h3>
+            <button class="btn-cerrar" onclick="cerrarModalDiagnostico()">X</button>
+        </div>
+        
+        <div class="modal-body">
+            <p>Selecciona el diagnóstico que deseas solicitar. Se abrirá tu aplicación de mensajes.</p>
             
-            <div class="modal-cmd-body" style="padding-top: 10px;">
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 12px 0;">
-                    <span style="color: #a0a0a0; font-size: 0.9rem; font-weight: bold;">IGNICIÓN</span>
-                    <span id="diag-ign" style="color: #fff; font-weight: bold;">--</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 12px 0;">
-                    <span style="color: #a0a0a0; font-size: 0.9rem; font-weight: bold;">VOLTAJE (BATERÍA)</span>
-                    <span id="diag-vol" style="color: #fff; font-weight: bold;">--</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 12px 0;">
-                    <span style="color: #a0a0a0; font-size: 0.9rem; font-weight: bold;">SALIDA 1</span>
-                    <span id="diag-out1" style="color: #fff; font-weight: bold;">--</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 12px 0;">
-                    <span style="color: #a0a0a0; font-size: 0.9rem; font-weight: bold;">COORDENADAS</span>
-                    <span id="diag-coord" style="color: #6db6ff; font-weight: bold; cursor: pointer;">--</span>
-                </div>
-                
-                <button id="btn-actualizar-diag" class="btn-guardar" style="width: 100%; margin-top: 20px; padding: 12px; background-color: #00c853; font-size: 1rem;" onclick="appSoporte.consultarMapon()">
-                    🔄 Actualizar Telemetría
-                </button>
-            </div>
+            <!-- Botones de Diagnóstico -->
+            <button class="btn-comando-sms" onclick="soporte.enviarSmsDiagnostico('estado')">
+                ⚡ Solicitar Estado (Ignición/Voltaje)
+            </button>
+            
+            <button class="btn-comando-sms" onclick="soporte.enviarSmsDiagnostico('gps')">
+                📍 Solicitar Coordenadas (Satélites)
+            </button>
+            
+            <button class="btn-comando-sms" onclick="soporte.enviarSmsDiagnostico('io')">
+                ⚙️ Solicitar Entradas/Salidas
+            </button>
         </div>
     </div>
+</div>
 
     <!-- MODAL FORMULARIO DE COMANDOS -->
     <div id="modal-comandos" class="modal-oscuro">
