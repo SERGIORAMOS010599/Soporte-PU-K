@@ -10,9 +10,145 @@
   {
     "marca": "TELTONIKA",
     "modelo": "UNIVERSAL",
-    "titulo": "Apagar Motor",
-    "claves": "apagar, motor, corte",
+    "titulo": "Información de Sistema (getinfo)",
+    "claves": "getinfo, sistema, runtime, estado",
+    "plantilla": "getinfo",
+    "preguntas": ""
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Versión de Firmware y IMEI (getver)",
+    "claves": "getver, version, imei, bt, mac",
+    "plantilla": "getver",
+    "preguntas": ""
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Estado del Módem (getstatus)",
+    "claves": "getstatus, modem, red",
+    "plantilla": "getstatus",
+    "preguntas": ""
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Datos GPS Actuales (getgps)",
+    "claves": "getgps, gps, fecha, hora",
+    "plantilla": "getgps",
+    "preguntas": ""
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Leer Entradas y Salidas (getio)",
+    "claves": "getio, entradas, salidas, analogico, digital",
+    "plantilla": "getio",
+    "preguntas": ""
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Ubicación con Enlace de Google Maps (ggps)",
+    "claves": "ggps, mapa, link, google maps, ubicacion",
+    "plantilla": "ggps",
+    "preguntas": ""
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Reiniciar Dispositivo (cpureset)",
+    "claves": "reiniciar, reboot, cpu, trabado",
+    "plantilla": "  cpureset",
+    "preguntas": ""
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Consultar Parámetro (getparam)",
+    "claves": "getparam, parametro, leer config",
+    "plantilla": "  getparam {VALOR1}",
+    "preguntas": "Ingresa el ID del parámetro (ej. 2004)"
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Configurar Parámetro (setparam)",
+    "claves": "setparam, configurar, ip, servidor, puerto",
+    "plantilla": "  setparam {VALOR1}:{VALOR2}",
+    "preguntas": "Ingresa ID del parámetro, Ingresa el nuevo valor"
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Apagar Motor / Salida",
+    "claves": "apagar, motor, corte, salida, digout",
     "plantilla": "  setdigout 1 0",
+    "preguntas": ""
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Encender Motor / Salida",
+    "claves": "encender, motor, restaurar, salida",
+    "plantilla": "  setdigout 0 0",
+    "preguntas": ""
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Estado de la Batería (battery)",
+    "claves": "bateria, voltaje, power",
+    "plantilla": "battery",
+    "preguntas": ""
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Cargar Configuración por Defecto (defaultcfg)",
+    "claves": "defaultcfg, reiniciar de fabrica, valores iniciales",
+    "plantilla": "defaultcfg",
+    "preguntas": ""
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Códigos de Error OBD (faultcodes)",
+    "claves": "faultcodes, obd, codigos de falla, escner",
+    "plantilla": "faultcodes",
+    "preguntas": ""
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Borrar Códigos OBD (cleardtc)",
+    "claves": "cleardtc, borrar fallas, limpiar obd",
+    "plantilla": "cleardtc",
+    "preguntas": ""
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Leer Código VIN (getvin)",
+    "claves": "vin, vehiculo, numero de serie",
+    "plantilla": "getvin",
+    "preguntas": ""
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Bloquear Motor por CAN (lvcanblockengine)",
+    "claves": "can, bloquear, motor, can-control",
+    "plantilla": "lvcanblockengine",
+    "preguntas": ""
+  },
+  {
+    "marca": "TELTONIKA",
+    "modelo": "UNIVERSAL",
+    "titulo": "Desbloquear Motor por CAN (lvcanunblockengine)",
+    "claves": "can, desbloquear, motor, can-control",
+    "plantilla": "lvcanunblockengine",
     "preguntas": ""
   }
 ]
