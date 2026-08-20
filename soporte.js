@@ -16,8 +16,8 @@ class SoporteTecnico {
             { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "Configurar a ZEEK PRIVADO", claves: "zeek, servidor, ip, privado", plantilla: "CMD;{ID};02;01;192.168.9.100;2405", preguntas: "" },
             
             // --- APNs SUNTECH ---
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN Corporativo (Con Usuario/Pass)", claves: "apn, telcel, corporativo", plantilla: "CMD;{ID};03;01;wwwcorps.itelcel.com;webgprs;webgprs2002", preguntas: "" },
-            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN Público (Sin Usuario/Pass)", claves: "apn, telcel, publico, internet", plantilla: "CMD;{ID};03;01;internet.itelcel.com;;", preguntas: "" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN Corporativo (Con Usuario/Pass)", claves: "apn, telcel, corporativo", plantilla: "CMD;{ID};03;01;wwwcorps.itelcel.com", preguntas: "" },
+            { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN Público (Sin Usuario/Pass)", claves: "apn, telcel, publico, internet", plantilla: "CMD;{ID};03;01;internet.itelcel.com;webgprs;webgprs2002;", preguntas: "" },
             { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN Argus R2 (Privado)", claves: "apn, argus, r2", plantilla: "CMD;{ID};03;01;argus.itelcel.com;;", preguntas: "" },
             { marca: "SUNTECH", modelo: "UNIVERSAL", titulo: "APN Argus R9 (Privado)", claves: "apn, argus, r9", plantilla: "CMD;{ID};03;01;argte.itelcel.com;;", preguntas: "" },
 
@@ -34,8 +34,8 @@ class SoporteTecnico {
             { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "Configurar a ZEEK PRIVADO", claves: "zeek, servidor, ip, privado", plantilla: "  setparam 2004:192.168.9.100;2005:20512", preguntas: "" },
             
             // --- APNs TELTONIKA ---
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Corporativo (Con Usuario/Pass)", claves: "apn, telcel, corporativo", plantilla: "  setparam 2001:wwwcorps.itelcel.com;2002:webgprs;2003:webgprs2002", preguntas: "" },
-            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Público (Sin Usuario/Pass)", claves: "apn, telcel, publico, internet", plantilla: "  setparam 2001:internet.itelcel.com", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Corporativo (Con Usuario/Pass)", claves: "apn, telcel, corporativo", plantilla: "  setparam 2001:wwwcorps.itelcel.com;", preguntas: "" },
+            { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Público (Sin Usuario/Pass)", claves: "apn, telcel, publico, internet", plantilla: "  setparam 2001:internet.itelcel.com;2002:webgprs;2003:webgprs2002", preguntas: "" },
             { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Argus R2 (Privado)", claves: "apn, argus, r2", plantilla: "  setparam 2001:argus.itelcel.com", preguntas: "" },
             { marca: "TELTONIKA", modelo: "UNIVERSAL", titulo: "APN Argus R9 (Privado)", claves: "apn, argus, r9", plantilla: "  setparam 2001:argte.itelcel.com", preguntas: "" },
 
