@@ -185,60 +185,55 @@ class SoporteTecnico {
         return cmd.marca === marcaActual || cmd.marca === 'UNIVERSAL';
     }
 
-    filtrarAsistente(ejecutarPeticion = false) {
+filtrarAsistente(ejecutarPeticion = false) {
         if (!this.equipoSeleccionado) return;
         const inputBuscador = document.getElementById('buscador-asistente');
         const textoOriginal = inputBuscador ? inputBuscador.value.toLowerCase().trim() : '';
+        
+        // Obtenemos todos los comandos válidos para la marca actual
         const comandosValidos = this.diccionarioComandos.filter(cmd => this.esComandoValido(cmd));
         
+        // Si no hay texto, mostramos todo
         if (textoOriginal === '') {
             this.mostrarBotonesSugerencia(comandosValidos);
             return;
         }
 
-// --- TRADUCTOR DE INTENCIONES (IA) CON REGLAS ESTRICTAS ---
-        let intencion = textoOriginal;
-        
-        // 1. MACROS (RUTINAS DE DESPLIEGUE)
-        const esMacro = textoOriginal.includes('preparar') || textoOriginal.includes('macro') || textoOriginal.includes('inicializar');
-        
-        if (esMacro) {
-            // Regla estricta: Mapon y Zeek separados. Por defecto usan APN Corporativo.
-            if (textoOriginal.includes('mapon')) {
-                if (textoOriginal.includes('publico')) intencion = 'macro, mapon, publico';
-                else intencion = 'macro, mapon, default'; // Asume Corporativo
-            } 
-            else if (textoOriginal.includes('zeek')) {
-                if (textoOriginal.includes('privado')) intencion = 'macro, zeek, privado';
-                else intencion = 'macro, zeek, publico, corporativo'; // Zeek Público asume APN Corporativo
+        // --- NUEVO MOTOR DE BÚSQUEDA FLEXIBLE ---
+        // Separamos lo que escribe el técnico en palabras individuales
+        const palabrasBuscadas = textoOriginal.split(' ').filter(p => p.trim().length > 0);
+
+        let comandosFiltrados = comandosValidos.filter(cmd => {
+            const clavesText = cmd.claves.toLowerCase();
+            const tituloText = cmd.titulo.toLowerCase();
+
+            // El comando debe contener TODAS las palabras que el técnico escribió, 
+            // no importa el orden, ya sea en su título o en sus claves.
+            return palabrasBuscadas.every(palabra => clavesText.includes(palabra) || tituloText.includes(palabra));
+        });
+
+        // Ordenamos los resultados para que los comandos "default" (como el APN Corporativo) salgan primero
+        comandosFiltrados.sort((a, b) => {
+            if (a.claves.includes('default') && !b.claves.includes('default')) return -1;
+            if (!a.claves.includes('default') && b.claves.includes('default')) return 1;
+            return 0;
+        });
+
+        // --- EJECUCIÓN O MUESTRA DE RESULTADOS ---
+        if (ejecutarPeticion && comandosFiltrados.length > 0) {
+            // Si el técnico pulsó Enter, ejecuta el primer comando (el más exacto)
+            const mejorComando = comandosFiltrados[0];
+            this.seleccionarComandoAsistente(mejorComando);
+            if (mejorComando.preguntas === "") this.generarComandoFinal();
+        } else {
+            // Mientras el técnico escribe, le mostramos los botones que coinciden
+            if (comandosFiltrados.length > 0) {
+                this.mostrarBotonesSugerencia(comandosFiltrados);
+            } else {
+                document.getElementById('asistente-sugerencias').innerHTML = 
+                    `<span style="color:#ffb74d; font-size:0.85em;">No encontré comandos para "${textoOriginal}". Intenta con "mapon", "apn publico", o "preparar zeek".</span>`;
             }
         }
-        // 2. SERVIDORES INDIVIDUALES
-        else if (textoOriginal.includes('mapon')) {
-            intencion = 'mapon, servidor';
-        } 
-        else if (textoOriginal.includes('zeek')) {
-            if (textoOriginal.includes('privado')) intencion = 'zeek, privado';
-            else intencion = 'zeek, publico';
-        }
-        // 3. APNs INDIVIDUALES Y ESTRICTOS
-        else if (textoOriginal.includes('apn')) {
-            // Diferenciación clara entre el Corporativo (default) y el Público (largo)
-            if (textoOriginal.includes('publico') || textoOriginal.includes('internet')) {
-                intencion = 'apn, publico';
-            } 
-            else if (textoOriginal.includes('zeek') || textoOriginal.includes('privado')) {
-                intencion = 'apn, zeek, privado'; // El APN privado es exclusivo para Zeek
-            } 
-            else {
-                intencion = 'apn, corporativo'; // Si solo dice APN, asume el más usado (Corporativo)
-            }
-        }
-        // 4. ACCIONES OPERATIVAS Y HARDWARE
-        else if (textoOriginal.includes('ignicion') || textoOriginal.includes('voltaje')) intencion = 'ignicion';
-        else if (textoOriginal.includes('apagar') || textoOriginal.includes('cortar')) intencion = 'apagar';
-        else if (textoOriginal.includes('encender') || textoOriginal.includes('restaurar')) intencion = 'encender';
-        else if (textoOriginal.includes('can') && textoOriginal.includes('bloquear')) intencion = 'can, bloquear';
     }
 
     mostrarBotonesSugerencia(comandosFiltrados) {
