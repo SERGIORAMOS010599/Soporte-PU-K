@@ -45,6 +45,8 @@ class SoporteTecnico {
                         imei: val(4) || 'N/A',
                         linea: val(5) || 'SIN NÚMERO',
                         iccid: val(6) || 'N/A',
+                        compania: val(7) || 'N/A', // NUEVO: Compañía
+                        estado: val(8) || 'N/A',   // NUEVO: Estado
                         cliente: val(9) || 'SIN CLIENTE',
                         estadoServicio: val(10) || 'PENDIENTE',
                         unidad: val(11) || 'SIN UNIDAD',
@@ -84,15 +86,20 @@ class SoporteTecnico {
     }
 
     // --- RENDERIZADO Y PANTALLAS ---
-    renderizar() {
+renderizar() {
         this.container.innerHTML = '';
         const query = this.busquedaActual.toLowerCase().trim();
+        
+        // --- BUSCADOR UNIVERSAL MEJORADO ---
         const equiposFiltrados = this.equipos.filter(eq => {
-            return String(eq.id).toLowerCase().includes(query) || 
-                   String(eq.imei).toLowerCase().includes(query) || 
-                   String(eq.iccid).toLowerCase().includes(query) || 
-                   String(eq.cliente).toLowerCase().includes(query) ||
-                   String(eq.unidad).toLowerCase().includes(query);
+            // Si no hay texto de búsqueda, muestra todos
+            if (query === '') return true;
+            
+            // Revisa TODAS las propiedades del equipo (id, marca, cliente, serie, etc.)
+            // Si alguna coincide con lo que el técnico escribió, muestra la tarjeta.
+            return Object.values(eq).some(valor => 
+                String(valor).toLowerCase().includes(query)
+            );
         });
 
         if (equiposFiltrados.length === 0) return this.container.innerHTML = '<p style="color:#a0a0a0; text-align:center;">Sin resultados.</p>';
