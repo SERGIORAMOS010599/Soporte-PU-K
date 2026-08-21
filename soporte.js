@@ -225,7 +225,7 @@ class SoporteTecnico {
     async consultarCerebroPUK(pregunta) {
         this.hablarPUK("Olfateando en mis manuales técnicos... Dame unos segundos 🐕", "pensando");
         
-        const urlAppsScript = 'https://script.google.com/macros/s/AKfycbxua3f3WK8cOQVV8NGFHaRJ4D7omCK7CptzXtDprnTpooGY-fZxw7m5XoHQgQOAMa2V/exec';
+        const urlAppsScript = 'https://script.google.com/macros/s/AKfycbxechSb9x2TtDrI_E8egBEkGjZOOFGMXNl5UiBjB9s8n_hJwH6qGHe5aEMMENaEO39H/exec';
 
         try {
             const peticion = await fetch(urlAppsScript, {
