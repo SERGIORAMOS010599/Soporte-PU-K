@@ -45,8 +45,8 @@ class SoporteTecnico {
                         imei: val(4) || 'N/A',
                         linea: val(5) || 'SIN NÚMERO',
                         iccid: val(6) || 'N/A',
-                        compania: val(7) || 'N/A', // NUEVO: Compañía
-                        estado: val(8) || 'N/A',   // NUEVO: Estado
+                        compania: val(7) || 'N/A', 
+                        estado: val(8) || 'N/A',   
                         cliente: val(9) || 'SIN CLIENTE',
                         estadoServicio: val(10) || 'PENDIENTE',
                         unidad: val(11) || 'SIN UNIDAD',
@@ -86,17 +86,13 @@ class SoporteTecnico {
     }
 
     // --- RENDERIZADO Y PANTALLAS ---
-renderizar() {
+    renderizar() {
         this.container.innerHTML = '';
         const query = this.busquedaActual.toLowerCase().trim();
         
         // --- BUSCADOR UNIVERSAL MEJORADO ---
         const equiposFiltrados = this.equipos.filter(eq => {
-            // Si no hay texto de búsqueda, muestra todos
             if (query === '') return true;
-            
-            // Revisa TODAS las propiedades del equipo (id, marca, cliente, serie, etc.)
-            // Si alguna coincide con lo que el técnico escribió, muestra la tarjeta.
             return Object.values(eq).some(valor => 
                 String(valor).toLowerCase().includes(query)
             );
@@ -147,8 +143,50 @@ renderizar() {
 
         this.iniciarAsistente();
     }
-    
-// --- MOTOR DE PERSONALIDAD PU-K 🐶 ---
+
+    // --- LAS FUNCIONES QUE SE HABÍAN BORRADO ---
+    iniciarAsistente() {
+        const eq = this.equipoSeleccionado;
+        const badgeMarca = document.getElementById('asistente-badge-marca');
+        if (badgeMarca) badgeMarca.innerText = eq.marca;
+        
+        const inputBuscador = document.getElementById('buscador-asistente');
+        const contenedorInteractivo = document.getElementById('asistente-interactivo');
+        if (contenedorInteractivo) contenedorInteractivo.style.display = 'none';
+        
+        if (inputBuscador) {
+            inputBuscador.value = '';
+            
+            inputBuscador.placeholder = "🐶 Ej. preparar mapon, o haz una pregunta...";
+            inputBuscador.style.cssText = "width: 100%; padding: 12px 15px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff; font-size: 0.95rem; margin-bottom: 15px; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); transition: all 0.3s ease; box-sizing: border-box;";
+            inputBuscador.onfocus = () => inputBuscador.style.border = "1px solid #ffb74d";
+            inputBuscador.onblur = () => inputBuscador.style.border = "1px solid #444";
+
+            inputBuscador.oninput = () => {
+                clearTimeout(this.debounceTimer);
+                this.debounceTimer = setTimeout(() => {
+                    this.filtrarAsistente(false);
+                }, 250); 
+            };
+
+            inputBuscador.onkeypress = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    clearTimeout(this.debounceTimer); 
+                    this.filtrarAsistente(true);
+                }
+            };
+        }
+        
+        this.filtrarAsistente(false);
+    }
+
+    esComandoValido(cmd) {
+        const marcaActual = this.equipoSeleccionado.marca.toUpperCase().trim();
+        return cmd.marca === marcaActual || cmd.marca === 'UNIVERSAL';
+    }
+
+    // --- MOTOR DE PERSONALIDAD PU-K 🐶 ---
     hablarPUK(mensaje, estado = 'normal') {
         let cajaPUK = document.getElementById('puk-dialogo-caja');
         const inputBuscador = document.getElementById('buscador-asistente');
@@ -170,7 +208,7 @@ renderizar() {
         } else if (estado === 'exito') {
             icono = '🐾'; colorBorde = '#4caf50'; // Verde
         } else if (estado === 'pensando') {
-            icono = '🐕'; colorBorde = '#64b5f6'; // Azul (Conectando a la IA)
+            icono = '🐕'; colorBorde = '#64b5f6'; // Azul
         }
 
         cajaPUK.style.borderLeft = `4px solid ${colorBorde}`;
@@ -187,7 +225,6 @@ renderizar() {
     async consultarCerebroPUK(pregunta) {
         this.hablarPUK("Olfateando en mis manuales técnicos... Dame unos segundos 🐕", "pensando");
         
-        // TU ENLACE DE APPS SCRIPT
         const urlAppsScript = 'https://script.google.com/macros/s/AKfycbwtMAnW-IoAEjLEGTq6TVzalr4XaKxt0IV7aczKNaqKFI-Vt3WE3MEFN522uWE81tM/exec';
 
         try {
@@ -198,7 +235,6 @@ renderizar() {
             const respuesta = await peticion.json();
 
             if (respuesta.success) {
-                // Formateamos la respuesta de Gemini (saltos de línea y negritas) para que se vea bien en HTML
                 let textoHTML = respuesta.respuesta
                     .replace(/\n/g, '<br>')
                     .replace(/\*\*(.*?)\*\*/g, '<b style="color:#fff;">$1</b>');
@@ -249,7 +285,6 @@ renderizar() {
                 
                 this.hablarPUK(`¡Atrapé el comando para <b style="color:#fff;">${mejorComando.titulo}</b>! Generando la trama...`, "exito");
             } else {
-                // AQUÍ ENTRA LA INTELIGENCIA ARTIFICIAL (GEMINI)
                 document.getElementById('asistente-sugerencias').innerHTML = '';
                 this.consultarCerebroPUK(textoOriginal);
             }
@@ -259,7 +294,6 @@ renderizar() {
                 this.hablarPUK("¡Olfateé estos comandos! Haz clic en el que necesites o presiona Enter.", "normal");
             } else {
                 document.getElementById('asistente-sugerencias').innerHTML = '';
-                // Si no hay comandos, le avisa al usuario que puede buscar en la IA
                 this.hablarPUK(`No encontré comandos directos para "<i>${textoOriginal}</i>". <br><b style="color:#64b5f6;">¡Presiona Enter y le preguntaré a mi cerebro de IA! 🐶</b>`, "pensando");
             }
         }
