@@ -196,42 +196,49 @@ class SoporteTecnico {
             return;
         }
 
-        // --- TRADUCTOR DE INTENCIONES (IA) ---
+// --- TRADUCTOR DE INTENCIONES (IA) CON REGLAS ESTRICTAS ---
         let intencion = textoOriginal;
         
-        if (textoOriginal.includes('mapon')) intencion = 'mapon';
-        else if (textoOriginal.includes('zeek') && textoOriginal.includes('publico')) intencion = 'zeek, publico';
-        else if (textoOriginal.includes('zeek') && (textoOriginal.includes('privado') || textoOriginal.includes('priv'))) intencion = 'zeek, privado';
-        else if (textoOriginal.includes('apn')) {
-            if (textoOriginal.includes('corporativo') || textoOriginal.includes('corps')) intencion = 'apn, corporativo';
-            else if (textoOriginal.includes('publico') || textoOriginal.includes('internet')) intencion = 'apn, publico';
-            else if (textoOriginal.includes('argus') && textoOriginal.includes('r2')) intencion = 'apn, r2';
-            else if (textoOriginal.includes('argus') && textoOriginal.includes('r9')) intencion = 'apn, r9';
-            else intencion = 'apn'; 
+        // 1. MACROS (RUTINAS DE DESPLIEGUE)
+        const esMacro = textoOriginal.includes('preparar') || textoOriginal.includes('macro') || textoOriginal.includes('inicializar');
+        
+        if (esMacro) {
+            // Regla estricta: Mapon y Zeek separados. Por defecto usan APN Corporativo.
+            if (textoOriginal.includes('mapon')) {
+                if (textoOriginal.includes('publico')) intencion = 'macro, mapon, publico';
+                else intencion = 'macro, mapon, default'; // Asume Corporativo
+            } 
+            else if (textoOriginal.includes('zeek')) {
+                if (textoOriginal.includes('privado')) intencion = 'macro, zeek, privado';
+                else intencion = 'macro, zeek, publico, corporativo'; // Zeek Público asume APN Corporativo
+            }
         }
+        // 2. SERVIDORES INDIVIDUALES
+        else if (textoOriginal.includes('mapon')) {
+            intencion = 'mapon, servidor';
+        } 
+        else if (textoOriginal.includes('zeek')) {
+            if (textoOriginal.includes('privado')) intencion = 'zeek, privado';
+            else intencion = 'zeek, publico';
+        }
+        // 3. APNs INDIVIDUALES Y ESTRICTOS
+        else if (textoOriginal.includes('apn')) {
+            // Diferenciación clara entre el Corporativo (default) y el Público (largo)
+            if (textoOriginal.includes('publico') || textoOriginal.includes('internet')) {
+                intencion = 'apn, publico';
+            } 
+            else if (textoOriginal.includes('zeek') || textoOriginal.includes('privado')) {
+                intencion = 'apn, zeek, privado'; // El APN privado es exclusivo para Zeek
+            } 
+            else {
+                intencion = 'apn, corporativo'; // Si solo dice APN, asume el más usado (Corporativo)
+            }
+        }
+        // 4. ACCIONES OPERATIVAS Y HARDWARE
         else if (textoOriginal.includes('ignicion') || textoOriginal.includes('voltaje')) intencion = 'ignicion';
         else if (textoOriginal.includes('apagar') || textoOriginal.includes('cortar')) intencion = 'apagar';
         else if (textoOriginal.includes('encender') || textoOriginal.includes('restaurar')) intencion = 'encender';
-
-        const comandosFiltrados = comandosValidos.filter(cmd => {
-            const claves = cmd.claves.split(',').map(c => c.trim().toLowerCase());
-            const intencionesArr = intencion.split(',').map(i => i.trim().toLowerCase());
-            
-            return intencionesArr.every(i => claves.some(c => c.includes(i) || i.includes(c))) || 
-                   cmd.titulo.toLowerCase().includes(textoOriginal);
-        });
-
-        if (ejecutarPeticion && comandosFiltrados.length > 0) {
-            const mejorComando = comandosFiltrados[0];
-            this.seleccionarComandoAsistente(mejorComando);
-            if (mejorComando.preguntas === "") this.generarComandoFinal();
-        } else {
-            if (comandosFiltrados.length > 0) {
-                this.mostrarBotonesSugerencia(comandosFiltrados);
-            } else {
-                document.getElementById('asistente-sugerencias').innerHTML = '<span style="color:#ffb74d; font-size:0.85em;">No entendí la petición. Intenta ser más directo, ej: "cambiar apn r2" o "apagar".</span>';
-            }
-        }
+        else if (textoOriginal.includes('can') && textoOriginal.includes('bloquear')) intencion = 'can, bloquear';
     }
 
     mostrarBotonesSugerencia(comandosFiltrados) {
