@@ -140,14 +140,52 @@ class SoporteTecnico {
 
         this.iniciarAsistente();
     }
+    
+    // --- MOTOR DE PERSONALIDAD PU-K 🐶 ---
+    hablarPUK(mensaje, estado = 'normal') {
+        let cajaPUK = document.getElementById('puk-dialogo-caja');
+        const inputBuscador = document.getElementById('buscador-asistente');
+        
+        // Si la caja no existe en el HTML, la creamos dinámicamente arriba del buscador
+        if (!cajaPUK && inputBuscador) {
+            cajaPUK = document.createElement('div');
+            cajaPUK.id = 'puk-dialogo-caja';
+            // Diseño del cuadro de diálogo al estilo de la imagen
+            cajaPUK.style.cssText = "background: #1e1e1e; border-left: 4px solid #ffb74d; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; font-size: 0.9em; color: #ccc; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.3s ease;";
+            inputBuscador.parentNode.insertBefore(cajaPUK, inputBuscador);
+        }
 
-    // ==========================================
-    // IA - MOTOR EJECUTOR Y PROCESAMIENTO DE LENGUAJE
-    // ==========================================
-    iniciarAsistente() {
+        if (!cajaPUK) return;
+
+        // Cambiamos la cara de PU-K y el color según la situación
+        let icono = '🐶'; 
+        let colorBorde = '#ffb74d'; // Naranja por defecto
+
+        if (estado === 'error') {
+            icono = '🐕‍🦺'; // Alerta / Buscando
+            colorBorde = '#ff4c4c'; // Rojo
+        } else if (estado === 'exito') {
+            icono = '🐾'; // Listo / Dejó huella
+            colorBorde = '#4caf50'; // Verde
+        }
+
+        cajaPUK.style.borderLeft = `4px solid ${colorBorde}`;
+        cajaPUK.innerHTML = `
+            <span style="font-size: 2.2em; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">${icono}</span> 
+            <span style="line-height: 1.4;">
+                <b style="color: ${colorBorde}; font-size: 1.05em;">PU-K dice:</b><br>
+                ${mensaje}
+            </span>
+        `;
+    }
+    
+iniciarAsistente() {
         const eq = this.equipoSeleccionado;
         const badgeMarca = document.getElementById('asistente-badge-marca');
         if (badgeMarca) badgeMarca.innerText = eq.marca;
+        
+        // Cambiar título estático si existe (Opcional, busca si tienes un 🤖 en el HTML y lo quita visualmente)
+        const tituloAsistente = document.querySelector('.titulo-detalles'); // Ajusta según tu clase
         
         const inputBuscador = document.getElementById('buscador-asistente');
         const contenedorInteractivo = document.getElementById('asistente-interactivo');
@@ -156,7 +194,8 @@ class SoporteTecnico {
         if (inputBuscador) {
             inputBuscador.value = '';
             
-            inputBuscador.placeholder = "🤖 Ej. necesito el apn de argus r2...";
+            // Reemplazamos el Robot por PU-K
+            inputBuscador.placeholder = "🐶 Ej. preparar mapon, o apn r2...";
             inputBuscador.style.cssText = "width: 100%; padding: 12px 15px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff; font-size: 0.95rem; margin-bottom: 15px; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); transition: all 0.3s ease; box-sizing: border-box;";
             inputBuscador.onfocus = () => inputBuscador.style.border = "1px solid #ffb74d";
             inputBuscador.onblur = () => inputBuscador.style.border = "1px solid #444";
@@ -190,48 +229,41 @@ filtrarAsistente(ejecutarPeticion = false) {
         const inputBuscador = document.getElementById('buscador-asistente');
         const textoOriginal = inputBuscador ? inputBuscador.value.toLowerCase().trim() : '';
         
-        // Obtenemos todos los comandos válidos para la marca actual
         const comandosValidos = this.diccionarioComandos.filter(cmd => this.esComandoValido(cmd));
         
-        // Si no hay texto, mostramos todo
         if (textoOriginal === '') {
             this.mostrarBotonesSugerencia(comandosValidos);
+            this.hablarPUK("¡Hola! Soy PU-K. Escribe qué necesitas configurar (ej. 'preparar mapon') o usa los botones rápidos. ¡Guau!", "normal");
             return;
         }
 
-        // --- NUEVO MOTOR DE BÚSQUEDA FLEXIBLE ---
-        // Separamos lo que escribe el técnico en palabras individuales
         const palabrasBuscadas = textoOriginal.split(' ').filter(p => p.trim().length > 0);
 
         let comandosFiltrados = comandosValidos.filter(cmd => {
             const clavesText = cmd.claves.toLowerCase();
             const tituloText = cmd.titulo.toLowerCase();
-
-            // El comando debe contener TODAS las palabras que el técnico escribió, 
-            // no importa el orden, ya sea en su título o en sus claves.
             return palabrasBuscadas.every(palabra => clavesText.includes(palabra) || tituloText.includes(palabra));
         });
 
-        // Ordenamos los resultados para que los comandos "default" (como el APN Corporativo) salgan primero
         comandosFiltrados.sort((a, b) => {
             if (a.claves.includes('default') && !b.claves.includes('default')) return -1;
             if (!a.claves.includes('default') && b.claves.includes('default')) return 1;
             return 0;
         });
 
-        // --- EJECUCIÓN O MUESTRA DE RESULTADOS ---
         if (ejecutarPeticion && comandosFiltrados.length > 0) {
-            // Si el técnico pulsó Enter, ejecuta el primer comando (el más exacto)
             const mejorComando = comandosFiltrados[0];
             this.seleccionarComandoAsistente(mejorComando);
             if (mejorComando.preguntas === "") this.generarComandoFinal();
+            
+            this.hablarPUK(`¡Atrapé el comando para <b>${mejorComando.titulo}</b>! Generando la trama...`, "exito");
         } else {
-            // Mientras el técnico escribe, le mostramos los botones que coinciden
             if (comandosFiltrados.length > 0) {
                 this.mostrarBotonesSugerencia(comandosFiltrados);
+                this.hablarPUK("¡Olfateé estos comandos! Haz clic en el que necesites o presiona Enter.", "normal");
             } else {
-                document.getElementById('asistente-sugerencias').innerHTML = 
-                    `<span style="color:#ffb74d; font-size:0.85em;">No encontré comandos para "${textoOriginal}". Intenta con "mapon", "apn publico", o "preparar zeek".</span>`;
+                document.getElementById('asistente-sugerencias').innerHTML = '';
+                this.hablarPUK(`¡Grrr! No entendí "<i>${textoOriginal}</i>". Revisa si lo escribiste bien. Intenta usar palabras como 'apn', 'zeek' o 'cortar'.`, "error");
             }
         }
     }
