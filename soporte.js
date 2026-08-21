@@ -1,5 +1,5 @@
 class SoporteTecnico {
-    constructor() {.
+    constructor() {
         this.container = document.getElementById('grid-salidas');
         this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM'; 
         
