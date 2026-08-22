@@ -116,7 +116,7 @@
                 </div>
             </div>
     
-    <!-- MODAL FORMULARIO DE COMANDOS -->
+<!-- MODAL FORMULARIO DE COMANDOS -->
             <div id="modal-comandos" class="modal-oscuro">
                 <div class="modal-comandos-content">
                     <div class="modal-cmd-header">
@@ -155,18 +155,12 @@
                 </div>
             </div>
 
-    <!-- Carga del Cerebro OOP -->
-    <script src="comandos.js"></script>
-   <script src="soporte.js?v=2"></script>
-        <!-- Botón Flotante PU-K -->
-<div id="puk-boton-flotante" onclick="appSoporte.toggleChatPUK()">
-    🐶
-</div>
-
-<!-- ... todo el resto de tu código, el grid de equipos, paneles, etc ... -->
+        </div> <!-- ¡AQUÍ ESTÁ EL CIERRE DEL PANEL LATERAL QUE FALTABA! -->
+    </div> <!-- ¡AQUÍ ESTÁ EL CIERRE DEL CONTENEDOR PRINCIPAL QUE FALTABA! -->
 
     <!-- ========================================== -->
     <!-- ASISTENTE GLOBAL PU-K (Botón y Panel)      -->
+    <!-- Ahora sí está libre en la pantalla general -->
     <!-- ========================================== -->
     <div id="puk-boton-flotante" onclick="appSoporte.toggleChatPUK()">
         🐶
@@ -179,7 +173,7 @@
         </div>
         <div id="puk-mensajes">
             <div class="puk-mensaje puk-ia">
-                ¡Guau! Hola, soy PU-K. ¿En qué te ayudo hoy?
+                ¡Guau! Hola, soy PU-K. ¿En qué te ayudo con los equipos de telemetría hoy?
             </div>
         </div>
         <div class="puk-input-area">
@@ -188,7 +182,8 @@
         </div>
     </div>
 
-    <!-- Tus scripts al final -->
-    <script src="soporte.js"></script>
+    <!-- Carga del Cerebro OOP y Scripts (Solo una vez) -->
+    <script src="comandos.js"></script>
+    <script src="soporte.js?v=2"></script>
 </body>
 </html>
