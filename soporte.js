@@ -517,6 +517,75 @@ class SoporteTecnico {
             }
         }
     }
+    // --- NUEVAS FUNCIONES PARA EL CHAT FLOTANTE PU-K ---
+    
+    toggleChatPUK() {
+        const panel = document.getElementById('puk-panel-chat');
+        panel.classList.toggle('puk-oculto');
+    }
+
+    manejarEnterChat(e) {
+        if (e.key === 'Enter') {
+            this.enviarMensajeChat();
+        }
+    }
+
+    async enviarMensajeChat() {
+        const input = document.getElementById('puk-input-chat');
+        const mensaje = input.value.trim();
+        if (!mensaje) return;
+
+        // 1. Mostrar la burbuja con lo que escribió el usuario
+        this.agregarBurbujaChat(mensaje, 'puk-usuario');
+        input.value = '';
+
+        // 2. Mostrar la burbuja de PU-K "pensando"
+        const idPensando = this.agregarBurbujaChat('Olfateando el manual de soporte... 🐕', 'puk-ia');
+
+        // 3. Consultar a tu puente de Apps Script (Asegúrate de pegar aquí tu URL actual que termina en /exec)
+        const urlAppsScript = 'AQUI_VA_TU_URL_DE_APPS_SCRIPT_QUE_TERMINA_EN_/EXEC'; 
+        
+        try {
+            const peticion = await fetch(urlAppsScript, {
+                method: 'POST',
+                body: JSON.stringify({ mensaje: mensaje })
+            });
+            const respuesta = await peticion.json();
+
+            // Borrar el mensaje de "pensando"
+            document.getElementById(idPensando).remove();
+
+            if (respuesta.success) {
+                let textoHTML = respuesta.respuesta
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<b style="color:#ffb74d;">$1</b>');
+                
+                this.agregarBurbujaChat(textoHTML, 'puk-ia');
+            } else {
+                this.agregarBurbujaChat("¡Grrr! Hubo un error al pensar: " + respuesta.error, 'puk-ia');
+            }
+        } catch (error) {
+            document.getElementById(idPensando).remove();
+            this.agregarBurbujaChat("¡Grrr! No pude conectarme con mi cerebro en la nube.", 'puk-ia');
+            console.error(error);
+        }
+    }
+
+    agregarBurbujaChat(texto, clase) {
+        const contenedor = document.getElementById('puk-mensajes');
+        const div = document.createElement('div');
+        div.className = `puk-mensaje ${clase}`;
+        div.innerHTML = texto;
+        
+        // Creamos un ID único temporal por si necesitamos borrarlo (como el de 'pensando')
+        const idUnico = 'msg-' + Date.now();
+        div.id = idUnico;
+        
+        contenedor.appendChild(div);
+        contenedor.scrollTop = contenedor.scrollHeight; // Hace que el chat baje automáticamente
+        
+        return idUnico;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => { window.appSoporte = new SoporteTecnico(); });
