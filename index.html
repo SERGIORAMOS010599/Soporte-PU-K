@@ -17,7 +17,7 @@
     </script>
 </head>
 <body>
-
+    
     <!-- BARRA DE BÚSQUEDA UNIVERSAL -->
     <div class="buscador-container" style="position: relative; max-width: 600px; margin: 0 auto; padding: 20px;">
         <input type="text" id="buscador-global" placeholder="Buscar por IMEI, ID, Cliente o Unidad..." oninput="appSoporte.buscarGlobal(this.value)">
@@ -163,21 +163,32 @@
     🐶
 </div>
 
-<!-- Panel de Chat Flotante PU-K -->
-<div id="puk-panel-chat" class="puk-oculto">
-    <div class="puk-header">
-        <span>🐶 Asistente PU-K</span>
-        <button onclick="appSoporte.toggleChatPUK()">✖</button>
+<!-- ... todo el resto de tu código, el grid de equipos, paneles, etc ... -->
+
+    <!-- ========================================== -->
+    <!-- ASISTENTE GLOBAL PU-K (Botón y Panel)      -->
+    <!-- ========================================== -->
+    <div id="puk-boton-flotante" onclick="appSoporte.toggleChatPUK()">
+        🐶
     </div>
-    <div id="puk-mensajes">
-        <div class="puk-mensaje puk-ia">
-            ¡Guau! Hola, soy PU-K. ¿En qué te ayudo con los equipos de soporte técnico hoy?
+
+    <div id="puk-panel-chat" class="puk-oculto">
+        <div class="puk-header">
+            <span>🐶 Asistente PU-K</span>
+            <button onclick="appSoporte.toggleChatPUK()">✖</button>
+        </div>
+        <div id="puk-mensajes">
+            <div class="puk-mensaje puk-ia">
+                ¡Guau! Hola, soy PU-K. ¿En qué te ayudo hoy?
+            </div>
+        </div>
+        <div class="puk-input-area">
+            <input type="text" id="puk-input-chat" placeholder="Pregunta algo al manual..." onkeypress="appSoporte.manejarEnterChat(event)">
+            <button onclick="appSoporte.enviarMensajeChat()">Enviar</button>
         </div>
     </div>
-    <div class="puk-input-area">
-        <input type="text" id="puk-input-chat" placeholder="Pregunta algo al manual..." onkeypress="appSoporte.manejarEnterChat(event)">
-        <button onclick="appSoporte.enviarMensajeChat()">Enviar</button>
-    </div>
-</div>
+
+    <!-- Tus scripts al final -->
+    <script src="soporte.js"></script>
 </body>
 </html>
