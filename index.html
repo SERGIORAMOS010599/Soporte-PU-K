@@ -158,5 +158,26 @@
     <!-- Carga del Cerebro OOP -->
     <script src="comandos.js"></script>
    <script src="soporte.js?v=2"></script>
+        <!-- Botón Flotante PU-K -->
+<div id="puk-boton-flotante" onclick="appSoporte.toggleChatPUK()">
+    🐶
+</div>
+
+<!-- Panel de Chat Flotante PU-K -->
+<div id="puk-panel-chat" class="puk-oculto">
+    <div class="puk-header">
+        <span>🐶 Asistente PU-K</span>
+        <button onclick="appSoporte.toggleChatPUK()">✖</button>
+    </div>
+    <div id="puk-mensajes">
+        <div class="puk-mensaje puk-ia">
+            ¡Guau! Hola, soy PU-K. ¿En qué te ayudo con los equipos de soporte técnico hoy?
+        </div>
+    </div>
+    <div class="puk-input-area">
+        <input type="text" id="puk-input-chat" placeholder="Pregunta algo al manual..." onkeypress="appSoporte.manejarEnterChat(event)">
+        <button onclick="appSoporte.enviarMensajeChat()">Enviar</button>
+    </div>
+</div>
 </body>
 </html>
