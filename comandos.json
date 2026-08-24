@@ -197,7 +197,7 @@
     "titulo": "Tipo de Ignición (FMC125 / FMC920)",
     "claves": "ignicion, voltaje, 101, movimiento",
     "plantilla": "  setparam 101:{VALOR1}",
-    "preguntas": "Ingresa valor (1=DIN1, 2=DIN2, 4=DIN3, 16=Mov., 32=Voltaje, suma los valores)"
+    "preguntas": "Ingresa valor (1=DIN1 2=DIN2 4=DIN3 16=Mov 32=Voltaje suma los valores)"
   },
   {
     "marca": "TELTONIKA",
@@ -205,7 +205,7 @@
     "titulo": "Tipo de Ignición (FMC150 / FMC003)",
     "claves": "ignicion, voltaje, 101, can",
     "plantilla": "  setparam 101:{VALOR1}",
-    "preguntas": "Ingresa valor (1=DIN1, 2=Acel., 4=Volt., 8=RPM, 16=DIN3, 32=CAN, suma los valores)"
+    "preguntas": "Ingresa valor (1=DIN1 2=Acel 4=Volt 8=RPM 16=DIN3 32=CAN suma los valores)"
   },
   {
     "marca": "TELTONIKA",
