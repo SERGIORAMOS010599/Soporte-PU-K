@@ -543,7 +543,7 @@ class SoporteTecnico {
         const idPensando = this.agregarBurbujaChat('Olfateando el manual de soporte... 🐕', 'puk-ia');
 
         // 3. Consultar a tu puente de Apps Script (Asegúrate de pegar aquí tu URL actual que termina en /exec)
-        const urlAppsScript = 'AQUI_VA_TU_URL_DE_APPS_SCRIPT_QUE_TERMINA_EN_/EXEC'; 
+        const urlAppsScript = 'https://script.google.com/macros/s/AKfycbxechSb9x2TtDrI_E8egBEkGjZOOFGMXNl5UiBjB9s8n_hJwH6qGHe5aEMMENaEO39H/exec'; 
         
         try {
             const peticion = await fetch(urlAppsScript, {
