@@ -55,7 +55,7 @@
   },
   {
     "marca": "SUNTECH",
-    "modelo": "ST4315, ST330, ST334, ST43",
+    "modelo": "ST4315, ST4315b, ST4310, ST330, ST334, ST43, ST8230",
     "tipo": "simple",
     "titulo": "Preparar Red ZEEK JASPER",
     "claves": "red, jasper, zeek, telcel, corporativo",
@@ -64,7 +64,7 @@
   },
   {
     "marca": "SUNTECH",
-    "modelo": "ST4315, ST330, ST334, ST43",
+    "modelo": "ST4315, ST4315b, ST4310, ST330, ST334, ST43, ST8230",
     "tipo": "simple",
     "titulo": "Preparar Red ZEEK TELCEL PÚBLICO TCP",
     "claves": "red, telcel publico, internet, zeek",
@@ -73,7 +73,7 @@
   },
   {
     "marca": "SUNTECH",
-    "modelo": "ST4315, ST330, ST334, ST43",
+    "modelo": "ST4315, ST4315b, ST4310, ST330, ST334, ST43, ST8230",
     "tipo": "simple",
     "titulo": "Preparar Red PRIVADO R2",
     "claves": "red, r2, argus, privado",
