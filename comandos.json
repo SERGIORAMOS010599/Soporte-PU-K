@@ -4,7 +4,7 @@
     "modelo": "ST600",
     "tipo": "simple",
     "titulo": "Preparar Red ZEEK JASPER (TCP)",
-    "claves": "red, jasper, zeek, telcel, corporativo",
+    "claves": "red, jasper, zeek, telcel, corporativo, st600",
     "plantilla": "ST600NTW;{ID};02;1;wwwcorps.itelcel.com;;;mobile.zeekgps.com;2404;;;;\nST600ADP;{ID};02;T;T;0;2404;0;0;0;0;0;0",
     "preguntas": ""
   },
@@ -13,7 +13,7 @@
     "modelo": "ST600",
     "tipo": "simple",
     "titulo": "Preparar Red ZEEK TELCEL PÚBLICO (TCP)",
-    "claves": "red, telcel publico, internet, zeek",
+    "claves": "red, telcel publico, internet, zeek, st600",
     "plantilla": "ST600NTW;{ID};02;0;internet.itelcel.com;webgprs;webgprs2002;mobile.zeekgps.com;2404;;;;\nST600ADP;{ID};02;T;T;0;2404;0;0;0;0;0;0",
     "preguntas": ""
   },
@@ -22,7 +22,7 @@
     "modelo": "ST600",
     "tipo": "simple",
     "titulo": "Preparar Red ZEEK PRIVADO R2 (UDP)",
-    "claves": "red, r2, argus, privado, zeek",
+    "claves": "red, r2, argus, privado, zeek, st600",
     "plantilla": "ST600NTW;{ID};02;0;argus.itelcel.com;;;192.168.9.100;2406;;;;\nST600ADP;{ID};02;U;U;1;2406;0;0;0;0;0;0",
     "preguntas": ""
   },
@@ -31,7 +31,7 @@
     "modelo": "ST300, ST340",
     "tipo": "simple",
     "titulo": "Preparar Red ZEEK JASPER (TCP)",
-    "claves": "red, jasper, zeek, telcel, corporativo",
+    "claves": "red, jasper, zeek, telcel, corporativo, st300, st340",
     "plantilla": "ST300NTW;{ID};02;0;wwwcorps.itelcel.com;;;mobile.zeekgps.com;2404;;;;\nST300ADP;{ID};02;T;T;0;2404;0;0;0;0;0;0;0;0;0;0;0;0",
     "preguntas": ""
   },
@@ -40,7 +40,7 @@
     "modelo": "ST300, ST340",
     "tipo": "simple",
     "titulo": "Preparar Red ZEEK TELCEL PÚBLICO (TCP)",
-    "claves": "red, telcel publico, internet, zeek",
+    "claves": "red, telcel publico, internet, zeek, st300, st340",
     "plantilla": "ST300NTW;{ID};02;0;internet.itelcel.com;webgprs;webgprs2002;mobile.zeekgps.com;2404;;;;\nST300ADP;{ID};02;T;T;0;2404;0;0;0;0;0;0;0;0;0;0;0;0",
     "preguntas": ""
   },
@@ -49,7 +49,7 @@
     "modelo": "ST2, SA200",
     "tipo": "simple",
     "titulo": "Preparar Red ZEEK JASPER (TCP)",
-    "claves": "red, jasper, zeek, telcel, corporativo",
+    "claves": "red, jasper, zeek, telcel, corporativo, st2, sa200",
     "plantilla": "SA200NTW;{ID};02;0;wwwcorps.itelcel.com;;;mobile.zeekgps.com;2404;;;;\nSA200ADP;{ID};02;T;T;0;2404;0;0;0;0;0;0;0;0;0;0;0;0",
     "preguntas": ""
   },
@@ -58,7 +58,7 @@
     "modelo": "ST4315, ST4315b, ST4310, ST330, ST334, ST43, ST8230",
     "tipo": "simple",
     "titulo": "Preparar Red ZEEK JASPER",
-    "claves": "red, jasper, zeek, telcel, corporativo",
+    "claves": "red, jasper, zeek, telcel, corporativo, st4315, st4315b, st4310, st330, st334, st43, st8230",
     "plantilla": "PRG;{ID};10;00#00;01#wwwcorps.itelcel.com;02#;03#;04#;05#mobile.zeekgps.com;06#2404;07#00",
     "preguntas": ""
   },
@@ -67,7 +67,7 @@
     "modelo": "ST4315, ST4315b, ST4310, ST330, ST334, ST43, ST8230",
     "tipo": "simple",
     "titulo": "Preparar Red ZEEK TELCEL PÚBLICO TCP",
-    "claves": "red, telcel publico, internet, zeek",
+    "claves": "red, telcel publico, internet, zeek, st4315, st4315b, st4310, st330, st334, st43, st8230",
     "plantilla": "PRG;{ID};10;00#00;01#internet.itelcel.com;02#webgprs;03#webgprs2002;04#;05#mobile.zeekgps.com;06#2404;07#00",
     "preguntas": ""
   },
@@ -76,7 +76,7 @@
     "modelo": "ST4315, ST4315b, ST4310, ST330, ST334, ST43, ST8230",
     "tipo": "simple",
     "titulo": "Preparar Red PRIVADO R2",
-    "claves": "red, r2, argus, privado",
+    "claves": "red, r2, argus, privado, st4315, st4315b, st4310, st330, st334, st43, st8230",
     "plantilla": "PRG;{ID};10;00#00;01#argus.itelcel.com;02#;03#;04#;05#192.168.9.100;06#2405;07#01",
     "preguntas": ""
   },
@@ -85,7 +85,7 @@
     "modelo": "FM, FMC",
     "tipo": "simple",
     "titulo": "Preparar Red ZEEK JASPER",
-    "claves": "red, jasper, zeek, telcel, corporativo",
+    "claves": "red, jasper, zeek, telcel, corporativo, fm, fmc",
     "plantilla": "  setparam 2001:wwwcorps.itelcel.com;2002:;2003:;2004:apps.zeekgps.com;2005:20513;2006:1;1004:1;",
     "preguntas": ""
   },
@@ -94,7 +94,7 @@
     "modelo": "FM, FMC",
     "tipo": "simple",
     "titulo": "Preparar Red ZEEK TELCEL PÚBLICO",
-    "claves": "red, telcel publico, internet, zeek",
+    "claves": "red, telcel publico, internet, zeek, fm, fmc",
     "plantilla": "  setparam 2001:internet.itelcel.com;2002:webgprs;2003:webgprs2002;2004:apps.zeekgps.com;2005:20513;2006:1;1004:1;",
     "preguntas": ""
   },
@@ -103,7 +103,7 @@
     "modelo": "FM, FMC",
     "tipo": "simple",
     "titulo": "Preparar Red PRIVADO R2",
-    "claves": "red, r2, argus, privado",
+    "claves": "red, r2, argus, privado, fm, fmc",
     "plantilla": "  setparam 2001:argus.itelcel.com;2002:;2003:;2004:192.168.9.100;2005:20512;2006:1;1004:1;",
     "preguntas": ""
   },
@@ -112,7 +112,7 @@
     "modelo": "ECO, TCO",
     "tipo": "simple",
     "titulo": "Preparar Red ZEEK JASPER",
-    "claves": "red, jasper, zeek, telcel, corporativo",
+    "claves": "red, jasper, zeek, telcel, corporativo, eco, tco",
     "plantilla": " setcfg 100 0, 101 wwwcorps.itelcel.com, 102 0, 103 0, 110 apps.zeekgps.com, 120 2402",
     "preguntas": ""
   },
@@ -121,7 +121,7 @@
     "modelo": "ECO, TCO",
     "tipo": "simple",
     "titulo": "Preparar Red ZEEK TELCEL PÚBLICO",
-    "claves": "red, telcel publico, internet, zeek",
+    "claves": "red, telcel publico, internet, zeek, eco, tco",
     "plantilla": " setcfg 100 0, 101 internet.itelcel.com, 102 webgprs, 103 webgprs2002, 110 apps.zeekgps.com, 120 2402",
     "preguntas": ""
   },
@@ -130,7 +130,7 @@
     "modelo": "UNIVERSAL",
     "tipo": "simple",
     "titulo": "Configurar APN JASPER y Servidor ZEEK",
-    "claves": "red, jasper, zeek, telcel, corporativo",
+    "claves": "red, jasper, zeek, telcel, corporativo, concox",
     "plantilla": "APN,wwwcorps.itelcel.com#\nSERVER,1,apps.zeekgps.com,2401,0#",
     "preguntas": ""
   },
@@ -139,7 +139,7 @@
     "modelo": "UNIVERSAL",
     "tipo": "simple",
     "titulo": "Configurar APN TELCEL PÚBLICO y Servidor ZEEK",
-    "claves": "red, telcel publico, internet, zeek",
+    "claves": "red, telcel publico, internet, zeek, concox",
     "plantilla": "APN,internet.itelcel.com,webgprs,webgprs2002#\nSERVER,1,apps.zeekgps.com,2401,0#",
     "preguntas": ""
   },
@@ -148,7 +148,7 @@
     "modelo": "UNIVERSAL",
     "tipo": "simple",
     "titulo": "Configurar Segundo Servidor (in.fleetapi.com)",
-    "claves": "segundo servidor, dual, fleetapi",
+    "claves": "segundo servidor, dual, fleetapi, teltonika",
     "plantilla": "  setparam 2010:2;2007:in.fleetapi.com;2008:5688;2009:0;",
     "preguntas": ""
   },
@@ -206,7 +206,7 @@
     "modelo": "FM, FMC",
     "tipo": "macro",
     "titulo": "Programación Desde 0 (Teltonika)",
-    "claves": "programacion desde 0, teltonika, inicializar",
+    "claves": "programacion desde 0, teltonika, inicializar, fm, fmc",
     "plantilla": [
       "  setparam 2001:wwwcorps.itelcel.com;2002:;2003:;2004:apps.zeekgps.com;2005:20513;2006:1;1004:1;2;",
       "  setparam 138:1;133:0;107:0;108:1;109:14;110:0;113:1;",
@@ -227,7 +227,7 @@
     "modelo": "ECO, TCO",
     "tipo": "macro",
     "titulo": "Programación Desde 0 (Ruptela)",
-    "claves": "programacion desde 0, ruptela, inicializar",
+    "claves": "programacion desde 0, ruptela, inicializar, eco, tco",
     "plantilla": [
       " setcfg 100 0, 101 wwwcorps.itelcel.com, 110 apps.zeekgps.com, 120 2402, 152 6, 307 1, 406 180, 698 0, 1105 1032, 1106 500, 1108 1280, 1122 600, 1123 4",
       " setcfg 1124 4000000000, 1132 4000000000, 1360 2, 1200 67, 1240 0, 1280 0, 1320 2000, 1361 3, 1201 67, 1241 0, 1281 0, 1321 2000",
