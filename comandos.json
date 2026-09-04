@@ -3,89 +3,98 @@
     "marca": "SUNTECH",
     "modelo": "ST600",
     "tipo": "simple",
-    "titulo": "Preparar Red ZEEK JASPER (TCP)",
+    "titulo": "Preparar Red JASPER - Solo ST600",
     "claves": "red, jasper, zeek, telcel, corporativo, st600",
     "plantilla": "ST600NTW;{ID};02;1;wwwcorps.itelcel.com;;;mobile.zeekgps.com;2404;;;;\nST600ADP;{ID};02;T;T;0;2404;0;0;0;0;0;0",
-    "preguntas": ""
+    "preguntas": "",
+    "instrucciones_ia": "REGLA ESTRICTA: Usa este comando ÚNICAMENTE si el modelo exacto en pantalla es ST600. Si el equipo es un ST8230 o ST4315, NO USES ESTE COMANDO."
   },
   {
     "marca": "SUNTECH",
     "modelo": "ST600",
     "tipo": "simple",
-    "titulo": "Preparar Red ZEEK TELCEL PÚBLICO (TCP)",
+    "titulo": "Preparar Red TELCEL PÚBLICO - Solo ST600",
     "claves": "red, telcel publico, internet, zeek, st600",
     "plantilla": "ST600NTW;{ID};02;0;internet.itelcel.com;webgprs;webgprs2002;mobile.zeekgps.com;2404;;;;\nST600ADP;{ID};02;T;T;0;2404;0;0;0;0;0;0",
-    "preguntas": ""
+    "preguntas": "",
+    "instrucciones_ia": "REGLA ESTRICTA: Usa este comando ÚNICAMENTE si el modelo exacto en pantalla es ST600."
   },
   {
     "marca": "SUNTECH",
     "modelo": "ST600",
     "tipo": "simple",
-    "titulo": "Preparar Red ZEEK PRIVADO R2 (UDP)",
+    "titulo": "Preparar Red PRIVADO R2 - Solo ST600",
     "claves": "red, r2, argus, privado, zeek, st600",
     "plantilla": "ST600NTW;{ID};02;0;argus.itelcel.com;;;192.168.9.100;2406;;;;\nST600ADP;{ID};02;U;U;1;2406;0;0;0;0;0;0",
-    "preguntas": ""
+    "preguntas": "",
+    "instrucciones_ia": "REGLA ESTRICTA: Usa este comando ÚNICAMENTE si el modelo exacto en pantalla es ST600."
   },
   {
     "marca": "SUNTECH",
     "modelo": "ST300, ST340",
     "tipo": "simple",
-    "titulo": "Preparar Red ZEEK JASPER (TCP)",
+    "titulo": "Preparar Red JASPER - Familia ST300",
     "claves": "red, jasper, zeek, telcel, corporativo, st300, st340",
     "plantilla": "ST300NTW;{ID};02;0;wwwcorps.itelcel.com;;;mobile.zeekgps.com;2404;;;;\nST300ADP;{ID};02;T;T;0;2404;0;0;0;0;0;0;0;0;0;0;0;0",
-    "preguntas": ""
+    "preguntas": "",
+    "instrucciones_ia": "REGLA ESTRICTA: Usa este comando ÚNICAMENTE para la familia ST300 y ST340."
   },
   {
     "marca": "SUNTECH",
     "modelo": "ST300, ST340",
     "tipo": "simple",
-    "titulo": "Preparar Red ZEEK TELCEL PÚBLICO (TCP)",
+    "titulo": "Preparar Red TELCEL PÚBLICO - Familia ST300",
     "claves": "red, telcel publico, internet, zeek, st300, st340",
     "plantilla": "ST300NTW;{ID};02;0;internet.itelcel.com;webgprs;webgprs2002;mobile.zeekgps.com;2404;;;;\nST300ADP;{ID};02;T;T;0;2404;0;0;0;0;0;0;0;0;0;0;0;0",
-    "preguntas": ""
+    "preguntas": "",
+    "instrucciones_ia": "REGLA ESTRICTA: Usa este comando ÚNICAMENTE para la familia ST300 y ST340."
   },
   {
     "marca": "SUNTECH",
     "modelo": "ST2, SA200",
     "tipo": "simple",
-    "titulo": "Preparar Red ZEEK JASPER (TCP)",
+    "titulo": "Preparar Red JASPER - Familia SA200",
     "claves": "red, jasper, zeek, telcel, corporativo, st2, sa200",
     "plantilla": "SA200NTW;{ID};02;0;wwwcorps.itelcel.com;;;mobile.zeekgps.com;2404;;;;\nSA200ADP;{ID};02;T;T;0;2404;0;0;0;0;0;0;0;0;0;0;0;0",
-    "preguntas": ""
+    "preguntas": "",
+    "instrucciones_ia": "REGLA ESTRICTA: Usa este comando ÚNICAMENTE para el modelo SA200."
   },
   {
     "marca": "SUNTECH",
     "modelo": "ST4315, ST4315b, ST4310, ST330, ST334, ST43, ST8230",
     "tipo": "simple",
-    "titulo": "Preparar Red ZEEK JASPER",
+    "titulo": "Preparar Red JASPER - ST8230 y ST4315",
     "claves": "red, jasper, zeek, telcel, corporativo, st4315, st4315b, st4310, st330, st334, st43, st8230",
     "plantilla": "PRG;{ID};10;00#00;01#wwwcorps.itelcel.com;02#;03#;04#;05#mobile.zeekgps.com;06#2404;07#00",
-    "preguntas": ""
+    "preguntas": "",
+    "instrucciones_ia": "REGLA ESTRICTA: Este es el comando correcto para el modelo ST8230 y la familia ST4315."
   },
   {
     "marca": "SUNTECH",
     "modelo": "ST4315, ST4315b, ST4310, ST330, ST334, ST43, ST8230",
     "tipo": "simple",
-    "titulo": "Preparar Red ZEEK TELCEL PÚBLICO TCP",
+    "titulo": "Preparar Red TELCEL PÚBLICO - ST8230 y ST4315",
     "claves": "red, telcel publico, internet, zeek, st4315, st4315b, st4310, st330, st334, st43, st8230",
     "plantilla": "PRG;{ID};10;00#00;01#internet.itelcel.com;02#webgprs;03#webgprs2002;04#;05#mobile.zeekgps.com;06#2404;07#00",
-    "preguntas": ""
+    "preguntas": "",
+    "instrucciones_ia": "REGLA ESTRICTA: Este es el comando correcto para el modelo ST8230 y la familia ST4315."
   },
   {
     "marca": "SUNTECH",
     "modelo": "ST4315, ST4315b, ST4310, ST330, ST334, ST43, ST8230",
     "tipo": "simple",
-    "titulo": "Preparar Red PRIVADO R2",
+    "titulo": "Preparar Red PRIVADO R2 - ST8230 y ST4315",
     "claves": "red, r2, argus, privado, st4315, st4315b, st4310, st330, st334, st43, st8230",
     "plantilla": "PRG;{ID};10;00#00;01#argus.itelcel.com;02#;03#;04#;05#192.168.9.100;06#2405;07#01",
-    "preguntas": ""
+    "preguntas": "",
+    "instrucciones_ia": "REGLA ESTRICTA: Este es el comando correcto para el modelo ST8230 y la familia ST4315."
   },
   {
     "marca": "TELTONIKA",
     "modelo": "FM, FMC",
     "tipo": "simple",
-    "titulo": "Preparar Red ZEEK JASPER",
-    "claves": "red, jasper, zeek, telcel, corporativo, fm, fmc",
+    "titulo": "Preparar Red JASPER - Teltonika",
+    "claves": "red, jasper, zeek, telcel, corporativo, fm, fmc, teltonika",
     "plantilla": "  setparam 2001:wwwcorps.itelcel.com;2002:;2003:;2004:apps.zeekgps.com;2005:20513;2006:1;1004:1;",
     "preguntas": ""
   },
@@ -93,8 +102,8 @@
     "marca": "TELTONIKA",
     "modelo": "FM, FMC",
     "tipo": "simple",
-    "titulo": "Preparar Red ZEEK TELCEL PÚBLICO",
-    "claves": "red, telcel publico, internet, zeek, fm, fmc",
+    "titulo": "Preparar Red TELCEL PÚBLICO - Teltonika",
+    "claves": "red, telcel publico, internet, zeek, fm, fmc, teltonika",
     "plantilla": "  setparam 2001:internet.itelcel.com;2002:webgprs;2003:webgprs2002;2004:apps.zeekgps.com;2005:20513;2006:1;1004:1;",
     "preguntas": ""
   },
@@ -102,8 +111,8 @@
     "marca": "TELTONIKA",
     "modelo": "FM, FMC",
     "tipo": "simple",
-    "titulo": "Preparar Red PRIVADO R2",
-    "claves": "red, r2, argus, privado, fm, fmc",
+    "titulo": "Preparar Red PRIVADO R2 - Teltonika",
+    "claves": "red, r2, argus, privado, fm, fmc, teltonika",
     "plantilla": "  setparam 2001:argus.itelcel.com;2002:;2003:;2004:192.168.9.100;2005:20512;2006:1;1004:1;",
     "preguntas": ""
   },
@@ -111,8 +120,8 @@
     "marca": "RUPTELA",
     "modelo": "ECO, TCO",
     "tipo": "simple",
-    "titulo": "Preparar Red ZEEK JASPER",
-    "claves": "red, jasper, zeek, telcel, corporativo, eco, tco",
+    "titulo": "Preparar Red JASPER - Ruptela",
+    "claves": "red, jasper, zeek, telcel, corporativo, eco, tco, ruptela",
     "plantilla": " setcfg 100 0, 101 wwwcorps.itelcel.com, 102 0, 103 0, 110 apps.zeekgps.com, 120 2402",
     "preguntas": ""
   },
@@ -120,8 +129,8 @@
     "marca": "RUPTELA",
     "modelo": "ECO, TCO",
     "tipo": "simple",
-    "titulo": "Preparar Red ZEEK TELCEL PÚBLICO",
-    "claves": "red, telcel publico, internet, zeek, eco, tco",
+    "titulo": "Preparar Red TELCEL PÚBLICO - Ruptela",
+    "claves": "red, telcel publico, internet, zeek, eco, tco, ruptela",
     "plantilla": " setcfg 100 0, 101 internet.itelcel.com, 102 webgprs, 103 webgprs2002, 110 apps.zeekgps.com, 120 2402",
     "preguntas": ""
   },
@@ -129,7 +138,7 @@
     "marca": "CONCOX",
     "modelo": "UNIVERSAL",
     "tipo": "simple",
-    "titulo": "Configurar APN JASPER y Servidor ZEEK",
+    "titulo": "Configurar Red JASPER - Concox",
     "claves": "red, jasper, zeek, telcel, corporativo, concox",
     "plantilla": "APN,wwwcorps.itelcel.com#\nSERVER,1,apps.zeekgps.com,2401,0#",
     "preguntas": ""
@@ -138,7 +147,7 @@
     "marca": "CONCOX",
     "modelo": "UNIVERSAL",
     "tipo": "simple",
-    "titulo": "Configurar APN TELCEL PÚBLICO y Servidor ZEEK",
+    "titulo": "Configurar Red TELCEL PÚBLICO - Concox",
     "claves": "red, telcel publico, internet, zeek, concox",
     "plantilla": "APN,internet.itelcel.com,webgprs,webgprs2002#\nSERVER,1,apps.zeekgps.com,2401,0#",
     "preguntas": ""
@@ -147,7 +156,7 @@
     "marca": "TELTONIKA",
     "modelo": "UNIVERSAL",
     "tipo": "simple",
-    "titulo": "Configurar Segundo Servidor (in.fleetapi.com)",
+    "titulo": "Configurar Segundo Servidor - Teltonika",
     "claves": "segundo servidor, dual, fleetapi, teltonika",
     "plantilla": "  setparam 2010:2;2007:in.fleetapi.com;2008:5688;2009:0;",
     "preguntas": ""
@@ -156,8 +165,8 @@
     "marca": "SUNTECH",
     "modelo": "ST4315",
     "tipo": "macro",
-    "titulo": "Programación Desde 0 (ST4315)",
-    "claves": "programacion desde 0, st4315, inicializar, completo",
+    "titulo": "Programación Desde 0 - ST8230 y ST4315",
+    "claves": "programacion desde 0, st4315, st8230, inicializar, completo",
     "plantilla": [
       "NTW,PRG;{ID};10;00#00;01#wwwcorps.itelcel.com;02#;03#;04#;05#mobile.zeekgps.com;06#2404;07#00",
       "NTW,PRG;{ID};10;65#60;66#60;67#60;68#60;16#00;52#00;53#20;54#01",
@@ -183,14 +192,14 @@
       "FTR,PRG;{ID};30;10#00;11#1;12#5",
       "GEOCONF,PRG;{ID};90;00#01;01#01"
     ],
-    "instrucciones_ia": "Informa al usuario que esta es una programación de 23 pasos. Debes entregarle los comandos de uno por uno conforme te avise que el GPS los recibe."
+    "instrucciones_ia": "Informa al usuario que esta es una programación de 23 pasos. Debes entregarle los comandos de uno por uno conforme te avise que el GPS los recibe. ESTO APLICA PARA ST8230 Y ST4315."
   },
   {
     "marca": "SUNTECH",
     "modelo": "ST4315",
     "tipo": "macro",
-    "titulo": "Programación Driving (ST4315, ST4310)",
-    "claves": "programacion driving, driving, st4315, st4310",
+    "titulo": "Programación Driving - ST8230 y ST4315",
+    "claves": "programacion driving, driving, st4315, st4310, st8230",
     "plantilla": [
       "DPA,PRG;{ID};19;00#07;01#0.06;02#600;03#0.80;04#3.00;10#01;12#10.0;13#20.0;14#40.0;21#10.0;22#10.0;23#10.0;24#00;25#0",
       "RPT,PRG;{ID};16;70#60;71#0;72#35;73#600;74#0;75#0;76#180;77#0;78#0;79#60;80#0;81#35;82#60;83#0;84#35;85#3600;86#1000;87#30",
@@ -205,7 +214,7 @@
     "marca": "TELTONIKA",
     "modelo": "FM, FMC",
     "tipo": "macro",
-    "titulo": "Programación Desde 0 (Teltonika)",
+    "titulo": "Programación Desde 0 - Teltonika",
     "claves": "programacion desde 0, teltonika, inicializar, fm, fmc",
     "plantilla": [
       "  setparam 2001:wwwcorps.itelcel.com;2002:;2003:;2004:apps.zeekgps.com;2005:20513;2006:1;1004:1;2;",
@@ -226,7 +235,7 @@
     "marca": "RUPTELA",
     "modelo": "ECO, TCO",
     "tipo": "macro",
-    "titulo": "Programación Desde 0 (Ruptela)",
+    "titulo": "Programación Desde 0 - Ruptela",
     "claves": "programacion desde 0, ruptela, inicializar, eco, tco",
     "plantilla": [
       " setcfg 100 0, 101 wwwcorps.itelcel.com, 110 apps.zeekgps.com, 120 2402, 152 6, 307 1, 406 180, 698 0, 1105 1032, 1106 500, 1108 1280, 1122 600, 1123 4",
