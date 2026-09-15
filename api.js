@@ -1,6 +1,6 @@
 // js/api.js
 
-const URL_APPS_SCRIPT = "AQUI_PEGA_TU_URL_DE_APPS_SCRIPT";
+const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbyzSFuh0aTXopHeBTSPOcjdUnGKmNNQGoxNRcg8tsfSgSAouDk3RPzsokj2fXjv--N6/exec";
 
 // Instancias globales de nuestros monitores
 let monitorMapon;
