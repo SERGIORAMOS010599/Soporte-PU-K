@@ -333,7 +333,8 @@ class SoporteTecnico {
             else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Enable1`;
             else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;01`;
             else if (marca === "TELTONIKA") comando = "  setdigout 1 0";
-        } else if (accion === 'encender') {
+        }
+        else if (accion === 'encender') {
             if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Disable1`;
             else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Disable1`;
             else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Disable1`;
@@ -343,6 +344,18 @@ class SoporteTecnico {
         else if (accion === 'reiniciar') {
             if (marca === "SUNTECH") comando = `CMD;${id};03;03`;
             else if (marca === "TELTONIKA") comando = "  cpureset";
+            else if (marca === "RUPTELA") comando = " reset";
+            else if (marca === "CONCOX") comando = "REBOOT#";
+            else if (marca === "JIMIIOT") comando = "REBOOT#";
+        }
+        else if (accion === 'configuracion') {
+            if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;PresetA`;
+            else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;PresetA`;
+            else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;PresetA`;
+            else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};03;05`;
+            else if (marca.startsWith("TELTONIKA")) comando = "  getparam 2001:;2002:;2003:;2004:;2005:;2006:;1004:";
+            else if (marca.startsWith("RUPTELA")  comando = " getapn";
+            else if (marca.startsWith("CONCOX") || marca.startsWith("JIMIIOT")) comando = "GPRSSET#";
         }
 
         if (comando) {
