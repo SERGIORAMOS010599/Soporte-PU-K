@@ -4,9 +4,7 @@ class SoporteTecnico {
         this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM'; 
         
         this.equipos = [];
-        this.diccionarioComandos = []; // Se cargará dinámicamente desde el JSON
         this.equipoSeleccionado = null; 
-        this.comandoSeleccionado = null; 
         
         this.busquedaActual = localStorage.getItem('busquedaGlobal') || ''; 
         this.iniciar();
@@ -14,25 +12,15 @@ class SoporteTecnico {
 
     async iniciar() {
         if (!this.container) return;
-        this.container.innerHTML = '<p style="text-align:center; color: #ffb74d; padding: 20px;">Conectando con Google Sheets y GitHub...</p>';
+        this.container.innerHTML = '<p style="text-align:center; color: #ffb74d; padding: 20px;">Conectando con el Inventario en la nube...</p>';
         
         const urlInventario = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Salidas')}`;
         
-        // AQUÍ VA TU ENLACE RAW DE GITHUB (El de comandos.json)
-        const urlComandos = 'https://raw.githubusercontent.com/SERGIORAMOS010599/Soporte-PU-K/refs/heads/main/comandos.json';
-        
         try {
-            // Hacemos ambas peticiones al mismo tiempo para mayor velocidad
-            const [respuestaInv, respuestaCmd] = await Promise.all([
-                fetch(urlInventario),
-                fetch(urlComandos)
-            ]);
-
+            // Ya no consultamos a GitHub, solo cargamos Sheets directo
+            const respuestaInv = await fetch(urlInventario);
             const textInv = await respuestaInv.text();
             const jsonInv = JSON.parse(textInv.substring(47).slice(0, -2));
-            
-            // Cargamos tu Biblia Técnica desde el JSON
-            this.diccionarioComandos = await respuestaCmd.json();
             
             this.equipos = [];
             jsonInv.table.rows.forEach((row, index) => {
@@ -55,7 +43,6 @@ class SoporteTecnico {
                         numSerie: val(14) || 'pendiente de asignar',
                         tipoServicio: val(15) || 'PENDIENTE DE ASIGNAR'
                     };
-                    // Protección con String()
                     if (equipo.id !== 'N/A' && String(equipo.id).trim() !== '') this.equipos.push(equipo);
                 }
             });
@@ -67,8 +54,8 @@ class SoporteTecnico {
             }
             this.renderizar();
         } catch (error) {
-            console.error("Error al conectar con las bases de datos:", error);
-            this.container.innerHTML = '<p style="text-align:center; color:#ff4c4c;">Error al cargar inventario o comandos.</p>';
+            console.error("Error al conectar con Google Sheets:", error);
+            this.container.innerHTML = '<p style="text-align:center; color:#ff4c4c;">Error al cargar inventario.</p>';
         }
     } 
 
@@ -90,7 +77,6 @@ class SoporteTecnico {
         this.container.innerHTML = '';
         const query = this.busquedaActual.toLowerCase().trim();
         
-        // --- BUSCADOR UNIVERSAL MEJORADO ---
         const equiposFiltrados = this.equipos.filter(eq => {
             if (query === '') return true;
             return Object.values(eq).some(valor => 
@@ -144,46 +130,45 @@ class SoporteTecnico {
         this.iniciarAsistente();
     }
 
-    // --- LAS FUNCIONES QUE SE HABÍAN BORRADO ---
+    // --- ASISTENTE IA DIRECTO ---
     iniciarAsistente() {
         const eq = this.equipoSeleccionado;
         const badgeMarca = document.getElementById('asistente-badge-marca');
         if (badgeMarca) badgeMarca.innerText = eq.marca;
         
-        const inputBuscador = document.getElementById('buscador-asistente');
+        // Limpiamos rastros del JSON viejo visualmente
         const contenedorInteractivo = document.getElementById('asistente-interactivo');
         if (contenedorInteractivo) contenedorInteractivo.style.display = 'none';
+        const contenedorSugerencias = document.getElementById('asistente-sugerencias');
+        if (contenedorSugerencias) contenedorSugerencias.innerHTML = '';
+        
+        const inputBuscador = document.getElementById('buscador-asistente');
         
         if (inputBuscador) {
             inputBuscador.value = '';
-            
-            inputBuscador.placeholder = "🐶 Ej. preparar mapon, o haz una pregunta...";
+            inputBuscador.placeholder = "🐶 Pídele un comando a PU-K y presiona Enter...";
             inputBuscador.style.cssText = "width: 100%; padding: 12px 15px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff; font-size: 0.95rem; margin-bottom: 15px; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); transition: all 0.3s ease; box-sizing: border-box;";
             inputBuscador.onfocus = () => inputBuscador.style.border = "1px solid #ffb74d";
             inputBuscador.onblur = () => inputBuscador.style.border = "1px solid #444";
 
-            inputBuscador.oninput = () => {
-                clearTimeout(this.debounceTimer);
-                this.debounceTimer = setTimeout(() => {
-                    this.filtrarAsistente(false);
-                }, 250); 
-            };
+            // Se elimina el debounce timer viejo, ahora solo escuchamos el ENTER
+            inputBuscador.oninput = null; 
 
             inputBuscador.onkeypress = (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    clearTimeout(this.debounceTimer); 
-                    this.filtrarAsistente(true);
+                    const pregunta = inputBuscador.value.trim();
+                    if (pregunta !== '') {
+                        // Inyectamos el contexto de forma transparente a la IA
+                        const promptOculto = `El técnico solicita: "${pregunta}". NOTA INTERNA: El equipo en pantalla es Marca: ${eq.marca}, Modelo: ${eq.modelo}, ID: ${eq.id}. Usa esta información para armar el comando correcto en base a tus manuales y reemplaza el {ID}.`;
+                        this.consultarCerebroPUK(promptOculto);
+                        inputBuscador.value = '';
+                    }
                 }
             };
         }
         
-        this.filtrarAsistente(false);
-    }
-
-    esComandoValido(cmd) {
-        const marcaActual = this.equipoSeleccionado.marca.toUpperCase().trim();
-        return cmd.marca === marcaActual || cmd.marca === 'UNIVERSAL';
+        this.hablarPUK(`¡Hola! Soy PU-K. Dime qué necesitas hacer con este <b>${eq.marca} ${eq.modelo}</b> y te armaré el comando.`, "normal");
     }
 
     // --- MOTOR DE PERSONALIDAD PU-K 🐶 ---
@@ -204,11 +189,11 @@ class SoporteTecnico {
         let colorBorde = '#ffb74d'; 
 
         if (estado === 'error') {
-            icono = '🐕‍🦺'; colorBorde = '#ff4c4c'; // Rojo
+            icono = '🐕‍🦺'; colorBorde = '#ff4c4c';
         } else if (estado === 'exito') {
-            icono = '🐾'; colorBorde = '#4caf50'; // Verde
+            icono = '🐾'; colorBorde = '#4caf50';
         } else if (estado === 'pensando') {
-            icono = '🐕'; colorBorde = '#64b5f6'; // Azul
+            icono = '🐕'; colorBorde = '#64b5f6';
         }
 
         cajaPUK.style.borderLeft = `4px solid ${colorBorde}`;
@@ -223,7 +208,7 @@ class SoporteTecnico {
 
     // --- CONEXIÓN CON GEMINI (EL CEREBRO EN LA NUBE) ---
     async consultarCerebroPUK(pregunta) {
-        this.hablarPUK("Olfateando en mis manuales técnicos... Dame unos segundos 🐕", "pensando");
+        this.hablarPUK("Revisando mis manuales técnicos... Dame unos segundos 🐕", "pensando");
         
         const urlAppsScript = 'https://script.google.com/macros/s/AKfycbxechSb9x2TtDrI_E8egBEkGjZOOFGMXNl5UiBjB9s8n_hJwH6qGHe5aEMMENaEO39H/exec';
 
@@ -247,151 +232,6 @@ class SoporteTecnico {
             console.error(error);
             this.hablarPUK("¡Grrr! No pude conectarme con mi cerebro en la nube. Revisa tu conexión a internet.", "error");
         }
-    }
-
-    // --- TRADUCTOR DE INTENCIONES ACTUALIZADO ---
-    filtrarAsistente(ejecutarPeticion = false) {
-        if (!this.equipoSeleccionado) return;
-        const inputBuscador = document.getElementById('buscador-asistente');
-        const textoOriginal = inputBuscador ? inputBuscador.value.toLowerCase().trim() : '';
-        
-        const comandosValidos = this.diccionarioComandos.filter(cmd => this.esComandoValido(cmd));
-        
-        if (textoOriginal === '') {
-            this.mostrarBotonesSugerencia(comandosValidos);
-            this.hablarPUK("¡Hola! Soy PU-K. Escribe un comando (ej. 'apn corporativo') o <b>hazme una pregunta técnica y presiona Enter</b>. ¡Guau!", "normal");
-            return;
-        }
-
-        const palabrasBuscadas = textoOriginal.split(' ').filter(p => p.trim().length > 0);
-
-        let comandosFiltrados = comandosValidos.filter(cmd => {
-            const clavesText = cmd.claves.toLowerCase();
-            const tituloText = cmd.titulo.toLowerCase();
-            return palabrasBuscadas.every(palabra => clavesText.includes(palabra) || tituloText.includes(palabra));
-        });
-
-        comandosFiltrados.sort((a, b) => {
-            if (a.claves.includes('default') && !b.claves.includes('default')) return -1;
-            if (!a.claves.includes('default') && b.claves.includes('default')) return 1;
-            return 0;
-        });
-
-        if (ejecutarPeticion) {
-            if (comandosFiltrados.length > 0) {
-                const mejorComando = comandosFiltrados[0];
-                this.seleccionarComandoAsistente(mejorComando);
-                if (mejorComando.preguntas === "") this.generarComandoFinal();
-                
-                this.hablarPUK(`¡Atrapé el comando para <b style="color:#fff;">${mejorComando.titulo}</b>! Generando la trama...`, "exito");
-            } else {
-                document.getElementById('asistente-sugerencias').innerHTML = '';
-                this.consultarCerebroPUK(textoOriginal);
-            }
-        } else {
-            if (comandosFiltrados.length > 0) {
-                this.mostrarBotonesSugerencia(comandosFiltrados);
-                this.hablarPUK("¡Olfateé estos comandos! Haz clic en el que necesites o presiona Enter.", "normal");
-            } else {
-                document.getElementById('asistente-sugerencias').innerHTML = '';
-                this.hablarPUK(`No encontré comandos directos para "<i>${textoOriginal}</i>". <br><b style="color:#64b5f6;">¡Presiona Enter y le preguntaré a mi cerebro de IA! 🐶</b>`, "pensando");
-            }
-        }
-    }
-
-    mostrarBotonesSugerencia(comandosFiltrados) {
-        const contenedorSugerencias = document.getElementById('asistente-sugerencias');
-        if (!contenedorSugerencias) return;
-        contenedorSugerencias.innerHTML = '';
-
-        comandosFiltrados.forEach((cmd) => {
-            const btn = document.createElement('button');
-            btn.innerText = cmd.titulo;
-            btn.style.cssText = 'background: #333; color: #ffb74d; border: 1px solid #555; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 0.85em; transition: 0.2s;';
-            btn.onmouseover = () => btn.style.background = '#444';
-            btn.onmouseout = () => btn.style.background = '#333';
-            btn.onclick = () => {
-                this.seleccionarComandoAsistente(cmd);
-                if (cmd.preguntas === "") this.generarComandoFinal();
-            };
-            contenedorSugerencias.appendChild(btn);
-        });
-    }
-
-    seleccionarComandoAsistente(cmd) {
-        this.comandoSeleccionado = cmd;
-        const contenedorSugerencias = document.getElementById('asistente-sugerencias');
-        const contenedor = document.getElementById('asistente-interactivo');
-        
-        if (contenedorSugerencias) contenedorSugerencias.innerHTML = ''; 
-        contenedor.style.display = 'block';
-        contenedor.innerHTML = '';
-
-        const titulo = document.createElement('h4');
-        titulo.innerText = `⚙️ Ejecutando: ${cmd.titulo}`;
-        titulo.style.cssText = 'margin: 0 0 10px 0; color: #fff; font-size: 1rem;';
-        contenedor.appendChild(titulo);
-
-        if (cmd.preguntas && cmd.preguntas.trim() !== '') {
-            const preguntasArray = cmd.preguntas.split(',');
-            preguntasArray.forEach((pregunta, index) => {
-                const div = document.createElement('div');
-                div.style.marginBottom = '10px';
-                div.innerHTML = `
-                    <label style="display:block; font-size:0.8em; color:#a0a0a0; margin-bottom:4px;">${pregunta.trim()}</label>
-                    <input type="text" id="asistente-input-${index}" class="input-edicion-general" onkeyup="appSoporte.generarComandoFinal()">
-                `;
-                contenedor.appendChild(div);
-            });
-            
-            const resultado = document.createElement('div');
-            resultado.id = 'asistente-resultado-final';
-            resultado.style.marginTop = '15px';
-            resultado.innerHTML = '<span style="color:#ffb74d; font-size:0.85em;">Por favor, llena los datos requeridos para generar la trama...</span>';
-            contenedor.appendChild(resultado);
-        } else {
-            const resultado = document.createElement('div');
-            resultado.id = 'asistente-resultado-final';
-            contenedor.appendChild(resultado);
-        }
-    }
-
-    generarComandoFinal() {
-        const cmd = this.comandoSeleccionado;
-        if (!cmd) return;
-
-        let tramaFinal = cmd.plantilla;
-        tramaFinal = tramaFinal.replace(/{ID}/g, this.equipoSeleccionado.id);
-        
-        if (cmd.preguntas && cmd.preguntas.trim() !== '') {
-            const preguntasArray = cmd.preguntas.split(',');
-            let faltanDatos = false;
-
-            preguntasArray.forEach((_, index) => {
-                const inputElem = document.getElementById(`asistente-input-${index}`);
-                const valorInput = inputElem ? inputElem.value.trim() : '';
-                if (valorInput === '') faltanDatos = true;
-                tramaFinal = tramaFinal.replace(new RegExp(`{VALOR${index + 1}}`, 'g'), valorInput);
-            });
-
-            if (faltanDatos) {
-                document.getElementById('asistente-resultado-final').innerHTML = '<span style="color:#ffb74d; font-size:0.85em;">Llena todos los datos para continuar.</span>';
-                return;
-            }
-        }
-
-        const numeroLinea = this.equipoSeleccionado.linea;
-        let enlaceSMS = '#';
-        if (numeroLinea && numeroLinea !== 'SIN NÚMERO') {
-            enlaceSMS = `sms:${numeroLinea}?body=${encodeURIComponent(tramaFinal)}`;
-        }
-
-        document.getElementById('asistente-resultado-final').innerHTML = `
-            <div class="comando-resultado">
-                <a href="${enlaceSMS}" style="color: #6db6ff; text-decoration: none; word-break: break-all; width: 85%;" title="Haz clic para enviar SMS">${tramaFinal}</a> 
-                <span class="icono-copiar" style="cursor:pointer; font-size: 1.2rem;" onclick="navigator.clipboard.writeText('${tramaFinal}'); alert('¡Comando Copiado!');">📋</span>
-            </div>
-        `;
     }
 
     // ==========================================
@@ -487,7 +327,6 @@ class SoporteTecnico {
         const id = eq.id;
         let comando = "";
 
-        // --- ACCIONES DIRECTAS DE LOS BOTONES ---
         if (accion === 'apagar') {
             if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Enable1`;
             else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Enable1`;
@@ -506,19 +345,12 @@ class SoporteTecnico {
             else if (marca === "TELTONIKA") comando = "  cpureset";
         }
 
-        // --- EJECUCIÓN O DERIVACIÓN A LA IA ---
         if (comando) {
             window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
-        } else {
-            const inputBuscador = document.getElementById('buscador-asistente');
-            if (inputBuscador) {
-                inputBuscador.value = accion;
-                this.filtrarAsistente(true); 
-            }
         }
     }
-    // --- NUEVAS FUNCIONES PARA EL CHAT FLOTANTE PU-K ---
     
+    // --- CHAT FLOTANTE PU-K ---
     toggleChatPUK() {
         const panel = document.getElementById('puk-panel-chat');
         panel.classList.toggle('puk-oculto');
@@ -535,14 +367,11 @@ class SoporteTecnico {
         const mensaje = input.value.trim();
         if (!mensaje) return;
 
-        // 1. Mostrar la burbuja con lo que escribió el usuario
         this.agregarBurbujaChat(mensaje, 'puk-usuario');
         input.value = '';
 
-        // 2. Mostrar la burbuja de PU-K "pensando"
         const idPensando = this.agregarBurbujaChat('Olfateando el manual de soporte... 🐕', 'puk-ia');
 
-        // 3. Consultar a tu puente de Apps Script (Asegúrate de pegar aquí tu URL actual que termina en /exec)
         const urlAppsScript = 'https://script.google.com/macros/s/AKfycbxechSb9x2TtDrI_E8egBEkGjZOOFGMXNl5UiBjB9s8n_hJwH6qGHe5aEMMENaEO39H/exec'; 
         
         try {
@@ -552,7 +381,6 @@ class SoporteTecnico {
             });
             const respuesta = await peticion.json();
 
-            // Borrar el mensaje de "pensando"
             document.getElementById(idPensando).remove();
 
             if (respuesta.success) {
@@ -577,12 +405,11 @@ class SoporteTecnico {
         div.className = `puk-mensaje ${clase}`;
         div.innerHTML = texto;
         
-        // Creamos un ID único temporal por si necesitamos borrarlo (como el de 'pensando')
         const idUnico = 'msg-' + Date.now();
         div.id = idUnico;
         
         contenedor.appendChild(div);
-        contenedor.scrollTop = contenedor.scrollHeight; // Hace que el chat baje automáticamente
+        contenedor.scrollTop = contenedor.scrollHeight; 
         
         return idUnico;
     }
