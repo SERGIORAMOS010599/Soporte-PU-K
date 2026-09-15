@@ -1,0 +1,42 @@
+/* css/monitormapon.css */
+.monitor-container {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    height: 400px;
+}
+
+.mapon-table-wrapper {
+    flex: 2;
+    overflow-y: auto;
+}
+
+.mapon-chart-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mapon-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mapon-table th, .mapon-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #444;
+}
+
+.mapon-table th {
+    color: #ffb74d; /* Naranja Mapon */
+    position: sticky;
+    top: 0;
+    background: #1e1e1e;
+}
