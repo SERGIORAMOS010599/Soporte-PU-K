@@ -87,7 +87,6 @@
                 <tr><td>Cliente</td><td id="det-cliente">---</td></tr>
                 <tr><td>Tipo de servicio</td><td id="det-tipo-servicio" style="text-transform: uppercase; font-weight: bold;">---</td></tr>
                 <tr><td>Estado del Servicio</td><td id="det-servicio">---</td></tr>
-                <!-- NUEVAS COLUMNAS -->
                 <tr><td>Marca/Mod. Unidad</td><td id="det-marcaModeloUnidad">---</td></tr>
                 <tr><td>Año Unidad</td><td id="det-anio">---</td></tr>
                 <tr><td>Nº Serie Unidad</td><td id="det-numSerie">---</td></tr>
@@ -115,52 +114,12 @@
                     </div>
                 </div>
             </div>
-    
-<!-- MODAL FORMULARIO DE COMANDOS -->
-            <div id="modal-comandos" class="modal-oscuro">
-                <div class="modal-comandos-content">
-                    <div class="modal-cmd-header">
-                        <h2>✕ Comandos Form</h2>
-                        <div>
-                            <button class="btn-cancelar" onclick="appSoporte.cerrarModalComandos()">Cancelar</button>
-                            <button class="btn-guardar">Guardar</button>
-                        </div>
-                    </div>
-                    <div class="modal-cmd-body">
-                        <div class="form-grupo"><label>MARCA</label><input type="text" id="cmd-marca" readonly></div>
-                        <div class="form-grupo"><label>MODELOS</label><input type="text" id="cmd-modelo" readonly></div>
-                        <div class="form-grupo"><label>ID</label><input type="text" id="cmd-id" readonly></div>
-                        <div class="form-grupo">
-                            <label>TIPO DE COMANDO</label>
-                            <select id="cmd-tipo" onchange="appSoporte.cambiarTipoComando()">
-                                <option value="">Buscar</option>
-                                <option value="puertos">PUERTOS, IP's y APN'S</option>
-                                <option value="fuel">PROGRAMACION FUEL</option>
-                                <option value="driving">PROGRAMACION DRIVING</option>
-                                <option value="cero">PROGRAMACION DESDE 0</option>
-                            </select>
-                        </div>
-                        <!-- SECCIÓN DINÁMICA (Se muestra al elegir un tipo) -->
-                        <div id="cmd-seccion-dinamica" style="display: none;">
-                            <div class="form-grupo">
-                                <label>LINEA DE TRAMA</label>
-                                <input type="text" id="cmd-trama" oninput="appSoporte.procesarComando()">
-                            </div>
-                            <div class="form-grupo">
-                                <label>COMANDOS</label>
-                                <div class="comando-resultado" id="cmd-resultado">NO HAY MAS CODIGOS!! 📋</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-        </div> <!-- ¡AQUÍ ESTÁ EL CIERRE DEL PANEL LATERAL QUE FALTABA! -->
-    </div> <!-- ¡AQUÍ ESTÁ EL CIERRE DEL CONTENEDOR PRINCIPAL QUE FALTABA! -->
+        </div> <!-- CIERRE DEL PANEL LATERAL -->
+    </div> <!-- CIERRE DEL CONTENEDOR PRINCIPAL -->
 
     <!-- ========================================== -->
     <!-- ASISTENTE GLOBAL PU-K (Botón y Panel)      -->
-    <!-- Ahora sí está libre en la pantalla general -->
     <!-- ========================================== -->
     <div id="puk-boton-flotante" onclick="appSoporte.toggleChatPUK()">
         🐶
@@ -183,7 +142,6 @@
     </div>
 
     <!-- Carga del Cerebro OOP y Scripts (Solo una vez) -->
-    <script src="comandos.js"></script>
     <script src="soporte.js?v=2"></script>
 </body>
 </html>
