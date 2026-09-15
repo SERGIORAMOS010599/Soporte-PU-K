@@ -357,6 +357,14 @@ class SoporteTecnico {
             else if (marca.startsWith("RUPTELA")  comando = " getapn";
             else if (marca.startsWith("CONCOX") || marca.startsWith("JIMIIOT")) comando = "GPRSSET#";
         }
+        else if (accion === 'borrar') {
+            if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;EraseAll`;
+            else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;EraseAll`;
+            else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;EraseAll`;
+            else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};05;02`;
+            else if (marca.startsWith("RUPTELA")) comando = " delrecords";
+            else if (marca.startsWith("TELTONIKA")) comando = "  deleterecords";
+        }
 
         if (comando) {
             window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
