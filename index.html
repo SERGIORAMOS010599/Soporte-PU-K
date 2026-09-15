@@ -8,6 +8,21 @@
     <title>Soporte PU-K</title>
     <link rel="stylesheet" href="soporte.css">
     
+    <!-- ESTILOS DE LOS NUEVOS MONITORES OOP -->
+    <link rel="stylesheet" href="css/monitormapon.css">
+    <link rel="stylesheet" href="css/monitorzeek.css">
+    
+    <style>
+        /* Estilo rápido para acomodar los dos monitores arriba de tu cuadrícula */
+        .dashboard-monitores {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+            /* Si en el futuro quieres que estén uno al lado del otro, cambia a flex-direction: row; */
+        }
+    </style>
+    
     <!-- DETECTOR DE ERRORES EN PANTALLA -->
     <script>
         window.onerror = function(msg, url, line) {
@@ -32,6 +47,17 @@
 
     <div class="contenedor-principal">
         
+        <!-- ========================================== -->
+        <!-- NUEVO DASHBOARD DE MONITORES EN VIVO       -->
+        <!-- ========================================== -->
+        <div class="dashboard-monitores">
+            <!-- Aquí se inyectará la clase MonitorMapon -->
+            <div id="contenedor-mapon"></div>
+            
+            <!-- Aquí se inyectará la clase MonitorZeek -->
+            <div id="contenedor-zeek"></div>
+        </div>
+
         <!-- CUADRÍCULA MAESTRA -->
         <div class="vista-cuadricula">
             <div id="grid-salidas" class="grid-tarjetas"></div>
@@ -143,8 +169,11 @@
         </div>
     </div>
 
-    <!-- Carga del Cerebro OOP y Scripts (Solo una vez) -->
+    <!-- Carga del Cerebro OOP y Scripts -->
     <script src="soporte.js?v=2"></script>
-    <div id="contenedor-mapon"></div>
+    
+    <!-- NUEVOS SCRIPTS PARA MONITORES -->
+    <script src="js/monitormapon.js"></script>
+    <script src="js/api.js"></script>
 </body>
 </html>
