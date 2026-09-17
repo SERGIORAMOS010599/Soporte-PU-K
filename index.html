@@ -170,11 +170,68 @@
         </div>
     </div>
 
-    <!-- Carga del Cerebro OOP y Scripts -->
+<!-- Carga del Cerebro OOP y Scripts -->
     <script src="soporte.js?v=2"></script>
     
     <!-- NUEVOS SCRIPTS PARA MONITORES -->
+    <!-- Asegúrate de que este archivo js/monitormapon.js existe y tiene código -->
     <script src="js/monitormapon.js"></script>
-    <script src="js/api.js"></script>
+    
+    <script>
+        // SCRIPT DIRECTO EN EL HTML PARA ASEGURAR QUE SE EJECUTE
+        console.log("Iniciando carga de monitores desde HTML...");
+
+        // ⚠️ PEGA AQUÍ TU URL DE APPS SCRIPT
+        const URL_APPS_SCRIPT = "AQUI_PEGA_TU_URL_DE_APPS_SCRIPT_LA_NUEVA"; 
+        
+        async function cargarDatosMaponDirecto() {
+            const divMapon = document.getElementById('contenedor-mapon');
+            if (!divMapon) {
+                console.error("¡No existe el div contenedor-mapon en el HTML!");
+                return;
+            }
+            
+            divMapon.innerHTML = '<h3 style="color: #ffb74d; text-align: center; padding: 50px;">⏳ Conectando con Google Sheets...</h3>';
+            
+            try {
+                const respuesta = await fetch(URL_APPS_SCRIPT);
+                const json = await respuesta.json();
+                
+                if (json.success) {
+                    divMapon.innerHTML = ''; 
+                    console.log("Datos de Mapon cargados, instanciando clase...");
+                    // Si la clase MonitorMapon no existe, aquí lanzará un error en la consola
+                    new MonitorMapon('contenedor-mapon', json.mapon);
+                } else {
+                    divMapon.innerHTML = `<h3 style="color: #f44336; text-align: center; padding: 50px;">❌ Error: ${json.error}</h3>`;
+                }
+            } catch (error) {
+                divMapon.innerHTML = `<h3 style="color: #f44336; text-align: center; padding: 50px;">❌ Error de red: ${error.message}</h3>`;
+                console.error(error);
+            }
+        }
+
+        // Ejecutar cuando se le dé clic a la pestaña de Monitores Globales
+        function verificarPestanaMonitores() {
+            const vistaMonitores = document.getElementById('vista-monitores');
+            // Si la vista está visible y el contenedor está vacío
+            if (vistaMonitores.classList.contains('vista-activa') && document.getElementById('contenedor-mapon').innerHTML.trim() === '') {
+                cargarDatosMaponDirecto();
+            }
+        }
+
+        // Sobrescribir ligeramente tu cambiarVista para que cargue los datos al dar clic
+        const cambiarVistaOriginal = appSoporte.cambiarVista.bind(appSoporte);
+        appSoporte.cambiarVista = function(vista) {
+            cambiarVistaOriginal(vista);
+            if(vista === 'monitores') {
+                setTimeout(verificarPestanaMonitores, 100);
+            }
+        }
+        
+        // También intentar cargar al inicio por si acaso
+        document.addEventListener('DOMContentLoaded', cargarDatosMaponDirecto);
+
+    </script>
 </body>
 </html>
