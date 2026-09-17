@@ -1,4 +1,32 @@
 class SoporteTecnico {
+    // Agrega esto a tu objeto appSoporte o como función global en soporte.js
+appSoporte.cambiarVista = function(vistaDestino) {
+    // 1. Ocultar todas las vistas
+    document.getElementById('vista-soporte').classList.add('vista-oculta');
+    document.getElementById('vista-soporte').classList.remove('vista-activa');
+    
+    document.getElementById('vista-monitores').classList.add('vista-oculta');
+    document.getElementById('vista-monitores').classList.remove('vista-activa');
+
+    // 2. Quitar la clase 'activo' de todos los botones
+    const botones = document.querySelectorAll('.tab-btn');
+    botones.forEach(btn => btn.classList.remove('activo'));
+
+    // 3. Mostrar la vista seleccionada y marcar el botón
+    if (vistaDestino === 'soporte') {
+        document.getElementById('vista-soporte').classList.remove('vista-oculta');
+        document.getElementById('vista-soporte').classList.add('vista-activa');
+        botones[0].classList.add('activo');
+    } 
+    else if (vistaDestino === 'monitores') {
+        document.getElementById('vista-monitores').classList.remove('vista-oculta');
+        document.getElementById('vista-monitores').classList.add('vista-activa');
+        botones[1].classList.add('activo');
+        
+        // OPCIONAL: Si quieres que los datos se recarguen de Sheets cada vez que entras a los monitores
+        // cargarDatosGlobales(); 
+    }
+};
     constructor() {
         this.container = document.getElementById('grid-salidas');
         this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM'; 
@@ -96,8 +124,8 @@ class SoporteTecnico {
                 <div class="tarjeta-modelo">${eq.modelo}</div>
                 <div class="tarjeta-servicio">${eq.estadoServicio}</div>
                 <div class="tarjeta-acciones">
-                    <div class="accion-btn rojo" onclick="event.stopPropagation(); appSoporte.enviarSMS('apagar', '${eq.id}')">APAGAR <span class="circulo"></span></div>
-                    <div class="accion-btn verde" onclick="event.stopPropagation(); appSoporte.enviarSMS('encender', '${eq.id}')">ENCENDER <span class="circulo"></span></div>
+                    <div class="accion-btn rojo" onclick="event.stopPropagation(); .enviarSMS('apagar', '${eq.id}')">APAGAR <span class="circulo"></span></div>
+                    <div class="accion-btn verde" onclick="event.stopPropagation(); .enviarSMS('encender', '${eq.id}')">ENCENDER <span class="circulo"></span></div>
                 </div>
             `;
             tarjeta.onclick = () => this.abrirDetalles(eq);
@@ -112,7 +140,7 @@ class SoporteTecnico {
 
         document.getElementById('det-titulo-contenedor').innerHTML = `
             <h1 class="titulo-detalles" id="det-titulo">${eq.unidad}</h1>
-            <span class="icono-editar" onclick="appSoporte.activarEdicionGeneral()">✏️</span>
+            <span class="icono-editar" onclick=".activarEdicionGeneral()">✏️</span>
         `;
         document.getElementById('det-id').innerText = eq.id;
         document.getElementById('det-linea').innerText = eq.linea;
@@ -246,8 +274,8 @@ class SoporteTecnico {
         const eq = this.equipoSeleccionado;
         document.getElementById('det-titulo-contenedor').innerHTML = `
             <input type="text" id="input-edit-unidad" value="${eq.unidad}" class="input-edicion-general" style="font-size: 1.5rem; width: 50%;">
-            <button class="btn-guardar-edicion" onclick="appSoporte.guardarEdicionGeneral()">Guardar</button>
-            <button class="btn-cancelar" onclick="appSoporte.abrirDetalles(appSoporte.equipoSeleccionado)" style="padding: 5px;">✖</button>
+            <button class="btn-guardar-edicion" onclick=".guardarEdicionGeneral()">Guardar</button>
+            <button class="btn-cancelar" onclick=".abrirDetalles(.equipoSeleccionado)" style="padding: 5px;">✖</button>
         `;
         const crearInput = (idHTML, idInput, valor) => {
             document.getElementById(idHTML).innerHTML = `<input type="text" id="${idInput}" value="${valor}" class="input-edicion-general">`;
@@ -435,4 +463,4 @@ class SoporteTecnico {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => { window.appSoporte = new SoporteTecnico(); });
+document.addEventListener('DOMContentLoaded', () => { window. = new SoporteTecnico(); });
