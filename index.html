@@ -5,7 +5,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soporte PU-K</title>
+    <title>Soporte PU-K - IDT Tecnologías</title>
     <link rel="stylesheet" href="soporte.css">
     
     <!-- ESTILOS DE LOS NUEVOS MONITORES OOP -->
@@ -13,13 +13,11 @@
     <link rel="stylesheet" href="css/monitorzeek.css">
     
     <style>
-        /* Estilo rápido para acomodar los dos monitores arriba de tu cuadrícula */
         .dashboard-monitores {
             display: flex;
             flex-direction: column;
             gap: 20px;
             margin-bottom: 30px;
-            /* Si en el futuro quieres que estén uno al lado del otro, cambia a flex-direction: row; */
         }
     </style>
     
@@ -35,133 +33,136 @@
 </head>
 <body>
     
-    <!-- BARRA DE BÚSQUEDA UNIVERSAL -->
-    <div class="buscador-container" style="position: relative; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <input type="text" id="buscador-global" placeholder="Buscar por IMEI, ID, Cliente o Unidad..." oninput="appSoporte.buscarGlobal(this.value)">
-        <span id="btn-limpiar-busqueda" onclick="appSoporte.limpiarBusqueda()" style="display: none; position: absolute; right: 30px; top: 35px; cursor: pointer; color: #a0a0a0;">✖</span>
+    <!-- NUEVA BARRA DE NAVEGACIÓN (Pestañas) -->
+    <div class="navbar-principal">
+        <div class="logo-app">IDT TECNOLOGÍAS - PU-K</div>
+        <div class="menu-tabs">
+            <button class="tab-btn activo" onclick="appSoporte.cambiarVista('soporte')">Soporte Técnico</button>
+            <button class="tab-btn" onclick="appSoporte.cambiarVista('monitores')">Monitores Globales</button>
+            <button class="tab-btn" onclick="appSoporte.cambiarVista('diagnostico')">Diagnóstico en Vivo</button>
+        </div>
     </div>
 
-    <div class="barra-superior">
-        SOPORTE TÉCNICO
-    </div>
-
-    <div class="contenedor-principal">
+    <!-- CONTENEDOR DE VISTAS (Alterna entre Soporte y Monitores) -->
+    <div class="vistas-container">
         
         <!-- ========================================== -->
-        <!-- NUEVO DASHBOARD DE MONITORES EN VIVO       -->
+        <!-- VISTA 1: SOPORTE TÉCNICO (Tu vista original) -->
         <!-- ========================================== -->
-        <div class="dashboard-monitores">
-            <!-- Aquí se inyectará la clase MonitorMapon -->
-            <div id="contenedor-mapon"></div>
+        <div id="vista-soporte" class="vista-activa">
             
-            <!-- Aquí se inyectará la clase MonitorZeek -->
-            <div id="contenedor-zeek"></div>
-        </div>
-
-        <!-- CUADRÍCULA MAESTRA -->
-        <div class="vista-cuadricula">
-            <div id="grid-salidas" class="grid-tarjetas"></div>
-        </div>
-
-        <!-- PANEL DE DETALLES -->
-        <div id="panel-detalles" class="panel-lateral">
-            <div class="encabezado-panel">
-                <!-- TÍTULO Y LÁPIZ MAESTRO -->
-                <div id="det-titulo-contenedor" style="display: flex; align-items: center; gap: 10px;">
-                    <h1 class="titulo-detalles" id="det-titulo">CARGANDO...</h1>
-                    <span class="icono-editar" onclick="appSoporte.activarEdicionGeneral()">✏️</span>
-                </div>
-                <button class="btn-cerrar" onclick="appSoporte.cerrarDetalles()">✖</button>
+            <!-- BARRA DE BÚSQUEDA UNIVERSAL -->
+            <div class="buscador-container" style="position: relative; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <input type="text" id="buscador-global" placeholder="Buscar por IMEI, ID, Cliente o Unidad..." oninput="appSoporte.buscarGlobal(this.value)">
+                <span id="btn-limpiar-busqueda" onclick="appSoporte.limpiarBusqueda()" style="display: none; position: absolute; right: 30px; top: 35px; cursor: pointer; color: #a0a0a0;">✖</span>
             </div>
-            
-            <!-- BOTONES DE ACCIÓN RÁPIDA -->
-            <div class="panel-botones" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
-                <button class="btn-accion" onclick="appSoporte.enviarSMS('apagar')">
-                    <div class="icono" style="background-color: #d32f2f;">⏻</div>APAGAR<br>MOTOR
-                </button>
-                <button class="btn-accion" onclick="appSoporte.enviarSMS('encender')">
-                    <div class="icono" style="background-color: #388e3c;">⏻</div>ENCENDER<br>MOTOR
-                </button>
-                <button class="btn-accion" onclick="appSoporte.enviarSMS('configuracion')">
-                    <div class="icono" style="background-color: #ffb74d;">?</div>CONFIGURACION<br>DEL EQUIPO
-                </button>
-                <button class="btn-accion" onclick="appSoporte.enviarSMS('reiniciar')">
-                    <div class="icono" style="background-color: #f57c00;">⟳</div>REINICIAR<br>EQUIPO
-                </button>
-                <button class="btn-accion" onclick="appSoporte.enviarSMS('borrar')">
-                    <div class="icono" style="background-color: #f57c00;">🗑️</div>BORRADO DE<br>MEMORIA
-                </button>
-                <button class="btn-accion" onclick="appSoporte.enviarSMS('formatear')">
-                    <div class="icono" style="background-color: #d32f2f;">⌫</div>FORMATEAR<br>EQUIPO
-                </button>
-                <button class="btn-accion" onclick="window.open('https://soporte.zeekgps.com/ZeekSoporte/', '_blank')">
-                    <div class="icono" style="background-color: #1976d2;">🛠️</div>ZEEK<br>SOPORTE
-                </button>
-                <button class="btn-accion" onclick="window.open('https://mapon.com/partner/gbox_new/', '_blank')">
-                    <div class="icono" style="background-color: #00c853;">📍</div>MAPON<br>SOPORTE
-                </button>
-                <button class="btn-accion" onclick="appSoporte.abrirDiagnostico()">
-                    <div class="icono" style="background-color: #9c27b0;">🩺</div>DIAGNÓSTICO<br>EN VIVO
-                </button>
-            </div>
-            
-            <table class="tabla-info">
-                <tr><td>ID</td><td id="det-id">---</td></tr>
-                <tr><td>Línea</td><td id="det-linea">---</td></tr>
-                <tr><td>ICCID</td><td id="det-iccid">---</td></tr>
-                <tr><td>IMEI</td><td id="det-imei">---</td></tr>
-                <tr><td>Marca</td><td id="det-marca">---</td></tr>
-                <tr><td>Modelo</td><td id="det-modelo">---</td></tr>
-                <tr><td>Cliente</td><td id="det-cliente">---</td></tr>
-                <tr><td>Tipo de servicio</td><td id="det-tipo-servicio" style="text-transform: uppercase; font-weight: bold;">---</td></tr>
-                <tr><td>Estado del Servicio</td><td id="det-servicio">---</td></tr>
-                <tr><td>Marca/Mod. Unidad</td><td id="det-marcaModeloUnidad">---</td></tr>
-                <tr><td>Año Unidad</td><td id="det-anio">---</td></tr>
-                <tr><td>Nº Serie Unidad</td><td id="det-numSerie">---</td></tr>
-            </table>
 
-            <!-- ASISTENTE INTELIGENTE DE COMANDOS -->
-            <div class="panel-comandos-box">
-                <div class="comandos-header">
-                    <h3>Asistente de Configuración</h3>
-                    <span class="badge" id="asistente-badge-marca">Marca</span>
+            <div class="contenedor-principal">
+                <!-- CUADRÍCULA MAESTRA -->
+                <div class="vista-cuadricula">
+                    <div id="grid-salidas" class="grid-tarjetas"></div>
                 </div>
-                
-                <div class="comandos-body" style="padding: 15px; text-align: left;">
-                    <!-- Buscador del Asistente -->
-                    <input type="text" id="buscador-asistente" placeholder="Escribe tu duda o comando...">
+
+                <!-- PANEL DE DETALLES -->
+                <div id="panel-detalles" class="panel-lateral">
+                    <div class="encabezado-panel">
+                        <div id="det-titulo-contenedor" style="display: flex; align-items: center; gap: 10px;">
+                            <h1 class="titulo-detalles" id="det-titulo">CARGANDO...</h1>
+                            <span class="icono-editar" onclick="appSoporte.activarEdicionGeneral()">✏️</span>
+                        </div>
+                        <button class="btn-cerrar" onclick="appSoporte.cerrarDetalles()">✖</button>
+                    </div>
                     
-                    <!-- Aquí aparecerán los botones sugeridos automáticamente -->
-                    <div id="asistente-sugerencias" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
-                        <!-- Generado por JS -->
+                    <div class="panel-botones" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                        <button class="btn-accion" onclick="appSoporte.enviarSMS('apagar')">
+                            <div class="icono" style="background-color: #d32f2f;">⏻</div>APAGAR<br>MOTOR
+                        </button>
+                        <button class="btn-accion" onclick="appSoporte.enviarSMS('encender')">
+                            <div class="icono" style="background-color: #388e3c;">⏻</div>ENCENDER<br>MOTOR
+                        </button>
+                        <button class="btn-accion" onclick="appSoporte.enviarSMS('configuracion')">
+                            <div class="icono" style="background-color: #ffb74d;">?</div>CONFIGURACION<br>DEL EQUIPO
+                        </button>
+                        <button class="btn-accion" onclick="appSoporte.enviarSMS('reiniciar')">
+                            <div class="icono" style="background-color: #f57c00;">⟳</div>REINICIAR<br>EQUIPO
+                        </button>
+                        <button class="btn-accion" onclick="appSoporte.enviarSMS('borrar')">
+                            <div class="icono" style="background-color: #f57c00;">🗑️</div>BORRADO DE<br>MEMORIA
+                        </button>
+                        <button class="btn-accion" onclick="appSoporte.enviarSMS('formatear')">
+                            <div class="icono" style="background-color: #d32f2f;">⌫</div>FORMATEAR<br>EQUIPO
+                        </button>
+                        <button class="btn-accion" onclick="window.open('https://soporte.zeekgps.com/ZeekSoporte/', '_blank')">
+                            <div class="icono" style="background-color: #1976d2;">🛠️</div>ZEEK<br>SOPORTE
+                        </button>
+                        <button class="btn-accion" onclick="window.open('https://mapon.com/partner/gbox_new/', '_blank')">
+                            <div class="icono" style="background-color: #00c853;">📍</div>MAPON<br>SOPORTE
+                        </button>
+                        <button class="btn-accion" onclick="appSoporte.abrirDiagnostico()">
+                            <div class="icono" style="background-color: #9c27b0;">🩺</div>DIAGNÓSTICO<br>EN VIVO
+                        </button>
                     </div>
-            
-                    <!-- Aquí aparecerán las cajitas de texto si el comando pide datos, o el resultado final -->
-                    <div id="asistente-interactivo" style="border-top: 1px dashed #444; padding-top: 15px; display: none;">
-                        <!-- Generado por JS -->
+                    
+                    <table class="tabla-info">
+                        <tr><td>ID</td><td id="det-id">---</td></tr>
+                        <tr><td>Línea</td><td id="det-linea">---</td></tr>
+                        <tr><td>ICCID</td><td id="det-iccid">---</td></tr>
+                        <tr><td>IMEI</td><td id="det-imei">---</td></tr>
+                        <tr><td>Marca</td><td id="det-marca">---</td></tr>
+                        <tr><td>Modelo</td><td id="det-modelo">---</td></tr>
+                        <tr><td>Cliente</td><td id="det-cliente">---</td></tr>
+                        <tr><td>Tipo de servicio</td><td id="det-tipo-servicio" style="text-transform: uppercase; font-weight: bold;">---</td></tr>
+                        <tr><td>Estado del Servicio</td><td id="det-servicio">---</td></tr>
+                        <tr><td>Marca/Mod. Unidad</td><td id="det-marcaModeloUnidad">---</td></tr>
+                        <tr><td>Año Unidad</td><td id="det-anio">---</td></tr>
+                        <tr><td>Nº Serie Unidad</td><td id="det-numSerie">---</td></tr>
+                    </table>
+
+                    <div class="panel-comandos-box">
+                        <div class="comandos-header">
+                            <h3>Asistente de Configuración</h3>
+                            <span class="badge" id="asistente-badge-marca">Marca</span>
+                        </div>
+                        <div class="comandos-body" style="padding: 15px; text-align: left;">
+                            <input type="text" id="buscador-asistente" placeholder="Escribe tu duda o comando...">
+                            <div id="asistente-sugerencias" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;"></div>
+                            <div id="asistente-interactivo" style="border-top: 1px dashed #444; padding-top: 15px; display: none;"></div>
+                        </div>
                     </div>
-                </div>
+                </div> 
+            </div> 
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VISTA 2: MONITORES GLOBALES (Nuevo)        -->
+        <!-- ========================================== -->
+        <div id="vista-monitores" class="vista-oculta">
+            <div class="header-vista" style="padding: 20px 20px 0 20px;">
+                <h2 style="color: #fff; margin-bottom: 5px;">Monitores de Telemetría</h2>
+                <p style="color: #888; margin-top: 0;">Radiografía global de equipos en plataforma</p>
             </div>
+            <div class="dashboard-monitores" style="padding: 20px;">
+                <!-- Monitor Mapon -->
+                <div id="contenedor-mapon"></div>
+                
+                <!-- Monitor Zeek -->
+                <div id="contenedor-zeek"></div>
+            </div>
+        </div>
 
-        </div> <!-- CIERRE DEL PANEL LATERAL -->
-    </div> <!-- CIERRE DEL CONTENEDOR PRINCIPAL -->
+    </div> <!-- CIERRE DEL CONTENEDOR DE VISTAS -->
 
     <!-- ========================================== -->
-    <!-- ASISTENTE GLOBAL PU-K (Botón y Panel)      -->
+    <!-- ASISTENTE GLOBAL PU-K                      -->
     <!-- ========================================== -->
-    <div id="puk-boton-flotante" onclick="appSoporte.toggleChatPUK()">
-        🐶
-    </div>
-
+    <div id="puk-boton-flotante" onclick="appSoporte.toggleChatPUK()">🐶</div>
     <div id="puk-panel-chat" class="puk-oculto">
         <div class="puk-header">
             <span>🐶 Asistente PU-K</span>
             <button onclick="appSoporte.toggleChatPUK()">✖</button>
         </div>
         <div id="puk-mensajes">
-            <div class="puk-mensaje puk-ia">
-                ¡Guau! Hola, soy PU-K. ¿En qué te ayudo con los equipos de telemetría hoy?
-            </div>
+            <div class="puk-mensaje puk-ia">¡Guau! Hola, soy PU-K. ¿En qué te ayudo con los equipos de telemetría hoy?</div>
         </div>
         <div class="puk-input-area">
             <input type="text" id="puk-input-chat" placeholder="Pregunta algo al manual..." onkeypress="appSoporte.manejarEnterChat(event)">
