@@ -302,3 +302,75 @@ body.con-panel-abierto .vista-cuadricula {
 /* Modal Iframe */
 .modal-iframe-content { background-color: #1a1a1a; width: 95%; max-width: 1200px; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; overflow: hidden; }
 .comando-resultado { background-color: #1e1e1e; border: 1px solid #444; color: #6db6ff; padding: 12px; border-radius: 4px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+/* --- NAVEGACIÓN PRINCIPAL --- */
+.navbar-principal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1a1a1a;
+    padding: 0 20px;
+    height: 60px;
+    border-bottom: 2px solid #333;
+}
+
+.logo-app {
+    color: #ffb74d;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.menu-tabs {
+    display: flex;
+    gap: 10px;
+}
+
+.tab-btn {
+    background: transparent;
+    color: #aaa;
+    border: none;
+    padding: 10px 20px;
+    font-size: 15px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+.tab-btn:hover {
+    color: #fff;
+    background-color: #2a2a2a;
+    border-radius: 4px 4px 0 0;
+}
+
+.tab-btn.activo {
+    color: #ffb74d;
+    border-bottom: 3px solid #ffb74d;
+    font-weight: bold;
+}
+
+/* --- CONTROL DE VISTAS --- */
+.vista-oculta {
+    display: none !important;
+}
+
+.vista-activa {
+    display: block;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.header-vista {
+    margin-bottom: 20px;
+}
+.header-vista h2 {
+    color: #fff;
+    margin: 0 0 5px 0;
+}
+.header-vista p {
+    color: #888;
+    margin: 0;
+}
