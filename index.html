@@ -177,12 +177,12 @@
     <!-- Asegúrate de que este archivo js/monitormapon.js existe y tiene código -->
     <script src="js/monitormapon.js"></script>
     
-    <script>
+ <script>
         // SCRIPT DIRECTO EN EL HTML PARA ASEGURAR QUE SE EJECUTE
         console.log("Iniciando carga de monitores desde HTML...");
 
-        // ⚠️ PEGA AQUÍ TU URL DE APPS SCRIPT
-        const URL_APPS_SCRIPT = "AQUI_PEGA_TU_URL_DE_APPS_SCRIPT_LA_NUEVA"; 
+        // ⚠️ Asegúrate de pegar aquí tu URL nueva que termina en /exec
+        const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbx7sI3YjJrBstOerZmFVXSEU77Fbp4kOLHvYuVekgDus795TNVFoW6zVNJiaEekUQhf/exec"; 
         
         async function cargarDatosMaponDirecto() {
             const divMapon = document.getElementById('contenedor-mapon');
@@ -193,17 +193,14 @@
             
             divMapon.innerHTML = '<h3 style="color: #ffb74d; text-align: center; padding: 50px;">⏳ Conectando con Google Sheets...</h3>';
             
-           try {
-                // Le decimos a fetch que siga las redirecciones de Google obligatoriamente
+            try {
+                // Fetch con seguimiento de redirección (El ajuste clave)
                 const respuesta = await fetch(URL_APPS_SCRIPT, {
                     method: "GET",
                     redirect: "follow" 
                 });
                 
-                // Primero leemos la respuesta como texto para ver qué nos manda realmente
                 const textoRespuesta = await respuesta.text();
-                
-                // Intentamos convertirlo a JSON
                 const json = JSON.parse(textoRespuesta);
                 
                 if (json.success) {
@@ -214,14 +211,20 @@
                     divMapon.innerHTML = `<h3 style="color: #f44336; text-align: center; padding: 50px;">❌ Error: ${json.error}</h3>`;
                 }
             } catch (error) {
-                // Si vuelve a fallar, este error nos dirá exactamente por qué falló el parseo
-                divMapon.innerHTML = `<h3 style="color: #f44336; text-align: center; padding: 50px;">❌ Error: La URL no devolvió datos válidos. Revisa los permisos de Apps Script.</h3>`;
+                divMapon.innerHTML = `<h3 style="color: #f44336; text-align: center; padding: 50px;">❌ Error: La URL no devolvió datos válidos. Vuelve a crear la implementación en Apps Script.</h3>`;
                 console.error("Error al procesar:", error);
             }
+        } // <- Esta era la llave que probablemente se había borrado
+
+        function verificarPestanaMonitores() {
+            const vistaMonitores = document.getElementById('vista-monitores');
+            if (vistaMonitores && vistaMonitores.classList.contains('vista-activa') && document.getElementById('contenedor-mapon').innerHTML.trim() === '') {
+                cargarDatosMaponDirecto();
+            }
+        }
 
         // ESPERAR A QUE LA CLASE SOPORTE TECNICO SE INSTANCIE
         document.addEventListener('DOMContentLoaded', () => {
-            // Le damos 500ms al navegador para asegurarse de que appSoporte ya existe
             setTimeout(() => {
                 if (typeof appSoporte !== 'undefined') {
                     const cambiarVistaOriginal = appSoporte.cambiarVista.bind(appSoporte);
@@ -237,7 +240,7 @@
                 }
             }, 500);
             
-            cargarDatosMaponDirecto(); // Intentar cargar al inicio
+            cargarDatosMaponDirecto(); 
         });
     </script>
 </body>
