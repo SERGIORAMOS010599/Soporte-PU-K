@@ -177,10 +177,145 @@
     <!-- Asegúrate de que este archivo js/monitormapon.js existe y tiene código -->
     <script src="js/monitormapon.js"></script>
     
- <script>
-        // SCRIPT DIRECTO EN EL HTML USANDO LA API NATIVA DE SHEETS (GVIZ)
-        console.log("Iniciando carga de monitores vía GVIZ...");
-        
+<script>
+        // ==========================================
+        // 1. CLASE MONITOR MAPON INCRUSTADA DIRECTAMENTE
+        // ==========================================
+        class MonitorMapon {
+            constructor(containerId, datosFila) {
+                this.container = document.getElementById(containerId);
+                this.datosUnidades = datosFila; 
+                this.grafica = null; 
+                this.inicializar();
+            }
+
+            inicializar() {
+                this.renderizarEstructura();
+                this.renderizarTabla(this.datosUnidades);
+                this.renderizarGrafica();
+            }
+
+            renderizarEstructura() {
+                // Estructura con estilos integrados a prueba de fallos
+                this.container.innerHTML = `
+                    <div style="display: flex; flex-direction: row; gap: 20px; background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; height: 450px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+                        <div style="flex: 2; overflow-y: auto; background: #141414; border-radius: 6px; padding: 10px;">
+                            <div id="mapon-filter-info" style="margin-bottom: 15px; cursor: pointer; color: #ffb74d; font-weight: bold; font-size: 14px; padding: 5px; background: #2a2a2a; border-radius: 4px; display: inline-block;">
+                                ✅ Mostrando todos los equipos
+                            </div>
+                            <table style="width: 100%; border-collapse: collapse; color: #fff; font-size: 14px;">
+                                <thead style="background: #1e1e1e; position: sticky; top: 0;">
+                                    <tr>
+                                        <th style="padding: 12px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Compañía</th>
+                                        <th style="padding: 12px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Económico</th>
+                                        <th style="padding: 12px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Estado</th>
+                                        <th style="padding: 12px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Último Reporte</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mapon-tbody"></tbody>
+                            </table>
+                        </div>
+                        <div style="flex: 1; display: flex; justify-content: center; align-items: center; background: #141414; border-radius: 6px; padding: 10px; max-width: 450px;">
+                            <div style="position: relative; width: 100%; height: 100%;">
+                                <canvas id="mapon-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('mapon-filter-info').addEventListener('click', () => {
+                    this.filtrarPorEstado(null);
+                });
+            }
+
+            renderizarTabla(datos) {
+                const tbody = document.getElementById('mapon-tbody');
+                tbody.innerHTML = ''; 
+
+                datos.forEach(unidad => {
+                    let compania = unidad['Compañía:'] || unidad['Compañía'] || 'Sin asignar';
+                    let economico = unidad['Economico'] || unidad['Name'] || 'S/N';
+                    let estado = unidad['Online status'] || 'Desconocido';
+                    let ultimoReporte = unidad['Last data received'] || 'Sin fecha';
+
+                    const tr = document.createElement('tr');
+                    let colorEstado = estado === 'OK' ? '#4caf50' : '#f44336'; 
+                    
+                    tr.innerHTML = `
+                        <td style="padding: 12px; border-bottom: 1px solid #333;">${compania}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #333;">${economico}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #333; color: ${colorEstado}; font-weight: bold;">${estado}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #333;">${ultimoReporte}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            renderizarGrafica() {
+                const conteoEstados = {};
+                this.datosUnidades.forEach(unidad => {
+                    let estado = unidad['Online status'] || 'Desconocido';
+                    conteoEstados[estado] = (conteoEstados[estado] || 0) + 1;
+                });
+
+                const labels = Object.keys(conteoEstados);
+                const dataValues = Object.values(conteoEstados);
+
+                const backgroundColors = labels.map(label => {
+                    if (label.toUpperCase() === 'OK') return '#4caf50'; 
+                    if (label.toUpperCase().includes('NODATA')) return '#f44336'; 
+                    return '#ffb74d'; 
+                });
+
+                const ctx = document.getElementById('mapon-chart').getContext('2d');
+                if (this.grafica) this.grafica.destroy();
+
+                this.grafica = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: dataValues,
+                            backgroundColor: backgroundColors,
+                            borderWidth: 2,
+                            borderColor: '#1e1e1e' 
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top', labels: { color: '#ffffff', padding: 20 } }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements && elements.length > 0) {
+                                const indexClick = elements[0].index;
+                                const estadoSeleccionado = this.grafica.data.labels[indexClick];
+                                this.filtrarPorEstado(estadoSeleccionado);
+                            }
+                        }
+                    }
+                });
+            }
+
+            filtrarPorEstado(estado) {
+                const infoDiv = document.getElementById('mapon-filter-info');
+                if (!estado) {
+                    infoDiv.innerHTML = `✅ Mostrando todos los equipos`;
+                    infoDiv.style.color = "#ffb74d"; 
+                    this.renderizarTabla(this.datosUnidades);
+                } else {
+                    infoDiv.innerHTML = `🔍 Filtrando por: <b style="color:white;">${estado}</b> (Clic aquí para ver todos)`;
+                    infoDiv.style.color = "#4caf50"; 
+                    const datosFiltrados = this.datosUnidades.filter(u => (u['Online status'] || 'Desconocido') === estado);
+                    this.renderizarTabla(datosFiltrados);
+                }
+            }
+        }
+
+        // ==========================================
+        // 2. CONEXIÓN A GOOGLE SHEETS
+        // ==========================================
         async function cargarDatosMaponDirecto() {
             const divMapon = document.getElementById('contenedor-mapon');
             if (!divMapon) return;
@@ -188,34 +323,27 @@
             divMapon.innerHTML = '<h3 style="color: #ffb74d; text-align: center; padding: 50px;">⏳ Descargando datos directo de Sheets...</h3>';
             
             try {
-                // TU ID DE HOJA DE CÁLCULO
                 const sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM';
-                // URL directa a la pestaña de Mapon usando el método GVIZ (igual que usas en soporte.js)
                 const urlMapon = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent("MONITOR MAPON")}`;
                 
                 const respuesta = await fetch(urlMapon);
                 const texto = await respuesta.text();
                 
-                // Limpiar el formato que devuelve Google
                 const jsonString = texto.substring(47).slice(0, -2);
                 const jsonGviz = JSON.parse(jsonString);
                 
-                // Extraer los encabezados de las columnas (Ej: "Compañía", "Economico", "Online status")
                 const headers = jsonGviz.table.cols.map(col => col.label);
                 
-                // Armar el arreglo de objetos para la gráfica
                 const datosFormateados = jsonGviz.table.rows.map(row => {
                     let obj = {};
                     row.c.forEach((celda, i) => {
-                        // Si la celda tiene un formato visual (como fechas), tomamos ese (celda.f), si no, tomamos el valor puro (celda.v)
                         obj[headers[i]] = (celda && celda.f) ? celda.f : (celda ? celda.v : 'S/N');
                     });
                     return obj;
                 });
                 
                 divMapon.innerHTML = ''; 
-                console.log("Datos de Mapon cargados con éxito, dibujando gráfica...");
-                // Mandamos los datos limpios a nuestra clase
+                // Ahora sí, no hay forma de que falle porque la clase está aquí mismo
                 new MonitorMapon('contenedor-mapon', datosFormateados);
                 
             } catch (error) {
@@ -231,7 +359,6 @@
             }
         }
 
-        // ESPERAR A QUE LA CLASE SOPORTE TECNICO SE INSTANCIE
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 if (typeof appSoporte !== 'undefined') {
@@ -242,11 +369,9 @@
                             setTimeout(verificarPestanaMonitores, 100);
                         }
                     }
-                    console.log("Integración con appSoporte exitosa.");
                 }
             }, 500);
             
-            // Intentar cargar por si el usuario recarga la página estando en esta pestaña
             cargarDatosMaponDirecto(); 
         });
     </script>
