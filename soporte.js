@@ -1,32 +1,4 @@
 class SoporteTecnico {
-    // Agrega esto a tu objeto appSoporte o como función global en soporte.js
-appSoporte.cambiarVista = function(vistaDestino) {
-    // 1. Ocultar todas las vistas
-    document.getElementById('vista-soporte').classList.add('vista-oculta');
-    document.getElementById('vista-soporte').classList.remove('vista-activa');
-    
-    document.getElementById('vista-monitores').classList.add('vista-oculta');
-    document.getElementById('vista-monitores').classList.remove('vista-activa');
-
-    // 2. Quitar la clase 'activo' de todos los botones
-    const botones = document.querySelectorAll('.tab-btn');
-    botones.forEach(btn => btn.classList.remove('activo'));
-
-    // 3. Mostrar la vista seleccionada y marcar el botón
-    if (vistaDestino === 'soporte') {
-        document.getElementById('vista-soporte').classList.remove('vista-oculta');
-        document.getElementById('vista-soporte').classList.add('vista-activa');
-        botones[0].classList.add('activo');
-    } 
-    else if (vistaDestino === 'monitores') {
-        document.getElementById('vista-monitores').classList.remove('vista-oculta');
-        document.getElementById('vista-monitores').classList.add('vista-activa');
-        botones[1].classList.add('activo');
-        
-        // OPCIONAL: Si quieres que los datos se recarguen de Sheets cada vez que entras a los monitores
-        // cargarDatosGlobales(); 
-    }
-};
     constructor() {
         this.container = document.getElementById('grid-salidas');
         this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM'; 
@@ -38,6 +10,32 @@ appSoporte.cambiarVista = function(vistaDestino) {
         this.iniciar();
     }
 
+    // --- NUEVO: FUNCIÓN PARA CAMBIAR ENTRE PESTAÑAS ---
+    cambiarVista(vistaDestino) {
+        // 1. Ocultar todas las vistas
+        document.getElementById('vista-soporte').classList.add('vista-oculta');
+        document.getElementById('vista-soporte').classList.remove('vista-activa');
+        
+        document.getElementById('vista-monitores').classList.add('vista-oculta');
+        document.getElementById('vista-monitores').classList.remove('vista-activa');
+
+        // 2. Quitar la clase 'activo' de todos los botones
+        const botones = document.querySelectorAll('.tab-btn');
+        botones.forEach(btn => btn.classList.remove('activo'));
+
+        // 3. Mostrar la vista seleccionada y marcar el botón
+        if (vistaDestino === 'soporte') {
+            document.getElementById('vista-soporte').classList.remove('vista-oculta');
+            document.getElementById('vista-soporte').classList.add('vista-activa');
+            botones[0].classList.add('activo');
+        } 
+        else if (vistaDestino === 'monitores') {
+            document.getElementById('vista-monitores').classList.remove('vista-oculta');
+            document.getElementById('vista-monitores').classList.add('vista-activa');
+            botones[1].classList.add('activo');
+        }
+    }
+
     async iniciar() {
         if (!this.container) return;
         this.container.innerHTML = '<p style="text-align:center; color: #ffb74d; padding: 20px;">Conectando con el Inventario en la nube...</p>';
@@ -45,7 +43,6 @@ appSoporte.cambiarVista = function(vistaDestino) {
         const urlInventario = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Salidas')}`;
         
         try {
-            // Ya no consultamos a GitHub, solo cargamos Sheets directo
             const respuestaInv = await fetch(urlInventario);
             const textInv = await respuestaInv.text();
             const jsonInv = JSON.parse(textInv.substring(47).slice(0, -2));
@@ -102,6 +99,7 @@ appSoporte.cambiarVista = function(vistaDestino) {
 
     // --- RENDERIZADO Y PANTALLAS ---
     renderizar() {
+        if (!this.container) return;
         this.container.innerHTML = '';
         const query = this.busquedaActual.toLowerCase().trim();
         
@@ -124,8 +122,8 @@ appSoporte.cambiarVista = function(vistaDestino) {
                 <div class="tarjeta-modelo">${eq.modelo}</div>
                 <div class="tarjeta-servicio">${eq.estadoServicio}</div>
                 <div class="tarjeta-acciones">
-                    <div class="accion-btn rojo" onclick="event.stopPropagation(); .enviarSMS('apagar', '${eq.id}')">APAGAR <span class="circulo"></span></div>
-                    <div class="accion-btn verde" onclick="event.stopPropagation(); .enviarSMS('encender', '${eq.id}')">ENCENDER <span class="circulo"></span></div>
+                    <div class="accion-btn rojo" onclick="event.stopPropagation(); appSoporte.enviarSMS('apagar', '${eq.id}')">APAGAR <span class="circulo"></span></div>
+                    <div class="accion-btn verde" onclick="event.stopPropagation(); appSoporte.enviarSMS('encender', '${eq.id}')">ENCENDER <span class="circulo"></span></div>
                 </div>
             `;
             tarjeta.onclick = () => this.abrirDetalles(eq);
@@ -140,7 +138,7 @@ appSoporte.cambiarVista = function(vistaDestino) {
 
         document.getElementById('det-titulo-contenedor').innerHTML = `
             <h1 class="titulo-detalles" id="det-titulo">${eq.unidad}</h1>
-            <span class="icono-editar" onclick=".activarEdicionGeneral()">✏️</span>
+            <span class="icono-editar" onclick="appSoporte.activarEdicionGeneral()">✏️</span>
         `;
         document.getElementById('det-id').innerText = eq.id;
         document.getElementById('det-linea').innerText = eq.linea;
@@ -164,7 +162,6 @@ appSoporte.cambiarVista = function(vistaDestino) {
         const badgeMarca = document.getElementById('asistente-badge-marca');
         if (badgeMarca) badgeMarca.innerText = eq.marca;
         
-        // Limpiamos rastros del JSON viejo visualmente
         const contenedorInteractivo = document.getElementById('asistente-interactivo');
         if (contenedorInteractivo) contenedorInteractivo.style.display = 'none';
         const contenedorSugerencias = document.getElementById('asistente-sugerencias');
@@ -179,7 +176,6 @@ appSoporte.cambiarVista = function(vistaDestino) {
             inputBuscador.onfocus = () => inputBuscador.style.border = "1px solid #ffb74d";
             inputBuscador.onblur = () => inputBuscador.style.border = "1px solid #444";
 
-            // Se elimina el debounce timer viejo, ahora solo escuchamos el ENTER
             inputBuscador.oninput = null; 
 
             inputBuscador.onkeypress = (e) => {
@@ -187,7 +183,6 @@ appSoporte.cambiarVista = function(vistaDestino) {
                     e.preventDefault();
                     const pregunta = inputBuscador.value.trim();
                     if (pregunta !== '') {
-                        // Inyectamos el contexto de forma transparente a la IA
                         const promptOculto = `El técnico solicita: "${pregunta}". NOTA INTERNA: El equipo en pantalla es Marca: ${eq.marca}, Modelo: ${eq.modelo}, ID: ${eq.id}. Usa esta información para armar el comando correcto en base a tus manuales y reemplaza el {ID}.`;
                         this.consultarCerebroPUK(promptOculto);
                         inputBuscador.value = '';
@@ -234,7 +229,7 @@ appSoporte.cambiarVista = function(vistaDestino) {
         `;
     }
 
-    // --- CONEXIÓN CON GEMINI (EL CEREBRO EN LA NUBE) ---
+    // --- CONEXIÓN CON GEMINI ---
     async consultarCerebroPUK(pregunta) {
         this.hablarPUK("Revisando mis manuales técnicos... Dame unos segundos 🐕", "pensando");
         
@@ -274,8 +269,8 @@ appSoporte.cambiarVista = function(vistaDestino) {
         const eq = this.equipoSeleccionado;
         document.getElementById('det-titulo-contenedor').innerHTML = `
             <input type="text" id="input-edit-unidad" value="${eq.unidad}" class="input-edicion-general" style="font-size: 1.5rem; width: 50%;">
-            <button class="btn-guardar-edicion" onclick=".guardarEdicionGeneral()">Guardar</button>
-            <button class="btn-cancelar" onclick=".abrirDetalles(.equipoSeleccionado)" style="padding: 5px;">✖</button>
+            <button class="btn-guardar-edicion" onclick="appSoporte.guardarEdicionGeneral()">Guardar</button>
+            <button class="btn-cancelar" onclick="appSoporte.abrirDetalles(appSoporte.equipoSeleccionado)" style="padding: 5px;">✖</button>
         `;
         const crearInput = (idHTML, idInput, valor) => {
             document.getElementById(idHTML).innerHTML = `<input type="text" id="${idInput}" value="${valor}" class="input-edicion-general">`;
@@ -463,4 +458,7 @@ appSoporte.cambiarVista = function(vistaDestino) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => { window. = new SoporteTecnico(); });
+// INICIALIZACIÓN CORRECTA
+document.addEventListener('DOMContentLoaded', () => { 
+    window.appSoporte = new SoporteTecnico(); 
+});
