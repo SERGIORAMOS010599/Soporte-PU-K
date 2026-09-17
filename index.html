@@ -193,9 +193,18 @@
             
             divMapon.innerHTML = '<h3 style="color: #ffb74d; text-align: center; padding: 50px;">⏳ Conectando con Google Sheets...</h3>';
             
-            try {
-                const respuesta = await fetch(URL_APPS_SCRIPT);
-                const json = await respuesta.json();
+           try {
+                // Le decimos a fetch que siga las redirecciones de Google obligatoriamente
+                const respuesta = await fetch(URL_APPS_SCRIPT, {
+                    method: "GET",
+                    redirect: "follow" 
+                });
+                
+                // Primero leemos la respuesta como texto para ver qué nos manda realmente
+                const textoRespuesta = await respuesta.text();
+                
+                // Intentamos convertirlo a JSON
+                const json = JSON.parse(textoRespuesta);
                 
                 if (json.success) {
                     divMapon.innerHTML = ''; 
@@ -205,17 +214,10 @@
                     divMapon.innerHTML = `<h3 style="color: #f44336; text-align: center; padding: 50px;">❌ Error: ${json.error}</h3>`;
                 }
             } catch (error) {
-                divMapon.innerHTML = `<h3 style="color: #f44336; text-align: center; padding: 50px;">❌ Error de red: ${error.message}</h3>`;
-                console.error(error);
+                // Si vuelve a fallar, este error nos dirá exactamente por qué falló el parseo
+                divMapon.innerHTML = `<h3 style="color: #f44336; text-align: center; padding: 50px;">❌ Error: La URL no devolvió datos válidos. Revisa los permisos de Apps Script.</h3>`;
+                console.error("Error al procesar:", error);
             }
-        }
-
-        function verificarPestanaMonitores() {
-            const vistaMonitores = document.getElementById('vista-monitores');
-            if (vistaMonitores && vistaMonitores.classList.contains('vista-activa') && document.getElementById('contenedor-mapon').innerHTML.trim() === '') {
-                cargarDatosMaponDirecto();
-            }
-        }
 
         // ESPERAR A QUE LA CLASE SOPORTE TECNICO SE INSTANCIE
         document.addEventListener('DOMContentLoaded', () => {
