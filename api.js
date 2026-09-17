@@ -1,7 +1,7 @@
 // js/api.js
 
 // ⚠️ PEGA AQUÍ TU URL DE APPS SCRIPT (Asegúrate de que no falte ni un carácter)
-const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbx7sI3YjJrBstOerZmFVXSEU77Fbp4kOLHvYuVekgDus795TNVFoW6zVNJiaEekUQhf/exec"; 
+const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbw_kPHwp_RGjVrlls7vSEplGQOW8XD7uONe2fuhN6NkknUzPLVNMoY1pbhBY1YIcu_r/exec"; 
 
 let monitorMapon;
 
