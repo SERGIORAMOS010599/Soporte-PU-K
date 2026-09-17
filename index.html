@@ -178,43 +178,51 @@
     <script src="js/monitormapon.js"></script>
     
  <script>
-        // SCRIPT DIRECTO EN EL HTML PARA ASEGURAR QUE SE EJECUTE
-        console.log("Iniciando carga de monitores desde HTML...");
-
-        // ⚠️ Asegúrate de pegar aquí tu URL nueva que termina en /exec
-        const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbw_kPHwp_RGjVrlls7vSEplGQOW8XD7uONe2fuhN6NkknUzPLVNMoY1pbhBY1YIcu_r/exec"; 
+        // SCRIPT DIRECTO EN EL HTML USANDO LA API NATIVA DE SHEETS (GVIZ)
+        console.log("Iniciando carga de monitores vía GVIZ...");
         
         async function cargarDatosMaponDirecto() {
             const divMapon = document.getElementById('contenedor-mapon');
-            if (!divMapon) {
-                console.error("¡No existe el div contenedor-mapon en el HTML!");
-                return;
-            }
+            if (!divMapon) return;
             
-            divMapon.innerHTML = '<h3 style="color: #ffb74d; text-align: center; padding: 50px;">⏳ Conectando con Google Sheets...</h3>';
+            divMapon.innerHTML = '<h3 style="color: #ffb74d; text-align: center; padding: 50px;">⏳ Descargando datos directo de Sheets...</h3>';
             
             try {
-                // Fetch con seguimiento de redirección (El ajuste clave)
-                const respuesta = await fetch(URL_APPS_SCRIPT, {
-                    method: "GET",
-                    redirect: "follow" 
+                // TU ID DE HOJA DE CÁLCULO
+                const sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM';
+                // URL directa a la pestaña de Mapon usando el método GVIZ (igual que usas en soporte.js)
+                const urlMapon = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent("MONITOR MAPON")}`;
+                
+                const respuesta = await fetch(urlMapon);
+                const texto = await respuesta.text();
+                
+                // Limpiar el formato que devuelve Google
+                const jsonString = texto.substring(47).slice(0, -2);
+                const jsonGviz = JSON.parse(jsonString);
+                
+                // Extraer los encabezados de las columnas (Ej: "Compañía", "Economico", "Online status")
+                const headers = jsonGviz.table.cols.map(col => col.label);
+                
+                // Armar el arreglo de objetos para la gráfica
+                const datosFormateados = jsonGviz.table.rows.map(row => {
+                    let obj = {};
+                    row.c.forEach((celda, i) => {
+                        // Si la celda tiene un formato visual (como fechas), tomamos ese (celda.f), si no, tomamos el valor puro (celda.v)
+                        obj[headers[i]] = (celda && celda.f) ? celda.f : (celda ? celda.v : 'S/N');
+                    });
+                    return obj;
                 });
                 
-                const textoRespuesta = await respuesta.text();
-                const json = JSON.parse(textoRespuesta);
+                divMapon.innerHTML = ''; 
+                console.log("Datos de Mapon cargados con éxito, dibujando gráfica...");
+                // Mandamos los datos limpios a nuestra clase
+                new MonitorMapon('contenedor-mapon', datosFormateados);
                 
-                if (json.success) {
-                    divMapon.innerHTML = ''; 
-                    console.log("Datos de Mapon cargados, instanciando clase...");
-                    new MonitorMapon('contenedor-mapon', json.mapon);
-                } else {
-                    divMapon.innerHTML = `<h3 style="color: #f44336; text-align: center; padding: 50px;">❌ Error: ${json.error}</h3>`;
-                }
             } catch (error) {
-                divMapon.innerHTML = `<h3 style="color: #f44336; text-align: center; padding: 50px;">❌ Error: La URL no devolvió datos válidos. Vuelve a crear la implementación en Apps Script.</h3>`;
-                console.error("Error al procesar:", error);
+                divMapon.innerHTML = `<h3 style="color: #f44336; text-align: center; padding: 50px;">❌ Error de conexión directa: ${error.message}</h3>`;
+                console.error("Error al procesar GVIZ:", error);
             }
-        } // <- Esta era la llave que probablemente se había borrado
+        }
 
         function verificarPestanaMonitores() {
             const vistaMonitores = document.getElementById('vista-monitores');
@@ -235,11 +243,10 @@
                         }
                     }
                     console.log("Integración con appSoporte exitosa.");
-                } else {
-                    console.error("No se encontró appSoporte después de cargar la página.");
                 }
             }, 500);
             
+            // Intentar cargar por si el usuario recarga la página estando en esta pestaña
             cargarDatosMaponDirecto(); 
         });
     </script>
