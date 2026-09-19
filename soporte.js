@@ -407,20 +407,54 @@ class SoporteTecnico {
 
     async enviarMensajeChat() {
         const input = document.getElementById('puk-input-chat');
-        const mensaje = input.value.trim();
-        if (!mensaje) return;
+        const mensajeUsuario = input.value.trim();
+        if (!mensajeUsuario) return;
 
-        this.agregarBurbujaChat(mensaje, 'puk-usuario');
+        this.agregarBurbujaChat(mensajeUsuario, 'puk-usuario');
         input.value = '';
 
-        const idPensando = this.agregarBurbujaChat('Olfateando el manual de soporte... 🐕', 'puk-ia');
+        const idPensando = this.agregarBurbujaChat('Olfateando el manual y revisando el equipo... 🐕', 'puk-ia');
+
+        // Construir el contexto oculto
+        let contextoOculto = "";
+        
+        // Revisamos si hay un equipo abierto en la ventana de Mapon
+        if (window.equipoEnPantallaMapon) {
+            const eq = window.equipoEnPantallaMapon;
+            const marca = eq['Device model'] || 'Desconocido';
+            const estado = eq['Online status'] || 'Desconocido';
+            const ultimoReporte = eq['Last data received'] || 'Desconocido';
+            const voltaje = eq['External voltage'] || 'Desconocido'; // Ejemplo: si tienes esta columna
+            const imei = eq['IMEI'] || 'Desconocido';
+
+            contextoOculto = `
+                NOTA INTERNA PARA LA IA: El técnico está viendo actualmente un equipo en el dashboard de Mapon. 
+                Aquí están los datos técnicos de ese equipo:
+                - Marca/Modelo: ${marca}
+                - Estado actual en Mapon: ${estado}
+                - Último reporte: ${ultimoReporte}
+                - IMEI: ${imei}
+                
+                Guía rápida de estados de Mapon para tu análisis:
+                - NODATA (NOGPS): El equipo tiene energía pero no recibe señal de satélite (GPS). Sugiere revisar la ubicación del vehículo (si está bajo techo), la posición de la antena o problemas con el módulo GPS.
+                - NODATA (INSTALL): Es un equipo nuevo que aún no ha reportado por primera vez o la instalación quedó inconclusa.
+                - NODATA (NOPOWER): El equipo perdió la alimentación eléctrica principal (batería desconectada, fusible fundido o cables cortados).
+                - OK: Funcionando correctamente.
+                - OK (NOGPS): Reporta datos pero sin posición válida.
+                
+                Si la pregunta del técnico ("${mensajeUsuario}") es sobre fallas, usa estos datos y la guía de estados para darle un diagnóstico preciso, sugiriendo comandos o revisiones físicas necesarias para ese modelo específico (${marca}). No menciones que leíste esta "Nota Interna", actúa como si lo supieras por contexto.
+            `;
+        }
+
+        // El mensaje final que se envía a Google Apps Script
+        const mensajeFinalParaIA = contextoOculto ? contextoOculto + "\n\nPregunta del técnico: " + mensajeUsuario : mensajeUsuario;
 
         const urlAppsScript = 'https://script.google.com/macros/s/AKfycbxechSb9x2TtDrI_E8egBEkGjZOOFGMXNl5UiBjB9s8n_hJwH6qGHe5aEMMENaEO39H/exec'; 
         
         try {
             const peticion = await fetch(urlAppsScript, {
                 method: 'POST',
-                body: JSON.stringify({ mensaje: mensaje })
+                body: JSON.stringify({ mensaje: mensajeFinalParaIA })
             });
             const respuesta = await peticion.json();
 
