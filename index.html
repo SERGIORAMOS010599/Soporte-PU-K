@@ -371,6 +371,12 @@
                 const contenedor = document.getElementById('modal-contenido-detalles');
                 contenedor.innerHTML = ''; 
 
+                // ¡AQUÍ ESTÁ LA MAGIA! Guardamos el equipo en la memoria global de la app
+                if (typeof appSoporte !== 'undefined') {
+                    // Creamos una variable global para el contexto de PU-K
+                    window.equipoEnPantallaMapon = unidad;
+                }
+
                 Object.keys(unidad).forEach(key => {
                     const valor = unidad[key] || '-';
                     if(key.trim() !== '' && valor !== '-') {
