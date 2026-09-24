@@ -403,8 +403,11 @@
             
             try {
                 const sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM';
-                // Agregamos tq=select * para forzar que traiga absolutamente todas las filas y columnas
-                const urlMapon = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&tq=${encodeURIComponent('select *')}&sheet=${encodeURIComponent("MONITOR MAPON")}`;
+                const query = encodeURIComponent('select *');
+                const sheetName = encodeURIComponent('MONITOR MAPON');
+                
+                // Concatenación clásica para evitar errores de sintaxis
+                const urlMapon = 'https://docs.google.com/spreadsheets/d/' + sheetId + '/gviz/tq?tqx=out:json&tq=' + query + '&sheet=' + sheetName;
                 
                 const respuesta = await fetch(urlMapon);
                 const texto = await respuesta.text();
@@ -412,12 +415,14 @@
                 const jsonString = texto.substring(47).slice(0, -2);
                 const jsonGviz = JSON.parse(jsonString);
                 
-                const headers = jsonGviz.table.cols.map((col, index) => col.label || `Columna_${index}`);
+                // Usando function() clásica en lugar de flechas =>
+                const headers = jsonGviz.table.cols.map(function(col, index) {
+                    return col.label ? col.label : 'Columna_' + index;
+                });
                 
-                const datosFormateados = jsonGviz.table.rows.map(row => {
+                const datosFormateados = jsonGviz.table.rows.map(function(row) {
                     let obj = {};
-                    row.c.forEach((celda, i) => {
-                        // FORZAR TODO A TEXTO PARA EVITAR PÉRDIDAS
+                    row.c.forEach(function(celda, i) {
                         if (celda && celda.f) {
                             obj[headers[i]] = String(celda.f);
                         } else if (celda && celda.v !== null && celda.v !== undefined) {
@@ -433,7 +438,7 @@
                 new MonitorMapon('contenedor-mapon', datosFormateados);
                 
             } catch (error) {
-                divMapon.innerHTML = `<h3 style="color: #f44336; text-align: center; padding: 50px;">❌ Error de conexión directa: ${error.message}</h3>`;
+                divMapon.innerHTML = '<h3 style="color: #f44336; text-align: center; padding: 50px;">❌ Error de conexión directa: ' + error.message + '</h3>';
                 console.error("Error al procesar GVIZ:", error);
             }
         }
