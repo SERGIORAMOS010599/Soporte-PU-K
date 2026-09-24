@@ -395,7 +395,7 @@
         // ==========================================
         // 2. CONEXIÓN A GOOGLE SHEETS
         // ==========================================
-        async function cargarDatosMaponDirecto() {
+async function cargarDatosMaponDirecto() {
             const divMapon = document.getElementById('contenedor-mapon');
             if (!divMapon) return;
             
@@ -403,7 +403,8 @@
             
             try {
                 const sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM';
-                const urlMapon = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent("MONITOR MAPON")}`;
+                // Agregamos tq=select * para forzar que traiga absolutamente todas las filas y columnas
+                const urlMapon = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&tq=${encodeURIComponent('select *')}&sheet=${encodeURIComponent("MONITOR MAPON")}`;
                 
                 const respuesta = await fetch(urlMapon);
                 const texto = await respuesta.text();
@@ -411,12 +412,19 @@
                 const jsonString = texto.substring(47).slice(0, -2);
                 const jsonGviz = JSON.parse(jsonString);
                 
-                const headers = jsonGviz.table.cols.map(col => col.label);
+                const headers = jsonGviz.table.cols.map((col, index) => col.label || `Columna_${index}`);
                 
                 const datosFormateados = jsonGviz.table.rows.map(row => {
                     let obj = {};
                     row.c.forEach((celda, i) => {
-                        obj[headers[i]] = (celda && celda.f) ? celda.f : (celda ? celda.v : '');
+                        // FORZAR TODO A TEXTO PARA EVITAR PÉRDIDAS
+                        if (celda && celda.f) {
+                            obj[headers[i]] = String(celda.f);
+                        } else if (celda && celda.v !== null && celda.v !== undefined) {
+                            obj[headers[i]] = String(celda.v);
+                        } else {
+                            obj[headers[i]] = '';
+                        }
                     });
                     return obj;
                 });
