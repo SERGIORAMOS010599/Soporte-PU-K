@@ -128,4 +128,25 @@ class MonitorMapon {
             this.renderizarTabla(datosFiltrados);
         }
     }
+    function descargarExcel() {
+    // 1. Reemplaza 'idDeTuTabla' con el ID real de tu tabla HTML
+    let tabla = document.getElementById("idDeTuTabla"); 
+    
+    // 2. Extraer el nombre del filtro actual (opcional, para el nombre del archivo)
+    // Si tu etiqueta de filtro está oculta cuando no hay filtro, detectamos eso:
+    let nombreFiltro = "Completo";
+    let textoFiltro = document.getElementById("etiquetaFiltro").innerText;
+    
+    if (textoFiltro && !textoFiltro.includes("oculto")) { // Ajusta esta lógica según cómo ocultes tu texto
+        // Extraemos solo el nombre del estado (ej. "NODATA (NOPOWER)")
+        nombreFiltro = textoFiltro.replace("🔍 Filtrando por: ", "").replace(" (Clic para quitar filtro)", "");
+    }
+
+    // 3. Crear el libro de Excel a partir de la tabla HTML visible
+    let libro = XLSX.utils.table_to_book(tabla, { sheet: "Monitor" });
+    
+    // 4. Forzar la descarga del archivo
+    let nombreArchivo = `Reporte_Unidades_${nombreFiltro}.xlsx`;
+    XLSX.writeFile(libro, nombreArchivo);
+}
 }
