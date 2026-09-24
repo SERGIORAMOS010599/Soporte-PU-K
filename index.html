@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Importar Chart.js para las gráficas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta charset="UTF-8">
@@ -198,45 +199,59 @@
             renderizarEstructura() {
                 this.container.innerHTML = `
                     <div style="display: flex; flex-direction: row; gap: 20px; background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; height: 500px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); position: relative;">
+                
+                <div style="flex: 2; overflow-y: auto; background: #141414; border-radius: 6px; padding: 10px; position: relative;">
+                    
+                    <!-- NUEVO CONTENEDOR FLEX PARA ALINEAR EL FILTRO Y EL BOTÓN -->
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
                         
-                        <div style="flex: 2; overflow-y: auto; background: #141414; border-radius: 6px; padding: 10px; position: relative;">
-                            <div id="mapon-filter-info" style="margin-bottom: 15px; cursor: pointer; color: #ffb74d; font-weight: bold; font-size: 14px; padding: 5px 10px; background: #2a2a2a; border-radius: 4px; display: inline-block; border: 1px solid #444;">
-                                ✅ Mostrando todos los equipos
-                            </div>
-                            <table style="width: 100%; border-collapse: collapse; color: #fff; font-size: 13px;">
-                                <thead style="background: #1e1e1e; position: sticky; top: 0; z-index: 2;">
-                                    <tr>
-                                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Compañía</th>
-                                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Económico</th>
-                                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">ID (Serie)</th>
-                                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Modelo GPS</th>
-                                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Estado</th>
-                                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Último Reporte</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="mapon-tbody"></tbody>
-                            </table>
+                        <!-- TU ETIQUETA ORIGINAL DEL FILTRO (Intacta) -->
+                        <div id="mapon-filter-info" style="cursor: pointer; color: #ffb74d; font-weight: bold; font-size: 14px; padding: 5px 10px; background: #2a2a2a; border-radius: 4px; display: inline-block; border: 1px solid #444;">
+                            ✅ Mostrando todos los equipos
                         </div>
-
-                        <div style="flex: 1; display: flex; justify-content: center; align-items: center; background: #141414; border-radius: 6px; padding: 10px; max-width: 400px;">
-                            <div style="position: relative; width: 100%; height: 100%;">
-                                <canvas id="mapon-chart"></canvas>
-                            </div>
-                        </div>
-
-                        <!-- MODAL DE DETALLES -->
-                        <div id="mapon-modal-detalles" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10; border-radius: 8px; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
-                            <div style="background: #1e1e1e; border: 1px solid #ffb74d; width: 80%; max-width: 600px; max-height: 90%; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #333; background: #2a2a2a; border-radius: 8px 8px 0 0;">
-                                    <h3 style="margin: 0; color: #ffb74d;" id="modal-titulo-unidad">Detalles del Equipo</h3>
-                                    <button onclick="document.getElementById('mapon-modal-detalles').style.display='none'; window.equipoEnPantallaMapon = null;" style="background: transparent; color: #aaa; border: none; font-size: 20px; cursor: pointer;">✖</button>
-                                </div>
-                                <div id="modal-contenido-detalles" style="padding: 20px; overflow-y: auto; color: #ddd; font-size: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                </div>
-                            </div>
-                        </div>
-
+                        
+                        <!-- NUEVO BOTÓN DE DESCARGA EXCEL -->
+                        <button onclick="descargarExcelMapon()" style="width: 35px; height: 35px; background-color: #1D6F42; color: white; border: 1px solid #145230; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; justify-content: center; align-items: center;" title="Descargar vista actual en Excel">
+                            XLSX
+                        </button>
+                        
                     </div>
+
+                    <!-- AQUÍ SE LE AGREGA EL ID "tabla-mapon-exportar" A LA TABLA PARA QUE SHEETJS LA ENCUENTRE -->
+                    <table id="tabla-mapon-exportar" style="width: 100%; border-collapse: collapse; color: #fff; font-size: 13px;">
+                        <thead style="background: #1e1e1e; position: sticky; top: 0; z-index: 2;">
+                            <tr>
+                                <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Compañía</th>
+                                <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Económico</th>
+                                <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">ID (Serie)</th>
+                                <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Modelo GPS</th>
+                                <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Estado</th>
+                                <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Último Reporte</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mapon-tbody"></tbody>
+                    </table>
+                </div>
+
+                <div style="flex: 1; display: flex; justify-content: center; align-items: center; background: #141414; border-radius: 6px; padding: 10px; max-width: 400px;">
+                    <div style="position: relative; width: 100%; height: 100%;">
+                        <canvas id="mapon-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- MODAL DE DETALLES -->
+                <div id="mapon-modal-detalles" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10; border-radius: 8px; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
+                    <div style="background: #1e1e1e; border: 1px solid #ffb74d; width: 80%; max-width: 600px; max-height: 90%; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #333; background: #2a2a2a; border-radius: 8px 8px 0 0;">
+                            <h3 style="margin: 0; color: #ffb74d;" id="modal-titulo-unidad">Detalles del Equipo</h3>
+                            <button onclick="document.getElementById('mapon-modal-detalles').style.display='none'; window.equipoEnPantallaMapon = null;" style="background: transparent; color: #aaa; border: none; font-size: 20px; cursor: pointer;">✖</button>
+                        </div>
+                        <div id="modal-contenido-detalles" style="padding: 20px; overflow-y: auto; color: #ddd; font-size: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
                 `;
 
                 document.getElementById('mapon-filter-info').addEventListener('click', () => {
