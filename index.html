@@ -412,18 +412,38 @@
         // ==========================================
         
         // FUNCIÓN AÑADIDA PARA EXPORTAR EXCEL
+        // FUNCIÓN AÑADIDA PARA EXPORTAR EXCEL (VERSIÓN BLINDADA)
         window.descargarExcelMapon = function() {
-            let tabla = document.getElementById("tabla-mapon-exportar"); 
-            
-            let nombreFiltro = "Todos_los_equipos";
-            let divFiltro = document.getElementById("mapon-filter-info");
-            
-            if (divFiltro && divFiltro.innerText.includes("Filtrando por:")) {
-                nombreFiltro = divFiltro.innerText.replace("🔍 Filtrando por:", "").replace("(Clic para quitar filtro)", "").trim().replace(/\s+/g, '_');
-            }
+            try {
+                let tabla = document.getElementById("tabla-mapon-exportar"); 
+                
+                let nombreFiltro = "Todos_Los_Equipos";
+                let divFiltro = document.getElementById("mapon-filter-info");
+                
+                // Si el filtro está activo, extraemos el nombre de forma segura
+                if (divFiltro && divFiltro.innerText.includes("Filtrando")) {
+                    let textoRaw = divFiltro.innerText;
+                    
+                    // Cortamos exactamente lo que está entre "por:" y "(Clic"
+                    let fragmento = textoRaw.split("por:")[1]; 
+                    if (fragmento) {
+                        let estadoBruto = fragmento.split("(Clic")[0].trim();
+                        
+                        // MAGIA: Reemplaza CUALQUIER símbolo raro, paréntesis o salto de línea por un guion bajo "_"
+                        // Así "NODATA (NOPOWER)" se convierte en "NODATA__NOPOWER_" (100% aceptado por Windows)
+                        nombreFiltro = estadoBruto.replace(/[^a-zA-Z0-9]/g, '_');
+                    }
+                }
 
-            let libro = XLSX.utils.table_to_book(tabla, { sheet: "Monitor Mapon" });
-            XLSX.writeFile(libro, `Reporte_Mapon_${nombreFiltro}.xlsx`);
+                // Generar y descargar el libro
+                let libro = XLSX.utils.table_to_book(tabla, { sheet: "Monitor Mapon" });
+                XLSX.writeFile(libro, `Reporte_Mapon_${nombreFiltro}.xlsx`);
+                
+            } catch (error) {
+                // Si algo sale mal, ahora sí nos va a avisar con una ventana emergente
+                alert("⚠️ Ocurrió un error al intentar descargar el Excel: " + error.message);
+                console.error(error);
+            }
         };
 
         // 2. CONEXIÓN A GOOGLE SHEETS
