@@ -10,20 +10,17 @@ class SoporteTecnico {
         this.iniciar();
     }
 
-    // --- NUEVO: FUNCIÓN PARA CAMBIAR ENTRE PESTAÑAS ---
+    // --- FUNCION PARA CAMBIAR ENTRE PESTAÑAS ---
     cambiarVista(vistaDestino) {
-        // 1. Ocultar todas las vistas
         document.getElementById('vista-soporte').classList.add('vista-oculta');
         document.getElementById('vista-soporte').classList.remove('vista-activa');
         
         document.getElementById('vista-monitores').classList.add('vista-oculta');
         document.getElementById('vista-monitores').classList.remove('vista-activa');
 
-        // 2. Quitar la clase 'activo' de todos los botones
         const botones = document.querySelectorAll('.tab-btn');
         botones.forEach(btn => btn.classList.remove('activo'));
 
-        // 3. Mostrar la vista seleccionada y marcar el botón
         if (vistaDestino === 'soporte') {
             document.getElementById('vista-soporte').classList.remove('vista-oculta');
             document.getElementById('vista-soporte').classList.add('vista-activa');
@@ -72,7 +69,6 @@ class SoporteTecnico {
                 }
             });
 
-            // Restaurar búsqueda global si había una
             const inputBuscador = document.getElementById('buscador-global');
             if (inputBuscador) {
                 inputBuscador.value = this.Actual;
@@ -83,7 +79,6 @@ class SoporteTecnico {
             }
             this.renderizar();
             
-            // Si había una búsqueda activa, la aplicamos a los monitores también
             if (this.Actual !== '') {
                 setTimeout(() => this.buscarGlobal(this.Actual), 500);
             }
@@ -94,7 +89,7 @@ class SoporteTecnico {
         }
     } 
 
-    // --- FUNCIONES DEL BUSCADOR GLOBAL (Separadas correctamente) ---
+    // --- FUNCIONES DEL BUSCADOR GLOBAL ---
     buscarGlobal(texto) {
         this.Actual = texto;
         localStorage.setItem('Global', texto); 
@@ -445,16 +440,13 @@ class SoporteTecnico {
 
         const idPensando = this.agregarBurbujaChat('Olfateando el manual y revisando el equipo... 🐕', 'puk-ia');
 
-        // Construir el contexto oculto
         let contextoOculto = "";
         
-        // Revisamos si hay un equipo abierto en la ventana de Mapon
         if (window.equipoEnPantallaMapon) {
             const eq = window.equipoEnPantallaMapon;
             const marca = eq['Device model'] || 'Desconocido';
             const estado = eq['Online status'] || 'Desconocido';
             const ultimoReporte = eq['Last data received'] || 'Desconocido';
-            const voltaje = eq['External voltage'] || 'Desconocido'; // Ejemplo: si tienes esta columna
             const imei = eq['IMEI'] || 'Desconocido';
 
             contextoOculto = `
@@ -476,7 +468,6 @@ class SoporteTecnico {
             `;
         }
 
-        // El mensaje final que se envía a Google Apps Script
         const mensajeFinalParaIA = contextoOculto ? contextoOculto + "\n\nPregunta del técnico: " + mensajeUsuario : mensajeUsuario;
 
         const urlAppsScript = 'https://script.google.com/macros/s/AKfycbxechSb9x2TtDrI_E8egBEkGjZOOFGMXNl5UiBjB9s8n_hJwH6qGHe5aEMMENaEO39H/exec'; 
