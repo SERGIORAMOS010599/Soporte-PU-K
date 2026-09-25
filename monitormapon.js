@@ -111,14 +111,15 @@ class MonitorMapon {
             let compania = unidad['Compañía:'] || unidad['Compañía'] || 'Sin asignar';
             let economico = unidad['Economico'] || unidad['Name'] || 'S/N';
             
-            // 1. EXTRACCIÓN BLINDADA (Busca cualquier columna que suene a Serie o IMEI)
+            // 1. EXTRACCIÓN EXACTA (Solo busca la columna de Número de Serie, ignorando ID disp)
             let idSerie = 'S/N';
             for (let key in unidad) {
                 let nombreColumna = key.toLowerCase();
-                if (nombreColumna.includes('serie') || nombreColumna.includes('imei') || nombreColumna.includes('id disp')) {
+                // Al buscar explícitamente "de serie", nos aseguramos de atrapar "núm. de serie" sin importar acentos
+                if (nombreColumna.includes('de serie')) {
                     if (unidad[key] && String(unidad[key]).trim() !== '') {
                         idSerie = unidad[key];
-                        break; // Lo encontró, salimos del ciclo
+                        break; 
                     }
                 }
             }
@@ -141,8 +142,7 @@ class MonitorMapon {
             
             tr.onclick = () => this.abrirModalDetalles(unidad, economico, colorEstado);
 
-            // 2. EL TRUCO MAESTRO: Texto oculto con toda la información de la unidad
-            // Así el buscador encontrará IMEIs o números de chip aunque no estén en las columnas visibles.
+            // 2. EL TRUCO MAESTRO: Texto oculto para el buscador universal
             let dataOculta = Object.values(unidad).join(' ');
 
             tr.innerHTML = `
