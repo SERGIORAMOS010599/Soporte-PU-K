@@ -111,9 +111,19 @@ class MonitorMapon {
             let compania = unidad['Compañía:'] || unidad['Compañía'] || 'Sin asignar';
             let economico = unidad['Economico'] || unidad['Name'] || 'S/N';
             
-            let idSerie = unidad['Núm. de serie'] || 'S/N';
-            let modelo = unidad['Device model'] || 'Desconocido';
+            // 1. EXTRACCIÓN BLINDADA (Busca cualquier columna que suene a Serie o IMEI)
+            let idSerie = 'S/N';
+            for (let key in unidad) {
+                let nombreColumna = key.toLowerCase();
+                if (nombreColumna.includes('serie') || nombreColumna.includes('imei') || nombreColumna.includes('id disp')) {
+                    if (unidad[key] && String(unidad[key]).trim() !== '') {
+                        idSerie = unidad[key];
+                        break; // Lo encontró, salimos del ciclo
+                    }
+                }
+            }
             
+            let modelo = unidad['Device model'] || 'Desconocido';
             let estado = unidad['Online status'] || 'Desconocido';
             let ultimoReporte = unidad['Last data received'] || 'Sin fecha';
 
@@ -131,10 +141,17 @@ class MonitorMapon {
             
             tr.onclick = () => this.abrirModalDetalles(unidad, economico, colorEstado);
 
+            // 2. EL TRUCO MAESTRO: Texto oculto con toda la información de la unidad
+            // Así el buscador encontrará IMEIs o números de chip aunque no estén en las columnas visibles.
+            let dataOculta = Object.values(unidad).join(' ');
+
             tr.innerHTML = `
                 <td style="padding: 10px; border-bottom: 1px solid #333;">${compania}</td>
                 <td style="padding: 10px; border-bottom: 1px solid #333; font-weight: bold;">${economico}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #333; color: #aaa;">${idSerie}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #333; color: #aaa;">
+                    ${idSerie}
+                    <span style="display:none;">${dataOculta}</span>
+                </td>
                 <td style="padding: 10px; border-bottom: 1px solid #333;">${modelo}</td>
                 <td style="padding: 10px; border-bottom: 1px solid #333; color: ${colorEstado}; font-weight: bold;">${estado}</td>
                 <td style="padding: 10px; border-bottom: 1px solid #333; font-size: 12px;">${ultimoReporte}</td>
