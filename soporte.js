@@ -6,7 +6,7 @@ class SoporteTecnico {
         this.equipos = [];
         this.equipoSeleccionado = null; 
         
-        this.busquedaActual = localStorage.getItem('busquedaGlobal') || ''; 
+        this.Actual = localStorage.getItem('Global') || ''; 
         this.iniciar();
     }
 
@@ -74,8 +74,8 @@ class SoporteTecnico {
 
             const inputBuscador = document.getElementById('buscador-global');
             if (inputBuscador) {
-                inputBuscador.value = this.busquedaActual;
-                document.getElementById('btn-limpiar-busqueda').style.display = this.busquedaActual ? 'block' : 'none';
+                inputBuscador.value = this.Actual;
+                document.getElementById('btn-limpiar-').style.display = this.Actual ? 'block' : 'none';
             }
             this.renderizar();
         } catch (error) {
@@ -85,15 +85,39 @@ class SoporteTecnico {
     } 
 
     // --- FUNCIONES DEL BUSCADOR GLOBAL ---
+    // --- FUNCIONES DEL BUSCADOR GLOBAL ---
     buscarGlobal(texto) {
-        this.busquedaActual = texto;
-        localStorage.setItem('busquedaGlobal', texto); 
-        document.getElementById('btn-limpiar-busqueda').style.display = texto.length > 0 ? 'block' : 'none';
+        this.Actual = texto;
+        localStorage.setItem('Global', texto); 
+        
+        const btnLimpiar = document.getElementById('btn-limpiar-');
+        if (btnLimpiar) {
+            btnLimpiar.style.display = texto.length > 0 ? 'block' : 'none';
+        }
+
+        // 1. FILTRAR PESTAÑA SOPORTE TÉCNICO (Reconstruye el grid-salidas)
         this.renderizar(); 
+
+        // 2. FILTRAR PESTAÑA MONITOR
+        const query = texto.toLowerCase().trim();
+        
+        // Selecciona todos los contenedores/tarjetas de los equipos en la vista del Monitor.
+        // OJO: Cambia '.tarjeta-mapon' por la clase CSS real que usen las tarjetas o filas de tu monitor.
+        const elementosMonitor = document.querySelectorAll('.tarjeta-mapon'); 
+        
+        elementosMonitor.forEach(elemento => {
+            if (query === '') {
+                elemento.style.display = ''; // Muestra todo si está vacío
+            } else {
+                const contenido = elemento.textContent.toLowerCase();
+                elemento.style.display = contenido.includes(query) ? '' : 'none';
+            }
+        });
     }
 
-    limpiarBusqueda() {
-        document.getElementById('buscador-global').value = '';
+    limpiar() {
+        const input = document.getElementById('buscador-global');
+        if (input) input.value = '';
         this.buscarGlobal('');
     }
 
@@ -101,7 +125,7 @@ class SoporteTecnico {
     renderizar() {
         if (!this.container) return;
         this.container.innerHTML = '';
-        const query = this.busquedaActual.toLowerCase().trim();
+        const query = this.Actual.toLowerCase().trim();
         
         const equiposFiltrados = this.equipos.filter(eq => {
             if (query === '') return true;
