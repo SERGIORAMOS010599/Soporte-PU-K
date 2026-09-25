@@ -34,14 +34,24 @@
 </head>
 <body>
     
-    <!-- NUEVA BARRA DE NAVEGACIÓN (Pestañas) -->
-    <div class="navbar-principal">
-        <div class="logo-app">IDT TECNOLOGÍAS - PU-K</div>
-        <div class="menu-tabs">
-            <button class="tab-btn activo" onclick="appSoporte.cambiarVista('soporte')">Soporte Técnico</button>
-            <button class="tab-btn" onclick="appSoporte.cambiarVista('monitores')">Monitores Globales</button>
-            <button class="tab-btn" onclick="appSoporte.cambiarVista('diagnostico')">Diagnóstico en Vivo</button>
+    <!-- NUEVA BARRA DE NAVEGACIÓN (Pestañas y Buscador Universal) -->
+    <div class="navbar-principal" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #1a1a1a; border-bottom: 2px solid #ffb74d;">
+        
+        <div style="display: flex; align-items: center; gap: 30px;">
+            <div class="logo-app" style="color: #ffb74d; font-weight: bold; font-size: 1.2rem;">IDT TECNOLOGÍAS - PU-K</div>
+            <div class="menu-tabs" style="display: flex; gap: 10px;">
+                <button class="tab-btn activo" onclick="appSoporte.cambiarVista('soporte')">Soporte Técnico</button>
+                <button class="tab-btn" onclick="appSoporte.cambiarVista('monitores')">Monitores Globales</button>
+                <button class="tab-btn" onclick="appSoporte.cambiarVista('diagnostico')">Diagnóstico en Vivo</button>
+            </div>
         </div>
+
+        <!-- BARRA DE BÚSQUEDA UNIVERSAL MOVIDA AQUÍ -->
+        <div class="buscador-container" style="position: relative; min-width: 300px;">
+            <input type="text" id="buscador-global" placeholder="Buscar por IMEI, ID, Cliente o Unidad..." oninput="appSoporte.buscarGlobal(this.value)" style="width: 100%; padding: 10px 35px 10px 15px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff;">
+            <span id="btn-limpiar-busqueda" onclick="appSoporte.limpiarBusqueda()" style="display: none; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #ffb74d; font-weight: bold;">✖</span>
+        </div>
+
     </div>
 
     <!-- CONTENEDOR DE VISTAS (Alterna entre Soporte y Monitores) -->
@@ -51,12 +61,6 @@
         <!-- VISTA 1: SOPORTE TÉCNICO (Tu vista original) -->
         <!-- ========================================== -->
         <div id="vista-soporte" class="vista-activa">
-            
-            <!-- BARRA DE BÚSQUEDA UNIVERSAL -->
-            <div class="buscador-container" style="position: relative; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <input type="text" id="buscador-global" placeholder="Buscar por IMEI, ID, Cliente o Unidad..." oninput="appSoporte.buscarGlobal(this.value)">
-                <span id="btn-limpiar-busqueda" onclick="appSoporte.limpiarBusqueda()" style="display: none; position: absolute; right: 30px; top: 35px; cursor: pointer; color: #a0a0a0;">✖</span>
-            </div>
 
             <div class="contenedor-principal">
                 <!-- CUADRÍCULA MAESTRA -->
@@ -426,19 +430,29 @@
                 });
 
                 // ==========================================================
-                // LA MAGIA: Buscar en el inventario por Número de Serie
+                // LA MAGIA: Buscar en el inventario por Número de Serie (VERSIÓN MEJORADA)
                 // ==========================================================
-                const numSerieMapon = unidad['Núm. de serie'] ? String(unidad['Núm. de serie']).replace(/\.0$/, '').trim() : null;
+                
+                // 1. Extraemos el Número de Serie del modal de Mapon y lo limpiamos al máximo
+                let rawNumSerieMapon = unidad['Núm. de serie'] || unidad['ID DISP.'] || unidad['IMEI'] || '';
+                const numSerieMapon = String(rawNumSerieMapon).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
                 
                 let eqSoporteEncontrado = null;
                 
-                // Verificamos si appSoporte existe y tiene los equipos cargados
-                if (window.appSoporte && window.appSoporte.equipos && numSerieMapon && numSerieMapon !== 'S/N' && numSerieMapon !== 'Sin dato') {
-                    // Buscamos el equipo en el arreglo principal usando el ID (que equivale al Num Serie en Salidas)
-                    eqSoporteEncontrado = window.appSoporte.equipos.find(e => String(e.id).replace(/\.0$/, '').trim() === numSerieMapon);
+                // 2. Buscamos en el inventario de Salidas
+                if (window.appSoporte && window.appSoporte.equipos && numSerieMapon && numSerieMapon !== 's/n' && numSerieMapon !== 'sindato') {
+                    
+                    eqSoporteEncontrado = window.appSoporte.equipos.find(e => {
+                        // Limpiamos también el ID de salidas para que sea una comparación exacta
+                        const idSalida = String(e.id).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
+                        
+                        // Si el ID es igual al Número de Serie, o al IMEI (como respaldo)
+                        return idSalida === numSerieMapon || 
+                               (e.imei && String(e.imei).replace(/\s+/g, '').toLowerCase() === numSerieMapon);
+                    });
                 }
 
-                // Si encontramos el equipo en Salidas, habilitamos el botón y armamos el panel
+                // 3. Si lo encontramos, mostramos el botón
                 if (eqSoporteEncontrado) {
                     btnSoporte.style.display = 'block';
                     
