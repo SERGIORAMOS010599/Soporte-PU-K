@@ -72,6 +72,7 @@ class SoporteTecnico {
                 }
             });
 
+            // Restaurar búsqueda global si había una
             const inputBuscador = document.getElementById('buscador-global');
             if (inputBuscador) {
                 inputBuscador.value = this.Actual;
@@ -81,30 +82,39 @@ class SoporteTecnico {
                 }
             }
             this.renderizar();
+            
+            // Si había una búsqueda activa, la aplicamos a los monitores también
+            if (this.Actual !== '') {
+                setTimeout(() => this.buscarGlobal(this.Actual), 500);
+            }
 
-   // --- FUNCIONES DEL BUSCADOR GLOBAL ---
+        } catch (error) {
+            console.error("Error al conectar con Google Sheets:", error);
+            this.container.innerHTML = '<p style="text-align:center; color:#ff4c4c;">Error al cargar inventario.</p>';
+        }
+    } 
+
+    // --- FUNCIONES DEL BUSCADOR GLOBAL (Separadas correctamente) ---
     buscarGlobal(texto) {
         this.Actual = texto;
         localStorage.setItem('Global', texto); 
         
-        // Muestra u oculta la crucecita de limpiar
         const btnLimpiar = document.getElementById('btn-limpiar-busqueda');
         if (btnLimpiar) {
             btnLimpiar.style.display = texto.length > 0 ? 'block' : 'none';
         }
 
-        // 1. FILTRAR PESTAÑA SOPORTE TÉCNICO (Recarga las tarjetas)
+        // 1. Filtrar Soporte
         this.renderizar(); 
 
-        // 2. FILTRAR PESTAÑA MONITOR MAPON (Oculta las filas de la tabla)
+        // 2. Filtrar Mapon
         const query = texto.toLowerCase().trim();
         const filasMapon = document.querySelectorAll('#mapon-tbody tr'); 
         
         filasMapon.forEach(fila => {
             if (query === '') {
-                fila.style.display = ''; // Muestra todo si está vacío
+                fila.style.display = ''; 
             } else {
-                // Lee todo el texto de la fila (compañía, económico, serie, etc.)
                 const contenido = fila.textContent.toLowerCase();
                 fila.style.display = contenido.includes(query) ? '' : 'none';
             }
