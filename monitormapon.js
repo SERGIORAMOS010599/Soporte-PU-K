@@ -34,6 +34,11 @@ class MonitorMapon {
                     <tr>
                         <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Compañía</th>
                         <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Económico</th>
+                        <!-- NUEVAS COLUMNAS -->
+                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Marca</th>
+                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Modelo</th>
+                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">VIN</th>
+                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Año Fab.</th>
                         <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">ID (Serie)</th>
                         <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Modelo GPS</th>
                         <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Estado</th>
