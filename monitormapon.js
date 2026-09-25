@@ -116,11 +116,17 @@ class MonitorMapon {
             let compania = unidad['Compañía:'] || unidad['Compañía'] || 'Sin asignar';
             let economico = unidad['Economico'] || unidad['Name'] || 'S/N';
             
-            // 1. EXTRACCIÓN EXACTA (Solo busca la columna de Número de Serie, ignorando ID disp)
+            // --- NUEVOS DATOS DE LA UNIDAD ---
+            // Ponemos varias opciones (||) por si en el Sheets de Mapon la columna se llama un poco diferente
+            let marcaUnidad = unidad['Marca'] || unidad['Vehicle brand'] || '-';
+            let modeloUnidad = unidad['Modelo'] || unidad['Vehicle model'] || '-';
+            let vin = unidad['VIN'] || unidad['Chassis number'] || '-';
+            let anio = unidad['Año fabricación'] || unidad['Año'] || unidad['Year'] || '-';
+            
+            // Extracción exacta del número de serie
             let idSerie = 'S/N';
             for (let key in unidad) {
                 let nombreColumna = key.toLowerCase();
-                // Al buscar explícitamente "de serie", nos aseguramos de atrapar "núm. de serie" sin importar acentos
                 if (nombreColumna.includes('de serie')) {
                     if (unidad[key] && String(unidad[key]).trim() !== '') {
                         idSerie = unidad[key];
@@ -136,11 +142,11 @@ class MonitorMapon {
             let colorEstado = '#fff';
             let estadoUp = estado.toUpperCase();
             
-            if (estadoUp.includes('NODATA')) colorEstado = '#f44336'; // Rojo
-            else if (estadoUp === 'OK') colorEstado = '#4caf50'; // Verde
-            else if (estadoUp.includes('NOGPS')) colorEstado = '#ffeb3b'; // Amarillo
-            else if (estadoUp.includes('NOPOWER')) colorEstado = '#ff9800'; // Naranja (Atrapa OK (NOPOWER))
-            else colorEstado = '#9e9e9e'; // Gris por defecto
+            if (estadoUp.includes('NODATA')) colorEstado = '#f44336'; 
+            else if (estadoUp === 'OK') colorEstado = '#4caf50'; 
+            else if (estadoUp.includes('NOGPS')) colorEstado = '#ffeb3b'; 
+            else if (estadoUp.includes('NOPOWER')) colorEstado = '#ff9800'; 
+            else colorEstado = '#9e9e9e'; 
 
             const tr = document.createElement('tr');
             tr.style.cssText = "cursor: pointer; transition: background 0.2s;";
@@ -149,12 +155,16 @@ class MonitorMapon {
             
             tr.onclick = () => this.abrirModalDetalles(unidad, economico, colorEstado);
 
-            // 2. EL TRUCO MAESTRO: Texto oculto para el buscador universal
             let dataOculta = Object.values(unidad).join(' ');
 
+            // ACTUALIZAMOS EL HTML DE LA FILA CON LAS 4 COLUMNAS NUEVAS
             tr.innerHTML = `
                 <td style="padding: 10px; border-bottom: 1px solid #333;">${compania}</td>
                 <td style="padding: 10px; border-bottom: 1px solid #333; font-weight: bold;">${economico}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #333;">${marcaUnidad}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #333;">${modeloUnidad}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #333; font-size: 11px; color: #bbb;">${vin}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #333;">${anio}</td>
                 <td style="padding: 10px; border-bottom: 1px solid #333; color: #aaa;">
                     ${idSerie}
                     <span style="display:none;">${dataOculta}</span>
