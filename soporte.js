@@ -86,36 +86,36 @@ class SoporteTecnico {
 
     // --- FUNCIONES DEL BUSCADOR GLOBAL ---
     // --- FUNCIONES DEL BUSCADOR GLOBAL ---
+   // --- FUNCIONES DEL BUSCADOR GLOBAL ---
     buscarGlobal(texto) {
         this.Actual = texto;
         localStorage.setItem('Global', texto); 
         
-        const btnLimpiar = document.getElementById('btn-limpiar-');
+        // Muestra u oculta la crucecita de limpiar
+        const btnLimpiar = document.getElementById('btn-limpiar-busqueda');
         if (btnLimpiar) {
             btnLimpiar.style.display = texto.length > 0 ? 'block' : 'none';
         }
 
-        // 1. FILTRAR PESTAÑA SOPORTE TÉCNICO (Reconstruye el grid-salidas)
+        // 1. FILTRAR PESTAÑA SOPORTE TÉCNICO (Recarga las tarjetas)
         this.renderizar(); 
 
-        // 2. FILTRAR PESTAÑA MONITOR
+        // 2. FILTRAR PESTAÑA MONITOR MAPON (Oculta las filas de la tabla)
         const query = texto.toLowerCase().trim();
+        const filasMapon = document.querySelectorAll('#mapon-tbody tr'); 
         
-        // Selecciona todos los contenedores/tarjetas de los equipos en la vista del Monitor.
-        // OJO: Cambia '.tarjeta-mapon' por la clase CSS real que usen las tarjetas o filas de tu monitor.
-        const elementosMonitor = document.querySelectorAll('.tarjeta-mapon'); 
-        
-        elementosMonitor.forEach(elemento => {
+        filasMapon.forEach(fila => {
             if (query === '') {
-                elemento.style.display = ''; // Muestra todo si está vacío
+                fila.style.display = ''; // Muestra todo si está vacío
             } else {
-                const contenido = elemento.textContent.toLowerCase();
-                elemento.style.display = contenido.includes(query) ? '' : 'none';
+                // Lee todo el texto de la fila (compañía, económico, serie, etc.)
+                const contenido = fila.textContent.toLowerCase();
+                fila.style.display = contenido.includes(query) ? '' : 'none';
             }
         });
     }
 
-    limpiar() {
+    limpiarBusqueda() {
         const input = document.getElementById('buscador-global');
         if (input) input.value = '';
         this.buscarGlobal('');
