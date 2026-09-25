@@ -130,10 +130,12 @@ class MonitorMapon {
 
             let colorEstado = '#fff';
             let estadoUp = estado.toUpperCase();
-            if (estadoUp.includes('NODATA')) colorEstado = '#f44336'; 
-            else if (estadoUp === 'OK') colorEstado = '#4caf50'; 
-            else if (estadoUp.includes('NOGPS')) colorEstado = '#ffeb3b'; 
-            else colorEstado = '#ffb74d'; 
+            
+            if (estadoUp.includes('NODATA')) colorEstado = '#f44336'; // Rojo
+            else if (estadoUp === 'OK') colorEstado = '#4caf50'; // Verde
+            else if (estadoUp.includes('NOGPS')) colorEstado = '#ffeb3b'; // Amarillo
+            else if (estadoUp.includes('NOPOWER')) colorEstado = '#ff9800'; // Naranja (Atrapa OK (NOPOWER))
+            else colorEstado = '#9e9e9e'; // Gris por defecto
 
             const tr = document.createElement('tr');
             tr.style.cssText = "cursor: pointer; transition: background 0.2s;";
@@ -175,6 +177,7 @@ class MonitorMapon {
             if (lbl.includes('NODATA')) return '#f44336'; 
             if (lbl === 'OK') return '#4caf50'; 
             if (lbl.includes('NOGPS')) return '#ffeb3b'; 
+            if (lbl.includes('NOPOWER')) return '#ff9800'; // Naranja para la gráfica
             return '#9e9e9e'; 
         });
 
