@@ -202,22 +202,15 @@
                 
                 <div style="flex: 2; overflow-y: auto; background: #141414; border-radius: 6px; padding: 10px; position: relative;">
                     
-                    <!-- NUEVO CONTENEDOR FLEX PARA ALINEAR EL FILTRO Y EL BOTÓN -->
                     <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
-                        
-                        <!-- TU ETIQUETA ORIGINAL DEL FILTRO (Intacta) -->
                         <div id="mapon-filter-info" style="cursor: pointer; color: #ffb74d; font-weight: bold; font-size: 14px; padding: 5px 10px; background: #2a2a2a; border-radius: 4px; display: inline-block; border: 1px solid #444;">
                             ✅ Mostrando todos los equipos
                         </div>
-                        
-                        <!-- NUEVO BOTÓN DE DESCARGA EXCEL -->
                         <button onclick="window.descargarExcelMapon()" style="width: 35px; height: 35px; background-color: #1D6F42; color: white; border: 1px solid #145230; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; justify-content: center; align-items: center;" title="Descargar vista actual en Excel">
                             XLSX
                         </button>
-                        
                     </div>
 
-                    <!-- AQUÍ SE LE AGREGA EL ID "tabla-mapon-exportar" A LA TABLA PARA QUE SHEETJS LA ENCUENTRE -->
                     <table id="tabla-mapon-exportar" style="width: 100%; border-collapse: collapse; color: #fff; font-size: 13px;">
                         <thead style="background: #1e1e1e; position: sticky; top: 0; z-index: 2;">
                             <tr>
@@ -239,14 +232,31 @@
                     </div>
                 </div>
 
-                <!-- MODAL DE DETALLES -->
+                <!-- MODAL DE DETALLES AMPLIADO PARA SOPORTE -->
                 <div id="mapon-modal-detalles" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10; border-radius: 8px; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
-                    <div style="background: #1e1e1e; border: 1px solid #ffb74d; width: 80%; max-width: 600px; max-height: 90%; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                    
+                    <div id="mapon-modal-box" style="background: #1e1e1e; border: 1px solid #ffb74d; width: 90%; max-width: 550px; max-height: 95%; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: max-width 0.3s ease;">
+                        
+                        <!-- ENCABEZADO DEL MODAL -->
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #333; background: #2a2a2a; border-radius: 8px 8px 0 0;">
-                            <h3 style="margin: 0; color: #ffb74d;" id="modal-titulo-unidad">Detalles del Equipo</h3>
+                            <div style="display: flex; gap: 15px; align-items: center;">
+                                <h3 style="margin: 0; color: #ffb74d;" id="modal-titulo-unidad">Detalles del Equipo</h3>
+                                <button id="btn-mostrar-soporte" style="display: none; background: #1976d2; color: white; border: 1px solid #115293; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s;">🛠️ Opciones de Soporte</button>
+                            </div>
                             <button onclick="document.getElementById('mapon-modal-detalles').style.display='none'; window.equipoEnPantallaMapon = null;" style="background: transparent; color: #aaa; border: none; font-size: 20px; cursor: pointer;">✖</button>
                         </div>
-                        <div id="modal-contenido-detalles" style="padding: 20px; overflow-y: auto; color: #ddd; font-size: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        
+                        <!-- CONTENEDOR DIVIDIDO (IZQ: Mapon | DER: Soporte) -->
+                        <div style="display: flex; flex-direction: row; overflow-y: auto; max-height: calc(100vh - 100px);">
+                            
+                            <!-- COLUMNA IZQUIERDA: Info Mapon Original -->
+                            <div id="modal-contenido-detalles" style="padding: 20px; color: #ddd; font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; align-content: start;">
+                            </div>
+                            
+                            <!-- COLUMNA DERECHA: Comandos y Datos de Inventario (Oculto por defecto) -->
+                            <div id="modal-contenido-soporte" style="display: none; padding: 20px; background: #141414; border-left: 1px solid #333; flex: 1; flex-direction: column; gap: 15px;">
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -258,7 +268,6 @@
                     this.filtrarPorEstado(null);
                 });
             }
-
             renderizarTabla(datos) {
                 const tbody = document.getElementById('mapon-tbody');
                 tbody.innerHTML = ''; 
@@ -383,12 +392,23 @@
                 document.getElementById('modal-titulo-unidad').innerText = nombreUnidad;
                 document.getElementById('mapon-modal-detalles').style.display = 'flex';
                 
+                // Resetear el modal a su tamaño original
+                const modalBox = document.getElementById('mapon-modal-box');
+                modalBox.style.maxWidth = '550px'; 
+                
+                const panelSoporte = document.getElementById('modal-contenido-soporte');
+                panelSoporte.style.display = 'none';
+                
+                const btnSoporte = document.getElementById('btn-mostrar-soporte');
+                btnSoporte.style.display = 'none';
+                btnSoporte.innerText = '🛠️ Opciones de Soporte';
+                btnSoporte.style.background = '#1976d2';
+
+                // Llenar cuadrícula de Mapon (Columna Izquierda)
                 const contenedor = document.getElementById('modal-contenido-detalles');
                 contenedor.innerHTML = ''; 
 
-                // ¡AQUÍ ESTÁ LA MAGIA! Guardamos el equipo en la memoria global de la app
                 if (typeof appSoporte !== 'undefined') {
-                    // Creamos una variable global para el contexto de PU-K
                     window.equipoEnPantallaMapon = unidad;
                 }
 
@@ -398,14 +418,95 @@
                         const divItem = document.createElement('div');
                         divItem.style.cssText = "background: #222; padding: 10px; border-radius: 4px; border-left: 3px solid " + colorBorde + ";";
                         divItem.innerHTML = `
-                            <div style="font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 3px;">${key}</div>
-                            <div style="font-size: 14px; font-weight: bold; word-break: break-all;">${valor}</div>
+                            <div style="font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 3px;">${key}</div>
+                            <div style="font-size: 13px; font-weight: bold; word-break: break-all;">${valor}</div>
                         `;
                         contenedor.appendChild(divItem);
                     }
                 });
+
+                // ==========================================================
+                // LA MAGIA: Buscar en el inventario por Número de Serie
+                // ==========================================================
+                const numSerieMapon = unidad['Núm. de serie'] ? String(unidad['Núm. de serie']).replace(/\.0$/, '').trim() : null;
+                
+                let eqSoporteEncontrado = null;
+                
+                // Verificamos si appSoporte existe y tiene los equipos cargados
+                if (window.appSoporte && window.appSoporte.equipos && numSerieMapon && numSerieMapon !== 'S/N' && numSerieMapon !== 'Sin dato') {
+                    // Buscamos el equipo en el arreglo principal usando el ID (que equivale al Num Serie en Salidas)
+                    eqSoporteEncontrado = window.appSoporte.equipos.find(e => String(e.id).replace(/\.0$/, '').trim() === numSerieMapon);
+                }
+
+                // Si encontramos el equipo en Salidas, habilitamos el botón y armamos el panel
+                if (eqSoporteEncontrado) {
+                    btnSoporte.style.display = 'block';
+                    
+                    // Extraemos los datos del equipo encontrado
+                    const id = eqSoporteEncontrado.id;
+                    const linea = eqSoporteEncontrado.linea || 'N/A';
+                    const imei = eqSoporteEncontrado.imei || 'N/A';
+                    
+                    // Armamos los botones minificados para que quepan bien a un lado
+                    panelSoporte.innerHTML = `
+                        <div style="border-bottom: 1px solid #444; padding-bottom: 5px; margin-bottom: 10px;">
+                            <h4 style="margin: 0; color: #ffb74d;">Acciones Rápidas</h4>
+                            <span style="font-size: 11px; color: #888;">Línea conectada: <b>${linea}</b></span>
+                        </div>
+                        
+                        <div class="panel-botones" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start;">
+                            <button class="btn-accion" style="flex: 1 1 30%; padding: 8px 5px; font-size: 9px; min-height: unset; flex-direction: row; gap: 8px; justify-content: flex-start;" onclick="appSoporte.enviarSMS('apagar', '${id}')">
+                                <div class="icono" style="background-color: #d32f2f; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">⏻</div>APAGAR
+                            </button>
+                            <button class="btn-accion" style="flex: 1 1 30%; padding: 8px 5px; font-size: 9px; min-height: unset; flex-direction: row; gap: 8px; justify-content: flex-start;" onclick="appSoporte.enviarSMS('encender', '${id}')">
+                                <div class="icono" style="background-color: #388e3c; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">⏻</div>ENCENDER
+                            </button>
+                            <button class="btn-accion" style="flex: 1 1 30%; padding: 8px 5px; font-size: 9px; min-height: unset; flex-direction: row; gap: 8px; justify-content: flex-start;" onclick="appSoporte.enviarSMS('configuracion', '${id}')">
+                                <div class="icono" style="background-color: #ffb74d; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">?</div>CONFIG.
+                            </button>
+                            <button class="btn-accion" style="flex: 1 1 30%; padding: 8px 5px; font-size: 9px; min-height: unset; flex-direction: row; gap: 8px; justify-content: flex-start;" onclick="appSoporte.enviarSMS('reiniciar', '${id}')">
+                                <div class="icono" style="background-color: #f57c00; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">⟳</div>REINICIAR
+                            </button>
+                            <button class="btn-accion" style="flex: 1 1 30%; padding: 8px 5px; font-size: 9px; min-height: unset; flex-direction: row; gap: 8px; justify-content: flex-start;" onclick="appSoporte.enviarSMS('borrar', '${id}')">
+                                <div class="icono" style="background-color: #f57c00; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">🗑️</div>BORRAR
+                            </button>
+                            <button class="btn-accion" style="flex: 1 1 30%; padding: 8px 5px; font-size: 9px; min-height: unset; flex-direction: row; gap: 8px; justify-content: flex-start;" onclick="appSoporte.enviarSMS('formatear', '${id}')">
+                                <div class="icono" style="background-color: #d32f2f; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">⌫</div>FORMATO
+                            </button>
+                        </div>
+                        
+                        <div style="border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 15px; margin-bottom: 10px;">
+                            <h4 style="margin: 0; color: #ffb74d;">Enlaces Externos</h4>
+                        </div>
+                        
+                        <div class="panel-botones" style="display: flex; gap: 10px;">
+                            <button class="btn-accion" style="flex: 1; padding: 8px 5px; font-size: 10px; min-height: unset; flex-direction: row; gap: 8px;" onclick="window.open('https://soporte.zeekgps.com/ZeekSoporte/', '_blank')">
+                                <div class="icono" style="background-color: #1976d2; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">🛠️</div>ZEEK
+                            </button>
+                            <button class="btn-accion" style="flex: 1; padding: 8px 5px; font-size: 10px; min-height: unset; flex-direction: row; gap: 8px;" onclick="window.open('https://mapon.com/partner/gbox_new/', '_blank')">
+                                <div class="icono" style="background-color: #00c853; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">📍</div>MAPON
+                            </button>
+                        </div>
+                    `;
+                    
+                    // Función del botón para expandir/contraer
+                    btnSoporte.onclick = () => {
+                        if (panelSoporte.style.display === 'none') {
+                            panelSoporte.style.display = 'flex';
+                            modalBox.style.maxWidth = '850px'; // Se expande para mostrar ambos lados
+                            btnSoporte.innerText = '◀ Ocultar Soporte';
+                            btnSoporte.style.background = '#444';
+                            btnSoporte.style.border = '1px solid #666';
+                        } else {
+                            panelSoporte.style.display = 'none';
+                            modalBox.style.maxWidth = '550px'; // Regresa a su tamaño original
+                            btnSoporte.innerText = '🛠️ Opciones de Soporte';
+                            btnSoporte.style.background = '#1976d2';
+                            btnSoporte.style.border = '1px solid #115293';
+                        }
+                    };
+                }
             }
-        }
 
         // ==========================================
         // FUNCIONES GLOBALES Y CONEXIÓN
