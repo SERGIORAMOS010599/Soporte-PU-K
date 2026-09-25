@@ -75,17 +75,13 @@ class SoporteTecnico {
             const inputBuscador = document.getElementById('buscador-global');
             if (inputBuscador) {
                 inputBuscador.value = this.Actual;
-                document.getElementById('btn-limpiar-').style.display = this.Actual ? 'block' : 'none';
+                const btnLimpiar = document.getElementById('btn-limpiar-busqueda');
+                if (btnLimpiar) {
+                    btnLimpiar.style.display = this.Actual ? 'block' : 'none';
+                }
             }
             this.renderizar();
-        } catch (error) {
-            console.error("Error al conectar con Google Sheets:", error);
-            this.container.innerHTML = '<p style="text-align:center; color:#ff4c4c;">Error al cargar inventario.</p>';
-        }
-    } 
 
-    // --- FUNCIONES DEL BUSCADOR GLOBAL ---
-    // --- FUNCIONES DEL BUSCADOR GLOBAL ---
    // --- FUNCIONES DEL BUSCADOR GLOBAL ---
     buscarGlobal(texto) {
         this.Actual = texto;
