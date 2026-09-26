@@ -1,4 +1,66 @@
 class SoporteTecnico {
+    // --- CONSULTA EN VIVO A JASPER / TELCEL ---
+    async consultarJasperLinea(iccidUnidad) {
+        const contenedorResultado = document.getElementById('jasper-resultado-box');
+        
+        if (!iccidUnidad || iccidUnidad === 'N/A' || iccidUnidad === 'S/N') {
+            if (contenedorResultado) {
+                contenedorResultado.innerHTML = '<span style="color: #ff4c4c;">❌ Este equipo no tiene un ICCID válido registrado.</span>';
+            }
+            return;
+        }
+
+        if (contenedorResultado) {
+            contenedorResultado.innerHTML = '<span style="color: #ffb74d;">⏳ Consultando satélites de Telcel Jasper... 📡</span>';
+        }
+
+        // Tu URL de Apps Script que acabamos de desplegar
+        const urlMicroservicioJasper = 'https://script.google.com/macros/s/AKfycbxnGi5haIiiDPQcTvFFlqJlreVWPNVGC4XASYrkhnbxItytizhDwleoW5oB0GP6ijel/exec';
+
+        try {
+            const respuesta = await fetch(urlMicroservicioJasper, {
+                method: 'POST',
+                body: JSON.stringify({ iccid: iccidUnidad })
+            });
+            const data = await respuesta.json();
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            // Colores dinámicos según el estado de la línea
+            let colorEstadoSim = '#4caf50'; // Verde por defecto (Activated)
+            if (data.status !== 'ACTIVATED') {
+                colorEstadoSim = '#f44336'; // Rojo si está suspendida o desactivada
+            }
+
+            // Pintamos los datos hermosos en el panel
+            if (contenedorResultado) {
+                contenedorResultado.innerHTML = `
+                    <div style="background: #141414; border: 1px solid #444; padding: 12px; border-radius: 6px; font-size: 12px; text-align: left; margin-top: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+                            <span style="color: #ffb74d; font-weight: bold;">📡 TELEMETRÍA TELCEL SIM</span>
+                            <span style="background: ${colorEstadoSim}; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">${data.status || 'DESCONOCIDO'}</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; color: #ccc;">
+                            <div>📞 <b>Msisdn:</b> ${data.msisdn || 'N/A'}</div>
+                            <div>💳 <b>Plan:</b> ${data.ratePlan || 'N/A'}</div>
+                            <div style="grid-column: span 2; word-break: break-all;">🏷️ <b>ICCID:</b> ${data.iccid || iccidUnidad}</div>
+                            <div style="grid-column: span 2;">📱 <b>IMEI Enlazado:</b> ${data.imei || 'No vinculado en red'}</div>
+                            <div style="grid-column: span 2; font-size: 11px; color: #888; margin-top: 4px;">📅 Activación: ${data.dateActivated ? data.dateActivated.split('T')[0] : 'N/A'}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+        } catch (error) {
+            console.error("Error Jasper:", error);
+            if (contenedorResultado) {
+                contenedorResultado.innerHTML = `<span style="color: #ff4c4c;">❌ Error al consultar Jasper: SIM no encontrado o error de red.</span>`;
+            }
+        }
+    }
+    
     constructor() {
         this.container = document.getElementById('grid-salidas');
         this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM'; 
@@ -177,7 +239,13 @@ class SoporteTecnico {
         document.getElementById('det-marcaModeloUnidad').innerText = eq.marcaModeloUnidad;
         document.getElementById('det-anio').innerText = eq.anio;
         document.getElementById('det-numSerie').innerText = eq.numSerie;
-
+        <!-- BOTÓN Y CAJA DE JASPER -->
+<div style="margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; text-align: center;">
+    <button onclick="appSoporte.consultarJasperLinea('${eq.iccid}')" style="background: #00c853; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%;">
+        📡 Consultar Estado en Telcel Jasper
+    </button>
+    <div id="jasper-resultado-box"></div>
+</div>
         this.iniciarAsistente();
     }
 
