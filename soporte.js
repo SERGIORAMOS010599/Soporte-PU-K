@@ -14,7 +14,6 @@ class SoporteTecnico {
             contenedorResultado.innerHTML = '<span style="color: #ffb74d;">⏳ Consultando satélites de Telcel Jasper... 📡</span>';
         }
 
-        // Tu URL de Apps Script que acabamos de desplegar
         const urlMicroservicioJasper = 'https://script.google.com/macros/s/AKfycbxnGi5haIiiDPQcTvFFlqJlreVWPNVGC4XASYrkhnbxItytizhDwleoW5oB0GP6ijel/exec';
 
         try {
@@ -28,13 +27,11 @@ class SoporteTecnico {
                 throw new Error(data.error);
             }
 
-            // Colores dinámicos según el estado de la línea
-            let colorEstadoSim = '#4caf50'; // Verde por defecto (Activated)
+            let colorEstadoSim = '#4caf50'; 
             if (data.status !== 'ACTIVATED') {
-                colorEstadoSim = '#f44336'; // Rojo si está suspendida o desactivada
+                colorEstadoSim = '#f44336'; 
             }
 
-            // Pintamos los datos hermosos en el panel
             if (contenedorResultado) {
                 contenedorResultado.innerHTML = `
                     <div style="background: #141414; border: 1px solid #444; padding: 12px; border-radius: 6px; font-size: 12px; text-align: left; margin-top: 10px;">
@@ -239,13 +236,29 @@ class SoporteTecnico {
         document.getElementById('det-marcaModeloUnidad').innerText = eq.marcaModeloUnidad;
         document.getElementById('det-anio').innerText = eq.anio;
         document.getElementById('det-numSerie').innerText = eq.numSerie;
-        <!-- BOTÓN Y CAJA DE JASPER -->
-        <div style="margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; text-align: center;">
-            <button onclick="appSoporte.consultarJasperLinea('${eq.iccid}')" style="background: #00c853; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%;">
-                📡 Consultar Estado en Telcel Jasper
-            </button>
-            <div id="jasper-resultado-box"></div>
-        </div>
+
+        // INYECCIÓN CORRECTA DEL BOTÓN DE JASPER DENTRO DEL ASISTENTE O ABAJO DE LA TABLA
+        const contenedorAsistenteBody = document.querySelector('.comandos-body');
+        
+        // Evitamos duplicar el botón si ya se abrió el panel antes
+        let botonJasperExistente = document.getElementById('contenedor-jasper-panel');
+        if (!botonJasperExistente && contenedorAsistenteBody) {
+            const wrapperJasper = document.createElement('div');
+            wrapperJasper.id = 'contenedor-jasper-panel';
+            wrapperJasper.style.cssText = "margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; text-align: center;";
+            wrapperJasper.innerHTML = `
+                <button onclick="appSoporte.consultarJasperLinea('${eq.iccid}')" style="background: #00c853; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%;">
+                    📡 Consultar Estado en Telcel Jasper
+                </button>
+                <div id="jasper-resultado-box"></div>
+            `;
+            contenedorAsistenteBody.appendChild(wrapperJasper);
+        } else if (botonJasperExistente) {
+            // Si ya existe, actualizamos el evento onclick con el ICCID del nuevo equipo seleccionado
+            botonJasperExistente.querySelector('button').setAttribute('onclick', `appSoporte.consultarJasperLinea('${eq.iccid}')`);
+            document.getElementById('jasper-resultado-box').innerHTML = ''; // Limpiamos consulta anterior
+        }
+
         this.iniciarAsistente();
     }
 
@@ -470,7 +483,7 @@ class SoporteTecnico {
             else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};03;05`;
             else if (marca.startsWith("TELTONIKA")) comando = "  getparam 2001:;2002:;2003:;2004:;2005:;2006:;1004:";
             else if (marca.startsWith("RUPTELA")) comando = " getapn";
-            else if (marca.startsWith("CONCOX") || marca.startsWith("JIMIIOT")) comando = "GPRSSET#";
+            else if (marca.startsWith("CONCOX" ) || marca.startsWith("JIMIIOT")) comando = "GPRSSET#";
         }
         else if (accion === 'borrar') {
             if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;EraseAll`;
