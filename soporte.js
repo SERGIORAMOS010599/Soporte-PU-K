@@ -42,8 +42,11 @@ class SoporteTecnico {
             const consumoMB = data.consumoMB !== "No disponible" ? `${data.consumoMB} MB` : "N/A";
             
             // 3. Textos para los límites
-            const limiteUso = '<span style="color:#aaa;">No en API</span>';
-            const bloqueoSIM = '<span style="color:#aaa;">No en API</span>';
+            const limiteUso = data.limiteAlcanzado 
+                ? '<span style="color:#f44336; font-weight: bold;">⚠️ SÍ (Alcanzado)</span>' 
+                : '<span style="color:#4caf50;">✅ NO (Normal)</span>';
+                
+            const bloqueoSIM = '<span style="color:#aaa;">No en API</span>'; // Este sigue escondido
 
             // Renderizamos la nueva interfaz compacta
             if (contenedorResultado) {
