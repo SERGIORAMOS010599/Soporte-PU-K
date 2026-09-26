@@ -34,18 +34,14 @@ class SoporteTecnico {
                 colorEstadoSim = '#f44336'; 
             }
 
-            // 2. Traducción de booleanos a interfaz visual
-            // Jasper maneja el estado de red como ONLINE/OFFLINE o incluye una IP si hay sesión
-            const enSesion = (data.sessionStatus === 'ONLINE' || data.ipAddress || data.fixedIPAddress) ? '<span style="color:#4caf50">🟢 SÍ</span>' : '<span style="color:#f44336">🔴 NO</span>';
+            // 2. Traducción de datos exactos procesados por el backend
+            const enSesion = data.enSesion ? '<span style="color:#4caf50">🟢 SÍ</span>' : '<span style="color:#f44336">🔴 NO</span>';
+            const consumoMB = data.consumoMB !== "No disponible" ? `${data.consumoMB} MB` : "Sin datos";
             
-            const limiteUso = data.overageLimitReached ? '<span style="color:#ff9800">⚠️ ALCANZADO (Sí)</span>' : '<span style="color:#4caf50">✅ NORMAL (No)</span>';
-            const bloqueoSIM = data.simLocked ? '<span style="color:#f44336">🔒 SÍ (Bloqueado)</span>' : '<span style="color:#4caf50">🔓 NO (Libre)</span>';
-
-            // 3. Conversión de Bytes a Megabytes
-            let consumoMB = "0.00 MB";
-            if (data.usoConsumo && data.usoConsumo.ctdDataUsage) {
-                consumoMB = (data.usoConsumo.ctdDataUsage / 1048576).toFixed(2) + " MB";
-            }
+            // Nota de ingeniería: Jasper API v1 no expone el "Límite alcanzado" ni el "Bloqueo SIM" en sus peticiones estándar. 
+            // Estos son cálculos internos del portal web. Los dejamos indicados para evitar datos falsos.
+            const limiteUso = '<span style="color:#aaa; font-size:10px;">No expuesto en API</span>';
+            const bloqueoSIM = '<span style="color:#aaa; font-size:10px;">No expuesto en API</span>';
 
             // Renderizamos la info ampliada y los botones
             if (contenedorResultado) {
@@ -64,9 +60,9 @@ class SoporteTecnico {
                             <div style="grid-column: span 2; font-size: 11px; color: #888;">📅 Activación: ${data.dateActivated ? data.dateActivated.split('T')[0] : 'N/A'}</div>
                         </div>
 
-                        <!-- ESTADOS Y CONSUMO (NUEVO) -->
+                        <!-- ESTADOS Y CONSUMO -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; color: #ccc; margin-bottom: 12px;">
-                            <div style="grid-column: span 2;">📊 <b>Consumo mensual:</b> <span style="color: #64b5f6; font-weight: bold; font-size: 13px;">${consumoMB}</span></div>
+                            <div style="grid-column: span 2; border-bottom: 1px solid #222; padding-bottom: 4px;">📊 <b>Consumo mensual:</b> <span style="color: #64b5f6; font-weight: bold; font-size: 13px;">${consumoMB}</span></div>
                             <div>🌐 <b>Sesión de datos:</b> ${enSesion}</div>
                             <div>🚫 <b>Límite de uso:</b> ${limiteUso}</div>
                             <div>🔐 <b>Bloqueo de SIM:</b> ${bloqueoSIM}</div>
