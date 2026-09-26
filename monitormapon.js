@@ -295,7 +295,23 @@ class MonitorMapon {
             const id = eqSoporteEncontrado.id;
             const linea = eqSoporteEncontrado.linea || 'N/A';
             const imei = eqSoporteEncontrado.imei || 'N/A';
+            const iccid = eqSoporteEncontrado.iccid || 'N/A';
+            const compania = eqSoporteEncontrado.compania || '';
             
+            // LÓGICA CONDICIONAL: Solo crear el botón Jasper si la línea pertenece a Telcel
+            let bloqueJasperModal = '';
+            if (compania.toUpperCase().includes('TELCEL')) {
+                bloqueJasperModal = `
+                    <div style="margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
+                        <button onclick="appSoporte.consultarJasperLinea('${iccid}', 'jasper-modal-box')" style="background: #00c853; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%; transition: background 0.2s;" onmouseover="this.style.background='#00e676'" onmouseout="this.style.background='#00c853'">
+                            📡 Consultar Estado en Telcel Jasper
+                        </button>
+                        <!-- CAJA ÚNICA PARA EL MODAL -->
+                        <div id="jasper-modal-box"></div>
+                    </div>
+                `;
+            }
+
             panelSoporte.innerHTML = `
                 <div style="border-bottom: 1px solid #444; padding-bottom: 5px; margin-bottom: 10px;">
                     <h4 style="margin: 0; color: #ffb74d;">Acciones Rápidas</h4>
@@ -335,6 +351,9 @@ class MonitorMapon {
                         <div class="icono" style="background-color: #00c853; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">📍</div>MAPON
                     </button>
                 </div>
+                
+                <!-- INYECCIÓN DEL BLOQUE JASPER AL FINAL DE LAS OPCIONES DE SOPORTE -->
+                ${bloqueJasperModal}
             `;
             
             btnSoporte.onclick = () => {
