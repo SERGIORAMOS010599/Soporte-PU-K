@@ -34,48 +34,57 @@ class SoporteTecnico {
                 colorEstadoSim = '#f44336'; 
             }
 
-            // 2. Traducción de datos exactos procesados por el backend
-            const enSesion = data.enSesion ? '<span style="color:#4caf50">🟢 SÍ</span>' : '<span style="color:#f44336">🔴 NO</span>';
-            const consumoMB = data.consumoMB !== "No disponible" ? `${data.consumoMB} MB` : "Sin datos";
+            // 2. Badges superiores dinámicos (Sesión y Consumo)
+            const enSesionBadge = data.enSesion 
+                ? '<span style="background: #4caf50; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">SESIÓN</span>' 
+                : '<span style="background: #f44336; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">SIN SESIÓN</span>';
             
-            // Nota de ingeniería: Jasper API v1 no expone el "Límite alcanzado" ni el "Bloqueo SIM" en sus peticiones estándar. 
-            // Estos son cálculos internos del portal web. Los dejamos indicados para evitar datos falsos.
-            const limiteUso = '<span style="color:#aaa; font-size:10px;">No expuesto en API</span>';
-            const bloqueoSIM = '<span style="color:#aaa; font-size:10px;">No expuesto en API</span>';
+            const consumoMB = data.consumoMB !== "No disponible" ? `${data.consumoMB} MB` : "N/A";
+            
+            // 3. Textos para los límites
+            const limiteUso = '<span style="color:#aaa;">No en API</span>';
+            const bloqueoSIM = '<span style="color:#aaa;">No en API</span>';
 
-            // Renderizamos la info ampliada y los botones
+            // Renderizamos la nueva interfaz compacta
             if (contenedorResultado) {
                 contenedorResultado.innerHTML = `
                     <div style="background: #141414; border: 1px solid #444; padding: 12px; border-radius: 6px; font-size: 12px; text-align: left; margin-top: 10px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px;">
-                            <span style="color: #ffb74d; font-weight: bold;">📡 TELEMETRÍA TELCEL SIM</span>
-                            <span style="background: ${colorEstadoSim}; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">${data.status || 'DESCONOCIDO'}</span>
+                        
+                        <!-- CABECERA COMPACTA (Plan, Consumo, Sesion, Estado) -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 8px; gap: 5px;">
+                            <span style="color: #ffb74d; font-weight: bold; font-size: 11px;">📡 TELCEL</span>
+                            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+                                <span style="color: #ccc; font-size: 10px;">💳 ${data.ratePlan || 'N/A'}</span>
+                                <span style="color: #64b5f6; font-weight: bold; font-size: 11px;">📊 ${consumoMB}</span>
+                                ${enSesionBadge}
+                                <span style="background: ${colorEstadoSim}; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">${data.status || 'DESCONOCIDO'}</span>
+                            </div>
                         </div>
                         
-                        <!-- DATOS BÁSICOS -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; color: #ccc; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 8px;">
-                            <div>📞 <b>Msisdn:</b> ${data.msisdn || 'N/A'}</div>
-                            <div>💳 <b>Plan:</b> ${data.ratePlan || 'N/A'}</div>
-                            <div style="grid-column: span 2; word-break: break-all;">🏷️ <b>ICCID:</b> ${data.iccid || iccidUnidad}</div>
-                            <div style="grid-column: span 2; font-size: 11px; color: #888;">📅 Activación: ${data.dateActivated ? data.dateActivated.split('T')[0] : 'N/A'}</div>
+                        <!-- CUERPO DE DATOS (2 Columnas) -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; color: #ccc; margin-bottom: 12px; font-size: 11px;">
+                            <!-- Columna Izquierda -->
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                <div>📞 <b>Msisdn:</b> ${data.msisdn || 'N/A'}</div>
+                                <div style="word-break: break-all;">🏷️ <b>ICCID:</b> ${data.iccid || iccidUnidad}</div>
+                                <div style="color: #888;">📅 <b>Activación:</b> ${data.dateActivated ? data.dateActivated.split('T')[0] : 'N/A'}</div>
+                            </div>
+                            
+                            <!-- Columna Derecha -->
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                <div>📱 <b>IMEI Red:</b> ${data.imei || 'N/A'}</div>
+                                <div>🚫 <b>Límite de uso:</b> ${limiteUso}</div>
+                                <div>🔐 <b>Bloqueo SIM:</b> ${bloqueoSIM}</div>
+                            </div>
                         </div>
 
-                        <!-- ESTADOS Y CONSUMO -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; color: #ccc; margin-bottom: 12px;">
-                            <div style="grid-column: span 2; border-bottom: 1px solid #222; padding-bottom: 4px;">📊 <b>Consumo mensual:</b> <span style="color: #64b5f6; font-weight: bold; font-size: 13px;">${consumoMB}</span></div>
-                            <div>🌐 <b>Sesión de datos:</b> ${enSesion}</div>
-                            <div>🚫 <b>Límite de uso:</b> ${limiteUso}</div>
-                            <div>🔐 <b>Bloqueo de SIM:</b> ${bloqueoSIM}</div>
-                            <div>📱 <b>IMEI Red:</b> ${data.imei || 'N/A'}</div>
-                        </div>
-
-                        <!-- FASE 3: BOTONES DE CONTROL DE LÍNEA -->
-                        <div style="display: flex; gap: 8px; border-top: 1px dashed #333; padding-top: 8px;">
+                        <!-- BOTONES DE CONTROL DE LÍNEA -->
+                        <div style="display: flex; gap: 8px; border-top: 1px dashed #333; padding-top: 10px;">
                             <button onclick="appSoporte.cambiarEstadoSim('${iccidUnidad}', 'ACTIVATED')" style="flex: 1; background: #2e7d32; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold;">
                                 ▶ Activar SIM
                             </button>
                             <button onclick="appSoporte.cambiarEstadoSim('${iccidUnidad}', 'DEACTIVATED')" style="flex: 1; background: #c62828; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold;">
-                                ⏹ Suspender SIM
+                                ⏹ Desactivar SIM
                             </button>
                         </div>
                     </div>
