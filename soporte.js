@@ -241,9 +241,9 @@ class SoporteTecnico {
         document.getElementById('det-numSerie').innerText = eq.numSerie;
         <!-- BOTÓN Y CAJA DE JASPER -->
         <div style="margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; text-align: center;">
-        <button onclick="appSoporte.consultarJasperLinea('${eq.iccid}')" style="background: #00c853; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%;">
-        📡 Consultar Estado en Telcel Jasper
-        </button>
+            <button onclick="appSoporte.consultarJasperLinea('${eq.iccid}')" style="background: #00c853; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%;">
+                📡 Consultar Estado en Telcel Jasper
+            </button>
             <div id="jasper-resultado-box"></div>
         </div>
         this.iniciarAsistente();
