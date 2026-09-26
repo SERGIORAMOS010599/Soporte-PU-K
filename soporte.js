@@ -1,8 +1,7 @@
 class SoporteTecnico {
-    // --- CONSULTA EN VIVO A JASPER / TELCEL ---
     // --- CONSULTA Y CONTROL EN VIVO DE JASPER / TELCEL ---
-    async consultarJasperLinea(iccidUnidad) {
-        const contenedorResultado = document.getElementById('jasper-resultado-box');
+    async consultarJasperLinea(iccidUnidad, containerId = 'jasper-resultado-box') {
+        const contenedorResultado = document.getElementById(containerId);
         
         if (!iccidUnidad || iccidUnidad === 'N/A' || iccidUnidad === 'S/N') {
             if (contenedorResultado) {
@@ -28,32 +27,28 @@ class SoporteTecnico {
                 throw new Error(data.error);
             }
 
-            // 1. Colores de estado general
             let colorEstadoSim = '#4caf50'; 
             if (data.status !== 'ACTIVATED') {
                 colorEstadoSim = '#f44336'; 
             }
 
-            // 2. Badges superiores dinámicos (Sesión y Consumo)
             const enSesionBadge = data.enSesion 
                 ? '<span style="background: #4caf50; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">SESIÓN</span>' 
                 : '<span style="background: #f44336; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">SIN SESIÓN</span>';
             
             const consumoMB = data.consumoMB !== "No disponible" ? `${data.consumoMB} MB` : "N/A";
             
-            // 3. Textos para los límites
             const limiteUso = data.limiteAlcanzado 
                 ? '<span style="color:#f44336; font-weight: bold;">⚠️ SÍ (Alcanzado)</span>' 
                 : '<span style="color:#4caf50;">✅ NO (Normal)</span>';
                 
-            const bloqueoSIM = '<span style="color:#aaa;">No en API</span>'; // Este sigue escondido
+            const bloqueoSIM = '<span style="color:#aaa;">Solo visible en Portal Web</span>';
 
-            // Renderizamos la nueva interfaz compacta
             if (contenedorResultado) {
                 contenedorResultado.innerHTML = `
                     <div style="background: #141414; border: 1px solid #444; padding: 12px; border-radius: 6px; font-size: 12px; text-align: left; margin-top: 10px;">
                         
-                        <!-- CABECERA COMPACTA (Plan, Consumo, Sesion, Estado) -->
+                        <!-- CABECERA COMPACTA -->
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 8px; gap: 5px;">
                             <span style="color: #ffb74d; font-weight: bold; font-size: 11px;">📡 TELCEL</span>
                             <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
@@ -64,16 +59,13 @@ class SoporteTecnico {
                             </div>
                         </div>
                         
-                        <!-- CUERPO DE DATOS (2 Columnas) -->
+                        <!-- CUERPO DE DATOS -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; color: #ccc; margin-bottom: 12px; font-size: 11px;">
-                            <!-- Columna Izquierda -->
                             <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <div>📞 <b>Msisdn:</b> ${data.msisdn || 'N/A'}</div>
                                 <div style="word-break: break-all;">🏷️ <b>ICCID:</b> ${data.iccid || iccidUnidad}</div>
                                 <div style="color: #888;">📅 <b>Activación:</b> ${data.dateActivated ? data.dateActivated.split('T')[0] : 'N/A'}</div>
                             </div>
-                            
-                            <!-- Columna Derecha -->
                             <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <div>📱 <b>IMEI Red:</b> ${data.imei || 'N/A'}</div>
                                 <div>🚫 <b>Límite de uso:</b> ${limiteUso}</div>
@@ -81,19 +73,18 @@ class SoporteTecnico {
                             </div>
                         </div>
 
-                        <!-- BOTONES DE CONTROL DE LÍNEA -->
+                        <!-- BOTONES DE CONTROL (Le pasamos el containerId) -->
                         <div style="display: flex; gap: 8px; border-top: 1px dashed #333; padding-top: 10px;">
-                            <button onclick="appSoporte.cambiarEstadoSim('${iccidUnidad}', 'ACTIVATED')" style="flex: 1; background: #2e7d32; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold;">
+                            <button onclick="appSoporte.cambiarEstadoSim('${iccidUnidad}', 'ACTIVATED', '${containerId}')" style="flex: 1; background: #2e7d32; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold;">
                                 ▶ Activar SIM
                             </button>
-                            <button onclick="appSoporte.cambiarEstadoSim('${iccidUnidad}', 'DEACTIVATED')" style="flex: 1; background: #c62828; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold;">
+                            <button onclick="appSoporte.cambiarEstadoSim('${iccidUnidad}', 'DEACTIVATED', '${containerId}')" style="flex: 1; background: #c62828; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold;">
                                 ⏹ Desactivar SIM
                             </button>
                         </div>
                     </div>
                 `;
             }
-
         } catch (error) {
             console.error("Error Jasper:", error);
             if (contenedorResultado) {
@@ -102,14 +93,13 @@ class SoporteTecnico {
         }
     }
 
-    // --- EJECUTAR CAMBIO DE ESTADO (FASE 3) ---
-    async cambiarEstadoSim(iccidUnidad, nuevoEstado) {
-        const accionTexto = nuevoEstado === 'ACTIVATED' ? 'ACTIVAR' : 'SUSPENDER';
+    async cambiarEstadoSim(iccidUnidad, nuevoEstado, containerId = 'jasper-resultado-box') {
+        const accionTexto = nuevoEstado === 'ACTIVATED' ? 'ACTIVAR' : 'DESACTIVAR';
         if (!confirm(`⚠️ ¿Estás seguro de que deseas ${accionTexto} la línea con ICCID: ${iccidUnidad} en la red de Telcel?`)) {
             return;
         }
 
-        const contenedorResultado = document.getElementById('jasper-resultado-box');
+        const contenedorResultado = document.getElementById(containerId);
         if (contenedorResultado) {
             contenedorResultado.innerHTML = `<span style="color: #ffb74d;">⏳ Enviando orden de ${accionTexto} a Telcel Jasper... 📡</span>`;
         }
@@ -128,13 +118,13 @@ class SoporteTecnico {
             }
 
             alert(`✅ ¡Éxito! La línea ha sido actualizada a estado: ${data.status}`);
-            // Recargamos automáticamente la información del SIM para ver el cambio reflejado
-            this.consultarJasperLinea(iccidUnidad);
+            // Recargamos en la misma caja donde se hizo el clic
+            this.consultarJasperLinea(iccidUnidad, containerId);
 
         } catch (error) {
             console.error("Error al cambiar estado:", error);
             alert("❌ Ocurrió un error al intentar cambiar el estado en Jasper.");
-            this.consultarJasperLinea(iccidUnidad);
+            this.consultarJasperLinea(iccidUnidad, containerId);
         }
     }
     
