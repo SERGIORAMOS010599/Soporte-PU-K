@@ -1,5 +1,6 @@
 class SoporteTecnico {
     // --- CONSULTA EN VIVO A JASPER / TELCEL ---
+    // --- CONSULTA Y CONTROL EN VIVO DE JASPER / TELCEL ---
     async consultarJasperLinea(iccidUnidad) {
         const contenedorResultado = document.getElementById('jasper-resultado-box');
         
@@ -19,7 +20,7 @@ class SoporteTecnico {
         try {
             const respuesta = await fetch(urlMicroservicioJasper, {
                 method: 'POST',
-                body: JSON.stringify({ iccid: iccidUnidad })
+                body: JSON.stringify({ accion: "consultar", iccid: iccidUnidad })
             });
             const data = await respuesta.json();
 
@@ -32,6 +33,7 @@ class SoporteTecnico {
                 colorEstadoSim = '#f44336'; 
             }
 
+            // Renderizamos la info y los botones de control de la Fase 3
             if (contenedorResultado) {
                 contenedorResultado.innerHTML = `
                     <div style="background: #141414; border: 1px solid #444; padding: 12px; border-radius: 6px; font-size: 12px; text-align: left; margin-top: 10px;">
@@ -39,12 +41,22 @@ class SoporteTecnico {
                             <span style="color: #ffb74d; font-weight: bold;">📡 TELEMETRÍA TELCEL SIM</span>
                             <span style="background: ${colorEstadoSim}; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">${data.status || 'DESCONOCIDO'}</span>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; color: #ccc;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; color: #ccc; margin-bottom: 10px;">
                             <div>📞 <b>Msisdn:</b> ${data.msisdn || 'N/A'}</div>
                             <div>💳 <b>Plan:</b> ${data.ratePlan || 'N/A'}</div>
                             <div style="grid-column: span 2; word-break: break-all;">🏷️ <b>ICCID:</b> ${data.iccid || iccidUnidad}</div>
                             <div style="grid-column: span 2;">📱 <b>IMEI Enlazado:</b> ${data.imei || 'No vinculado en red'}</div>
                             <div style="grid-column: span 2; font-size: 11px; color: #888; margin-top: 4px;">📅 Activación: ${data.dateActivated ? data.dateActivated.split('T')[0] : 'N/A'}</div>
+                        </div>
+
+                        <!-- FASE 3: BOTONES DE CONTROL DE LÍNEA -->
+                        <div style="display: flex; gap: 8px; border-top: 1px dashed #333; padding-top: 8px;">
+                            <button onclick="appSoporte.cambiarEstadoSim('${iccidUnidad}', 'ACTIVATED')" style="flex: 1; background: #2e7d32; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold;">
+                                ▶ Activar SIM
+                            </button>
+                            <button onclick="appSoporte.cambiarEstadoSim('${iccidUnidad}', 'DEACTIVATED')" style="flex: 1; background: #c62828; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold;">
+                                ⏹ Suspender SIM
+                            </button>
                         </div>
                     </div>
                 `;
@@ -55,6 +67,42 @@ class SoporteTecnico {
             if (contenedorResultado) {
                 contenedorResultado.innerHTML = `<span style="color: #ff4c4c;">❌ Error al consultar Jasper: SIM no encontrado o error de red.</span>`;
             }
+        }
+    }
+
+    // --- EJECUTAR CAMBIO DE ESTADO (FASE 3) ---
+    async cambiarEstadoSim(iccidUnidad, nuevoEstado) {
+        const accionTexto = nuevoEstado === 'ACTIVATED' ? 'ACTIVAR' : 'SUSPENDER';
+        if (!confirm(`⚠️ ¿Estás seguro de que deseas ${accionTexto} la línea con ICCID: ${iccidUnidad} en la red de Telcel?`)) {
+            return;
+        }
+
+        const contenedorResultado = document.getElementById('jasper-resultado-box');
+        if (contenedorResultado) {
+            contenedorResultado.innerHTML = `<span style="color: #ffb74d;">⏳ Enviando orden de ${accionTexto} a Telcel Jasper... 📡</span>`;
+        }
+
+        const urlMicroservicioJasper = 'https://script.google.com/macros/s/AKfycbxnGi5haIiiDPQcTvFFlqJlreVWPNVGC4XASYrkhnbxItytizhDwleoW5oB0GP6ijel/exec';
+
+        try {
+            const respuesta = await fetch(urlMicroservicioJasper, {
+                method: 'POST',
+                body: JSON.stringify({ accion: "cambiar_estado", iccid: iccidUnidad, nuevoEstado: nuevoEstado })
+            });
+            const data = await respuesta.json();
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            alert(`✅ ¡Éxito! La línea ha sido actualizada a estado: ${data.status}`);
+            // Recargamos automáticamente la información del SIM para ver el cambio reflejado
+            this.consultarJasperLinea(iccidUnidad);
+
+        } catch (error) {
+            console.error("Error al cambiar estado:", error);
+            alert("❌ Ocurrió un error al intentar cambiar el estado en Jasper.");
+            this.consultarJasperLinea(iccidUnidad);
         }
     }
     
