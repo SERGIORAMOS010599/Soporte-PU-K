@@ -28,12 +28,26 @@ class SoporteTecnico {
                 throw new Error(data.error);
             }
 
+            // 1. Colores de estado general
             let colorEstadoSim = '#4caf50'; 
             if (data.status !== 'ACTIVATED') {
                 colorEstadoSim = '#f44336'; 
             }
 
-            // Renderizamos la info y los botones de control de la Fase 3
+            // 2. Traducción de booleanos a interfaz visual
+            // Jasper maneja el estado de red como ONLINE/OFFLINE o incluye una IP si hay sesión
+            const enSesion = (data.sessionStatus === 'ONLINE' || data.ipAddress || data.fixedIPAddress) ? '<span style="color:#4caf50">🟢 SÍ</span>' : '<span style="color:#f44336">🔴 NO</span>';
+            
+            const limiteUso = data.overageLimitReached ? '<span style="color:#ff9800">⚠️ ALCANZADO (Sí)</span>' : '<span style="color:#4caf50">✅ NORMAL (No)</span>';
+            const bloqueoSIM = data.simLocked ? '<span style="color:#f44336">🔒 SÍ (Bloqueado)</span>' : '<span style="color:#4caf50">🔓 NO (Libre)</span>';
+
+            // 3. Conversión de Bytes a Megabytes
+            let consumoMB = "0.00 MB";
+            if (data.usoConsumo && data.usoConsumo.ctdDataUsage) {
+                consumoMB = (data.usoConsumo.ctdDataUsage / 1048576).toFixed(2) + " MB";
+            }
+
+            // Renderizamos la info ampliada y los botones
             if (contenedorResultado) {
                 contenedorResultado.innerHTML = `
                     <div style="background: #141414; border: 1px solid #444; padding: 12px; border-radius: 6px; font-size: 12px; text-align: left; margin-top: 10px;">
@@ -41,12 +55,22 @@ class SoporteTecnico {
                             <span style="color: #ffb74d; font-weight: bold;">📡 TELEMETRÍA TELCEL SIM</span>
                             <span style="background: ${colorEstadoSim}; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">${data.status || 'DESCONOCIDO'}</span>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; color: #ccc; margin-bottom: 10px;">
+                        
+                        <!-- DATOS BÁSICOS -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; color: #ccc; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 8px;">
                             <div>📞 <b>Msisdn:</b> ${data.msisdn || 'N/A'}</div>
                             <div>💳 <b>Plan:</b> ${data.ratePlan || 'N/A'}</div>
                             <div style="grid-column: span 2; word-break: break-all;">🏷️ <b>ICCID:</b> ${data.iccid || iccidUnidad}</div>
-                            <div style="grid-column: span 2;">📱 <b>IMEI Enlazado:</b> ${data.imei || 'No vinculado en red'}</div>
-                            <div style="grid-column: span 2; font-size: 11px; color: #888; margin-top: 4px;">📅 Activación: ${data.dateActivated ? data.dateActivated.split('T')[0] : 'N/A'}</div>
+                            <div style="grid-column: span 2; font-size: 11px; color: #888;">📅 Activación: ${data.dateActivated ? data.dateActivated.split('T')[0] : 'N/A'}</div>
+                        </div>
+
+                        <!-- ESTADOS Y CONSUMO (NUEVO) -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; color: #ccc; margin-bottom: 12px;">
+                            <div style="grid-column: span 2;">📊 <b>Consumo mensual:</b> <span style="color: #64b5f6; font-weight: bold; font-size: 13px;">${consumoMB}</span></div>
+                            <div>🌐 <b>Sesión de datos:</b> ${enSesion}</div>
+                            <div>🚫 <b>Límite de uso:</b> ${limiteUso}</div>
+                            <div>🔐 <b>Bloqueo de SIM:</b> ${bloqueoSIM}</div>
+                            <div>📱 <b>IMEI Red:</b> ${data.imei || 'N/A'}</div>
                         </div>
 
                         <!-- FASE 3: BOTONES DE CONTROL DE LÍNEA -->
