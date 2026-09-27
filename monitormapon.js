@@ -15,73 +15,76 @@ class MonitorMapon {
     }
 
     renderizarEstructura() {
-        // CORRECCIÓN SCROLL: Quitamos la altura fija restrictiva y le damos un min-height para que crezca naturalmente
         this.container.innerHTML = `
-            <div style="display: flex; flex-direction: row; gap: 15px; min-height: 600px; position: relative; margin-bottom: 30px;">
-                
-                <!-- PANEL IZQUIERDO: TABLA -->
-                <div style="flex: 2.5; background: #1a1a1a; border-radius: 8px; padding: 15px; border: 1px solid #2a2a2a; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); display: flex; flex-direction: column;">
-                    
-                    <!-- BARRA DE HERRAMIENTAS -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #333;">
-                        <div id="mapon-filter-info" style="cursor: pointer; color: #ffb74d; font-weight: bold; font-size: 11px; padding: 6px 12px; background: rgba(255, 183, 77, 0.1); border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255, 183, 77, 0.3); transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.background='rgba(255, 183, 77, 0.2)'" onmouseout="this.style.background='rgba(255, 183, 77, 0.1)'">
-                            <span>✅</span> Mostrando todos los equipos
-                        </div>
-                        <button onclick="window.descargarExcelMapon()" style="background: rgba(0, 200, 83, 0.1); color: #00e676; border: 1px solid #00c853; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px;" title="Descargar vista actual en Excel" onmouseover="this.style.background='#00c853'; this.style.color='#fff';" onmouseout="this.style.background='rgba(0, 200, 83, 0.1)'; this.style.color='#00e676';">
-                            <span>📊</span> EXCEL
-                        </button>
-                    </div>
-
-                    <!-- TABLA ESTILIZADA -->
-                    <div style="overflow-y: auto; max-height: 500px; padding-right: 5px;">
-                        <table id="tabla-mapon-exportar" style="width: 100%; border-collapse: separate; border-spacing: 0; color: #ccc; font-size: 11px;">
-                            <thead style="position: sticky; top: 0; z-index: 2;">
-                                <tr>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">Compañía</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">Económico</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">Marca</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">Modelo</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">VIN</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">Año</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">ID Serie</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">GPS</th>
-                                    <th style="padding: 12px 10px; text-align: center; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">Estado</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">Últ. Reporte</th>
-                                </tr>
-                            </thead>
-                            <tbody id="mapon-tbody"></tbody>
-                        </table>
-                    </div>
+            <div style="display: flex; flex-direction: row; gap: 20px; background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; height: 500px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); position: relative;">
+        
+        <div style="flex: 2; overflow-y: auto; background: #141414; border-radius: 6px; padding: 10px; position: relative;">
+            
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <div id="mapon-filter-info" style="cursor: pointer; color: #ffb74d; font-weight: bold; font-size: 14px; padding: 5px 10px; background: #2a2a2a; border-radius: 4px; display: inline-block; border: 1px solid #444;">
+                    ✅ Mostrando todos los equipos
                 </div>
-
-                <!-- PANEL DERECHO: GRÁFICA -->
-                <div style="flex: 1; display: flex; flex-direction: column; background: #1a1a1a; border-radius: 8px; padding: 15px; border: 1px solid #2a2a2a; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); min-width: 300px;">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #333;">
-                        <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">📊 Distribución de Estados</h4>
-                    </div>
-                    <div style="position: relative; width: 100%; flex: 1; display: flex; justify-content: center; align-items: center; min-height: 300px;">
-                        <canvas id="mapon-chart"></canvas>
-                    </div>
-                </div>
-
-                <!-- MODAL DE DETALLES AMPLIADO PARA SOPORTE -->
-                <div id="mapon-modal-detalles" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10; border-radius: 8px; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
-                    <div id="mapon-modal-box" style="background: #1e1e1e; border: 1px solid #ffb74d; width: 90%; max-width: 550px; max-height: 95%; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: max-width 0.3s ease;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #333; background: #2a2a2a; border-radius: 8px 8px 0 0;">
-                            <div style="display: flex; gap: 15px; align-items: center;">
-                                <h3 style="margin: 0; color: #ffb74d;" id="modal-titulo-unidad">Detalles del Equipo</h3>
-                                <button id="btn-mostrar-soporte" style="display: none; background: rgba(25, 118, 210, 0.1); color: #64b5f6; border: 1px solid #1976d2; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s;">🛠️ Opciones de Soporte</button>
-                            </div>
-                            <button onclick="document.getElementById('mapon-modal-detalles').style.display='none'; window.equipoEnPantallaMapon = null;" style="background: transparent; color: #aaa; border: none; font-size: 20px; cursor: pointer;">✖</button>
-                        </div>
-                        <div style="display: flex; flex-direction: row; overflow-y: auto; max-height: calc(100vh - 100px);">
-                            <div id="modal-contenido-detalles" style="padding: 20px; color: #ddd; font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; align-content: start;"></div>
-                            <div id="modal-contenido-soporte" style="display: none; padding: 20px; background: #141414; border-left: 1px solid #333; flex: 1; flex-direction: column; gap: 15px;"></div>
-                        </div>
-                    </div>
-                </div>
-
+                <button onclick="window.descargarExcelMapon()" style="width: 35px; height: 35px; background-color: #1D6F42; color: white; border: 1px solid #145230; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; justify-content: center; align-items: center;" title="Descargar vista actual en Excel">
+                    XLSX
+                </button>
             </div>
+
+            <table id="tabla-mapon-exportar" style="width: 100%; border-collapse: collapse; color: #fff; font-size: 13px;">
+                <thead style="background: #1e1e1e; position: sticky; top: 0; z-index: 2;">
+                    <tr>
+                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Compañía</th>
+                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Económico</th>
+                        <!-- NUEVAS COLUMNAS -->
+                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Marca</th>
+                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Modelo</th>
+                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">VIN</th>
+                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Año Fab.</th>
+                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">ID (Serie)</th>
+                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Modelo GPS</th>
+                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Estado</th>
+                        <th style="padding: 10px; text-align: left; color: #ffb74d; border-bottom: 1px solid #333;">Último Reporte</th>
+                    </tr>
+                </thead>
+                <tbody id="mapon-tbody"></tbody>
+            </table>
+        </div>
+
+        <div style="flex: 1; display: flex; justify-content: center; align-items: center; background: #141414; border-radius: 6px; padding: 10px; max-width: 400px;">
+            <div style="position: relative; width: 100%; height: 100%;">
+                <canvas id="mapon-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- MODAL DE DETALLES AMPLIADO PARA SOPORTE -->
+        <div id="mapon-modal-detalles" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10; border-radius: 8px; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
+            
+            <div id="mapon-modal-box" style="background: #1e1e1e; border: 1px solid #ffb74d; width: 90%; max-width: 550px; max-height: 95%; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: max-width 0.3s ease;">
+                
+                <!-- ENCABEZADO DEL MODAL -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #333; background: #2a2a2a; border-radius: 8px 8px 0 0;">
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <h3 style="margin: 0; color: #ffb74d;" id="modal-titulo-unidad">Detalles del Equipo</h3>
+                        <button id="btn-mostrar-soporte" style="display: none; background: #1976d2; color: white; border: 1px solid #115293; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s;">🛠️ Opciones de Soporte</button>
+                    </div>
+                    <button onclick="document.getElementById('mapon-modal-detalles').style.display='none'; window.equipoEnPantallaMapon = null;" style="background: transparent; color: #aaa; border: none; font-size: 20px; cursor: pointer;">✖</button>
+                </div>
+                
+                <!-- CONTENEDOR DIVIDIDO (IZQ: Mapon | DER: Soporte) -->
+                <div style="display: flex; flex-direction: row; overflow-y: auto; max-height: calc(100vh - 100px);">
+                    
+                    <!-- COLUMNA IZQUIERDA: Info Mapon Original -->
+                    <div id="modal-contenido-detalles" style="padding: 20px; color: #ddd; font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; align-content: start;">
+                    </div>
+                    
+                    <!-- COLUMNA DERECHA: Comandos y Datos de Inventario (Oculto por defecto) -->
+                    <div id="modal-contenido-soporte" style="display: none; padding: 20px; background: #141414; border-left: 1px solid #333; flex: 1; flex-direction: column; gap: 15px;">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
         `;
 
         document.getElementById('mapon-filter-info').addEventListener('click', () => {
@@ -93,33 +96,38 @@ class MonitorMapon {
         const tbody = document.getElementById('mapon-tbody');
         tbody.innerHTML = ''; 
 
-        // CORRECCIÓN DATOS: Restablecemos la lectura segura de las variables desde tu array
         let datosOrdenados = [...datos].sort((a, b) => {
-            let compA = (a['Compañía:'] || a['Compañía'] || a['Company'] || 'Sin asignar').toUpperCase();
-            let compB = (b['Compañía:'] || b['Compañía'] || b['Company'] || 'Sin asignar').toUpperCase();
+            let compA = (a['Compañía:'] || a['Compañía'] || 'Sin asignar').toUpperCase();
+            let compB = (b['Compañía:'] || b['Compañía'] || 'Sin asignar').toUpperCase();
+            
             if (compA < compB) return -1;
             if (compA > compB) return 1;
 
             let estA = (a['Online status'] || 'Desconocido').toUpperCase();
             let estB = (b['Online status'] || 'Desconocido').toUpperCase();
+            
             if (estA < estB) return -1;
             if (estA > estB) return 1;
+
             return 0;
         });
 
         datosOrdenados.forEach((unidad, index) => {
-            let compania = unidad['Compañía:'] || unidad['Compañía'] || unidad['Company'] || 'Sin asignar';
+            let compania = unidad['Compañía:'] || unidad['Compañía'] || 'Sin asignar';
             let economico = unidad['Economico'] || unidad['Name'] || 'S/N';
+            
+            // --- NUEVOS DATOS DE LA UNIDAD ---
+            // Ponemos varias opciones (||) por si en el Sheets de Mapon la columna se llama un poco diferente
             let marcaUnidad = unidad['Marca'] || unidad['Vehicle brand'] || '-';
             let modeloUnidad = unidad['Modelo'] || unidad['Vehicle model'] || '-';
             let vin = unidad['VIN'] || unidad['Chassis number'] || '-';
             let anio = unidad['Año fabricación'] || unidad['Año'] || unidad['Year'] || '-';
             
+            // Extracción exacta del número de serie
             let idSerie = 'S/N';
             for (let key in unidad) {
                 let nombreColumna = key.toLowerCase();
-                // Tu Google Sheets original exporta "Núm. de serie" o "IMEI"
-                if (nombreColumna.includes('de serie') || nombreColumna === 'imei' || nombreColumna === 'id disp.') {
+                if (nombreColumna.includes('de serie')) {
                     if (unidad[key] && String(unidad[key]).trim() !== '') {
                         idSerie = unidad[key];
                         break; 
@@ -131,40 +139,39 @@ class MonitorMapon {
             let estado = unidad['Online status'] || 'Desconocido';
             let ultimoReporte = unidad['Last data received'] || 'Sin fecha';
 
-            // ESTILOS PREMIUM PARA EL ESTADO (PÍLDORAS)
-            let colorTexto = '#fff';
-            let colorFondo = 'rgba(158, 158, 158, 0.1)';
-            let colorBorde = 'rgba(158, 158, 158, 0.3)';
+            let colorEstado = '#fff';
             let estadoUp = estado.toUpperCase();
             
-            if (estadoUp.includes('NODATA')) { colorTexto = '#f44336'; colorFondo = 'rgba(244, 67, 54, 0.1)'; colorBorde = 'rgba(244, 67, 54, 0.3)'; } 
-            else if (estadoUp === 'OK') { colorTexto = '#00e676'; colorFondo = 'rgba(0, 230, 118, 0.1)'; colorBorde = 'rgba(0, 230, 118, 0.3)'; } 
-            else if (estadoUp.includes('NOGPS')) { colorTexto = '#ffeb3b'; colorFondo = 'rgba(255, 235, 59, 0.1)'; colorBorde = 'rgba(255, 235, 59, 0.3)'; } 
-            else if (estadoUp.includes('NOPOWER')) { colorTexto = '#ff9800'; colorFondo = 'rgba(255, 152, 0, 0.1)'; colorBorde = 'rgba(255, 152, 0, 0.3)'; } 
-            else { colorTexto = '#9e9e9e'; }
-
-            let badgeEstado = `<span style="background: ${colorFondo}; color: ${colorTexto}; border: 1px solid ${colorBorde}; padding: 4px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;">${estado}</span>`;
+            if (estadoUp.includes('NODATA')) colorEstado = '#f44336'; 
+            else if (estadoUp === 'OK') colorEstado = '#4caf50'; 
+            else if (estadoUp.includes('NOGPS')) colorEstado = '#ffeb3b'; 
+            else if (estadoUp.includes('NOPOWER')) colorEstado = '#ff9800'; 
+            else colorEstado = '#9e9e9e'; 
 
             const tr = document.createElement('tr');
             tr.style.cssText = "cursor: pointer; transition: background 0.2s;";
-            tr.onmouseover = () => tr.style.background = "#222";
+            tr.onmouseover = () => tr.style.background = "#2a2a2a";
             tr.onmouseout = () => tr.style.background = "transparent";
             
-            tr.onclick = () => this.abrirModalDetalles(unidad, economico, colorTexto);
+            tr.onclick = () => this.abrirModalDetalles(unidad, economico, colorEstado);
 
             let dataOculta = Object.values(unidad).join(' ');
 
+            // ACTUALIZAMOS EL HTML DE LA FILA CON LAS 4 COLUMNAS NUEVAS
             tr.innerHTML = `
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; color: #ddd;">${compania}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; font-weight: bold; color: #fff;">${economico}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; color: #ccc;">${marcaUnidad}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; color: #ccc;">${modeloUnidad}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; font-size: 10px; color: #888;">${vin}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; color: #ccc;">${anio}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; color: #888;">${idSerie}<span style="display:none;">${dataOculta}</span></td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; color: #ccc;">${modelo}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; text-align: center;">${badgeEstado}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; font-size: 10px; color: #aaa;">${ultimoReporte}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #333;">${compania}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #333; font-weight: bold;">${economico}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #333;">${marcaUnidad}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #333;">${modeloUnidad}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #333; font-size: 11px; color: #bbb;">${vin}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #333;">${anio}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #333; color: #aaa;">
+                    ${idSerie}
+                    <span style="display:none;">${dataOculta}</span>
+                </td>
+                <td style="padding: 10px; border-bottom: 1px solid #333;">${modelo}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #333; color: ${colorEstado}; font-weight: bold;">${estado}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #333; font-size: 12px;">${ultimoReporte}</td>
             `;
             tbody.appendChild(tr);
         });
@@ -173,12 +180,7 @@ class MonitorMapon {
     renderizarGrafica() {
         const conteoEstados = {};
         this.datosUnidades.forEach(unidad => {
-            // Validamos que el estado exista y no esté en blanco
-            let estadoBruto = unidad['Online status'];
-            if (!estadoBruto || String(estadoBruto).trim() === '') {
-                estadoBruto = 'Desconocido';
-            }
-            let estado = estadoBruto.toString().trim();
+            let estado = (unidad['Online status'] || 'Desconocido').toString().trim();
             conteoEstados[estado] = (conteoEstados[estado] || 0) + 1;
         });
 
@@ -188,9 +190,9 @@ class MonitorMapon {
         const backgroundColors = labels.map(label => {
             let lbl = label.toUpperCase();
             if (lbl.includes('NODATA')) return '#f44336'; 
-            if (lbl === 'OK') return '#00e676'; 
+            if (lbl === 'OK') return '#4caf50'; 
             if (lbl.includes('NOGPS')) return '#ffeb3b'; 
-            if (lbl.includes('NOPOWER')) return '#ff9800';
+            if (lbl.includes('NOPOWER')) return '#ff9800'; // Naranja para la gráfica
             return '#9e9e9e'; 
         });
 
@@ -204,16 +206,15 @@ class MonitorMapon {
                 datasets: [{
                     data: dataValues,
                     backgroundColor: backgroundColors,
-                    borderWidth: 3,
-                    borderColor: '#1a1a1a' 
+                    borderWidth: 2,
+                    borderColor: '#1e1e1e' 
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '70%', 
                 plugins: {
-                    legend: { position: 'top', labels: { color: '#ccc', padding: 15, font: {size: 11, family: 'sans-serif'} } }
+                    legend: { position: 'top', labels: { color: '#ffffff', padding: 15, font: {size: 11} } }
                 },
                 onClick: (event, elements) => {
                     if (elements && elements.length > 0) {
@@ -229,16 +230,12 @@ class MonitorMapon {
     filtrarPorEstado(estado) {
         const infoDiv = document.getElementById('mapon-filter-info');
         if (!estado) {
-            infoDiv.innerHTML = `<span>✅</span> Mostrando todos los equipos`;
-            infoDiv.style.background = "rgba(255, 183, 77, 0.1)";
-            infoDiv.style.border = "1px solid rgba(255, 183, 77, 0.3)";
-            infoDiv.style.color = "#ffb74d";
+            infoDiv.innerHTML = `✅ Mostrando todos los equipos`;
+            infoDiv.style.color = "#ffb74d"; 
             this.renderizarTabla(this.datosUnidades);
         } else {
-            infoDiv.innerHTML = `<span>🔍</span> Filtrando: <b style="color:#fff;">${estado}</b> <span style="font-size:10px; margin-left:4px;">(✖)</span>`;
-            infoDiv.style.background = "rgba(0, 230, 118, 0.1)";
-            infoDiv.style.border = "1px solid rgba(0, 230, 118, 0.3)";
-            infoDiv.style.color = "#00e676"; 
+            infoDiv.innerHTML = `🔍 Filtrando por: <b style="color:white;">${estado}</b> (Clic para quitar filtro)`;
+            infoDiv.style.color = "#4caf50"; 
             const datosFiltrados = this.datosUnidades.filter(u => (u['Online status'] || 'Desconocido') === estado);
             this.renderizarTabla(datosFiltrados);
         }
@@ -275,6 +272,7 @@ class MonitorMapon {
                 let badgeStyle = "";
                 let displayValor = valor;
 
+                // Destacar el estatus online como píldora si es la columna correspondiente
                 if (key.toUpperCase() === 'ONLINE STATUS') {
                     badgeStyle = `background: ${colorBorde}15; color: ${colorBorde}; border: 1px solid ${colorBorde}; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; letter-spacing: 0.5px;`;
                     displayValor = `<span style="${badgeStyle}">${valor}</span>`;
@@ -336,12 +334,14 @@ class MonitorMapon {
             }
 
             panelSoporte.innerHTML = `
+                <!-- ENCABEZADO ACCIONES RÁPIDAS -->
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
                     <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Acciones Rápidas</h4>
                     <div style="flex: 1; height: 1px; background: #333;"></div>
                 </div>
                 <div style="margin-bottom: 15px; font-size: 11px; color: #888;">Línea vinculada: <b style="color: #ccc; letter-spacing: 0.5px;">${linea}</b></div>
                 
+                <!-- GRID DE BOTONES FANTASMA -->
                 <div class="panel-botones" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 25px;">
                     <button onclick="appSoporte.enviarSMS('apagar', '${id}')" style="background: rgba(244, 67, 54, 0.1); color: #ef5350; border: 1px solid #d32f2f; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#d32f2f'; this.style.color='#fff';" onmouseout="this.style.background='rgba(244, 67, 54, 0.1)'; this.style.color='#ef5350';">
                         <span style="font-size: 14px;">⏻</span> APAGAR
@@ -363,11 +363,13 @@ class MonitorMapon {
                     </button>
                 </div>
                 
+                <!-- ENCABEZADO ENLACES EXTERNOS -->
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
                     <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">🔗 Enlaces Externos</h4>
                     <div style="flex: 1; height: 1px; background: #333;"></div>
                 </div>
                 
+                <!-- BOTONES ENLACES EXTERNOS -->
                 <div class="panel-botones" style="display: flex; gap: 8px;">
                     <button onclick="window.open('https://soporte.zeekgps.com/ZeekSoporte/', '_blank')" style="flex: 1; background: rgba(33, 150, 243, 0.1); color: #42a5f5; border: 1px solid #1976d2; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.background='#1976d2'; this.style.color='#fff';" onmouseout="this.style.background='rgba(33, 150, 243, 0.1)'; this.style.color='#42a5f5';">
                         <span style="font-size: 14px;">🛠️</span> ZEEK
@@ -377,6 +379,7 @@ class MonitorMapon {
                     </button>
                 </div>
                 
+                <!-- INYECCIÓN DEL BLOQUE JASPER -->
                 ${bloqueJasperModal}
             `;
             
