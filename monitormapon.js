@@ -14,10 +14,10 @@ class MonitorMapon {
         this.renderizarGrafica();
     }
 
-    renderizarEstructura() {
-        // AJUSTE 1 (FLECHA ROJA): Agregamos height y overflow-y: auto al contenedor principal
+renderizarEstructura() {
         this.container.innerHTML = `
-            <div style="display: flex; flex-direction: row; gap: 15px; height: calc(100vh - 110px); min-height: 600px; position: relative; margin-bottom: 30px; overflow-y: auto; overflow-x: hidden; padding-right: 5px;">
+            <!-- ELIMINAMOS height Y overflow-y PARA LIBERAR EL SCROLL MAESTRO DERECHO -->
+            <div style="display: flex; flex-direction: row; gap: 15px; min-height: 600px; position: relative; margin-bottom: 50px; padding-right: 5px;">
                 
                 <!-- PANEL IZQUIERDO: TABLA -->
                 <div style="flex: 2.5; background: #1a1a1a; border-radius: 8px; padding: 15px; border: 1px solid #2a2a2a; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); display: flex; flex-direction: column;">
