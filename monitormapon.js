@@ -15,7 +15,6 @@ class MonitorMapon {
     }
 
    renderizarEstructura() {
-    renderizarEstructura() {
         // CORRECCIÓN SCROLL: Quitamos la altura fija restrictiva y le damos un min-height para que crezca naturalmente
         this.container.innerHTML = `
             <div style="display: flex; flex-direction: row; gap: 15px; height: calc(100vh - 150px); min-height: 500px; position: relative;">
@@ -421,3 +420,4 @@ class MonitorMapon {
             };
         }
     }
+}
