@@ -8,6 +8,24 @@ class MonitorMapon {
         this.inicializar();
     }
 
+    // --- ESCÁNER BLINDADO: Ignora espacios, mayúsculas, acentos y signos de puntuación ---
+    extraerDato(unidad, opcionesBusqueda) {
+        for (let key in unidad) {
+            // Limpiamos la llave real de la base de datos ("Compañía:" -> "compania")
+            let keyLimpia = key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+            
+            for (let opcion of opcionesBusqueda) {
+                // Limpiamos nuestra opción de búsqueda para que coincidan perfecto
+                let opcLimpia = opcion.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+                
+                if (keyLimpia === opcLimpia && unidad[key] !== undefined) {
+                    return unidad[key];
+                }
+            }
+        }
+        return null;
+    }
+
     inicializar() {
         this.renderizarEstructura();
         this.renderizarTabla(this.datosUnidades);
@@ -89,35 +107,33 @@ class MonitorMapon {
         const tbody = document.getElementById('mapon-tbody');
         tbody.innerHTML = ''; 
 
-        // ORDENAMIENTO DIRECTO USANDO TUS NOMBRES EXACTOS
+        // Ordenamiento ciego e infalible
         let datosOrdenados = [...datos].sort((a, b) => {
-            let compA = (a['Compañía:'] || 'Sin asignar').toString().toUpperCase();
-            let compB = (b['Compañía:'] || 'Sin asignar').toString().toUpperCase();
+            let compA = (this.extraerDato(a, ['compania', 'company', 'cliente']) || 'Sin asignar').toString().toUpperCase();
+            let compB = (this.extraerDato(b, ['compania', 'company', 'cliente']) || 'Sin asignar').toString().toUpperCase();
             if (compA < compB) return -1;
             if (compA > compB) return 1;
 
-            let estA = (a['Online status'] || 'Desconocido').toString().toUpperCase();
-            let estB = (b['Online status'] || 'Desconocido').toString().toUpperCase();
+            let estA = (this.extraerDato(a, ['onlinestatus', 'estado']) || 'Desconocido').toString().toUpperCase();
+            let estB = (this.extraerDato(b, ['onlinestatus', 'estado']) || 'Desconocido').toString().toUpperCase();
             if (estA < estB) return -1;
             if (estA > estB) return 1;
             return 0;
         });
 
         datosOrdenados.forEach((unidad, index) => {
-            // EXTRACCIÓN EXACTA Y DIRECTA
-            let compania = unidad['Compañía:'] || 'Sin asignar';
-            let economico = unidad['Economico'] || 'S/N';
-            let marcaUnidad = unidad['Marca'] || '-';
-            let modeloUnidad = unidad['Modelo'] || '-';
-            let vin = unidad['VIN'] || '-';
-            let anio = unidad['Año fabricación'] || '-';
+            // Extracción 100% segura (lee de tus columnas exactas sin importar espacios)
+            let compania = this.extraerDato(unidad, ['compania', 'company', 'cliente']) || 'Sin asignar';
+            let economico = this.extraerDato(unidad, ['economico', 'name']) || 'S/N';
+            let marcaUnidad = this.extraerDato(unidad, ['marca', 'vehicle brand']) || '-';
+            let modeloUnidad = this.extraerDato(unidad, ['modelo', 'vehicle model']) || '-';
+            let vin = this.extraerDato(unidad, ['vin', 'chassis number']) || '-';
+            let anio = this.extraerDato(unidad, ['anofabricacion', 'año', 'year', 'anio']) || '-';
             
-            // Usamos las opciones de serie exactas que me diste
-            let idSerie = unidad['Núm. de serie '] || unidad['Núm. de serie'] || unidad['ID disp.'] || unidad['IMEI'] || 'S/N';
-            
-            let modelo = unidad['Device model'] || 'Desconocido';
-            let estado = unidad['Online status'] || 'Desconocido';
-            let ultimoReporte = unidad['Last data received'] || 'Sin fecha';
+            let idSerie = this.extraerDato(unidad, ['numdeserie', 'iddisp', 'imei', 'numerodeserie']) || 'S/N';
+            let modelo = this.extraerDato(unidad, ['devicemodel', 'modelogps']) || 'Desconocido';
+            let estado = this.extraerDato(unidad, ['onlinestatus', 'estadosim']) || 'Desconocido';
+            let ultimoReporte = this.extraerDato(unidad, ['lastdatareceived', 'ultimoreporte']) || 'Sin fecha';
 
             // ESTILOS PREMIUM PARA EL ESTADO
             let colorTexto = '#fff';
@@ -161,7 +177,7 @@ class MonitorMapon {
     renderizarGrafica() {
         const conteoEstados = {};
         this.datosUnidades.forEach(unidad => {
-            let estadoBruto = unidad['Online status'];
+            let estadoBruto = this.extraerDato(unidad, ['onlinestatus', 'estado']);
             if (!estadoBruto || String(estadoBruto).trim() === '') {
                 estadoBruto = 'Desconocido';
             }
@@ -227,9 +243,8 @@ class MonitorMapon {
             infoDiv.style.border = "1px solid rgba(0, 230, 118, 0.3)";
             infoDiv.style.color = "#00e676"; 
             
-            // FILTRADO DIRECTO
             const datosFiltrados = this.datosUnidades.filter(u => {
-                let est = (u['Online status'] || 'Desconocido').toString().trim();
+                let est = (this.extraerDato(u, ['onlinestatus', 'estado']) || 'Desconocido').toString().trim();
                 return est === estado;
             });
             this.renderizarTabla(datosFiltrados);
@@ -265,8 +280,11 @@ class MonitorMapon {
             if(key.trim() !== '' && valor !== '-') {
                 let badgeStyle = "";
                 let displayValor = valor;
+                
+                // Le damos formato a la etiqueta superior limpiando el nombre
+                let keyVisual = key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
 
-                if (key.toUpperCase() === 'ONLINE STATUS') {
+                if (keyVisual === 'onlinestatus' || keyVisual === 'estado') {
                     badgeStyle = `background: ${colorBorde}15; color: ${colorBorde}; border: 1px solid ${colorBorde}; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; letter-spacing: 0.5px;`;
                     displayValor = `<span style="${badgeStyle}">${valor}</span>`;
                 }
@@ -284,8 +302,7 @@ class MonitorMapon {
             }
         });
 
-        // EXTRACCIÓN DIRECTA PARA EL ID SERIE DEL MODAL
-        let rawNumSerieMapon = unidad['Núm. de serie '] || unidad['Núm. de serie'] || unidad['ID disp.'] || unidad['IMEI'] || '';
+        let rawNumSerieMapon = this.extraerDato(unidad, ['numdeserie', 'iddisp', 'imei']) || '';
         const numSerieMapon = String(rawNumSerieMapon).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
         
         let eqSoporteEncontrado = null;
