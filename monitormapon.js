@@ -8,19 +8,6 @@ class MonitorMapon {
         this.inicializar();
     }
 
-    // --- ESCÁNER INTELIGENTE PARA BLINDAR LA LECTURA DE COLUMNAS ---
-    obtenerValor(obj, posiblesLlaves) {
-        for (let key in obj) {
-            let keyLimpia = key.trim().toLowerCase();
-            for (let llave of posiblesLlaves) {
-                if (keyLimpia === llave.trim().toLowerCase()) {
-                    return obj[key];
-                }
-            }
-        }
-        return null;
-    }
-
     inicializar() {
         this.renderizarEstructura();
         this.renderizarTabla(this.datosUnidades);
@@ -90,7 +77,6 @@ class MonitorMapon {
                         </div>
                     </div>
                 </div>
-
             </div>
         `;
 
@@ -103,43 +89,35 @@ class MonitorMapon {
         const tbody = document.getElementById('mapon-tbody');
         tbody.innerHTML = ''; 
 
-        // ORDENAMIENTO BLINDADO
+        // ORDENAMIENTO DIRECTO USANDO TUS NOMBRES EXACTOS
         let datosOrdenados = [...datos].sort((a, b) => {
-            let compA = (this.obtenerValor(a, ['compañía:', 'compañía', 'compania', 'company', 'cliente']) || 'Sin asignar').toString().toUpperCase();
-            let compB = (this.obtenerValor(b, ['compañía:', 'compañía', 'compania', 'company', 'cliente']) || 'Sin asignar').toString().toUpperCase();
+            let compA = (a['Compañía:'] || 'Sin asignar').toString().toUpperCase();
+            let compB = (b['Compañía:'] || 'Sin asignar').toString().toUpperCase();
             if (compA < compB) return -1;
             if (compA > compB) return 1;
 
-            let estA = (this.obtenerValor(a, ['online status', 'estado', 'status']) || 'Desconocido').toString().toUpperCase();
-            let estB = (this.obtenerValor(b, ['online status', 'estado', 'status']) || 'Desconocido').toString().toUpperCase();
+            let estA = (a['Online status'] || 'Desconocido').toString().toUpperCase();
+            let estB = (b['Online status'] || 'Desconocido').toString().toUpperCase();
             if (estA < estB) return -1;
             if (estA > estB) return 1;
             return 0;
         });
 
         datosOrdenados.forEach((unidad, index) => {
-            // EXTRACCIÓN BLINDADA
-            let compania = this.obtenerValor(unidad, ['compañía:', 'compañía', 'compania', 'company', 'cliente']) || 'Sin asignar';
-            let economico = this.obtenerValor(unidad, ['economico', 'económico', 'name', 'unidad']) || 'S/N';
-            let marcaUnidad = this.obtenerValor(unidad, ['marca', 'vehicle brand']) || '-';
-            let modeloUnidad = this.obtenerValor(unidad, ['modelo', 'vehicle model']) || '-';
-            let vin = this.obtenerValor(unidad, ['vin', 'chassis number']) || '-';
-            let anio = this.obtenerValor(unidad, ['año fabricación', 'año', 'year', 'anio']) || '-';
+            // EXTRACCIÓN EXACTA Y DIRECTA
+            let compania = unidad['Compañía:'] || 'Sin asignar';
+            let economico = unidad['Economico'] || 'S/N';
+            let marcaUnidad = unidad['Marca'] || '-';
+            let modeloUnidad = unidad['Modelo'] || '-';
+            let vin = unidad['VIN'] || '-';
+            let anio = unidad['Año fabricación'] || '-';
             
-            let idSerie = 'S/N';
-            for (let key in unidad) {
-                let k = key.toLowerCase().trim();
-                if (k.includes('de serie') || k === 'imei' || k === 'id disp.' || k === 'id' || k === 'numserie') {
-                    if (unidad[key] && String(unidad[key]).trim() !== '') {
-                        idSerie = unidad[key];
-                        break; 
-                    }
-                }
-            }
+            // Usamos las opciones de serie exactas que me diste
+            let idSerie = unidad['Núm. de serie '] || unidad['Núm. de serie'] || unidad['ID disp.'] || unidad['IMEI'] || 'S/N';
             
-            let modelo = this.obtenerValor(unidad, ['device model', 'modelo gps', 'modelogps']) || 'Desconocido';
-            let estado = this.obtenerValor(unidad, ['online status', 'estado', 'status']) || 'Desconocido';
-            let ultimoReporte = this.obtenerValor(unidad, ['last data received', 'último reporte', 'ultimo reporte']) || 'Sin fecha';
+            let modelo = unidad['Device model'] || 'Desconocido';
+            let estado = unidad['Online status'] || 'Desconocido';
+            let ultimoReporte = unidad['Last data received'] || 'Sin fecha';
 
             // ESTILOS PREMIUM PARA EL ESTADO
             let colorTexto = '#fff';
@@ -183,7 +161,7 @@ class MonitorMapon {
     renderizarGrafica() {
         const conteoEstados = {};
         this.datosUnidades.forEach(unidad => {
-            let estadoBruto = this.obtenerValor(unidad, ['online status', 'estado', 'status']);
+            let estadoBruto = unidad['Online status'];
             if (!estadoBruto || String(estadoBruto).trim() === '') {
                 estadoBruto = 'Desconocido';
             }
@@ -248,8 +226,10 @@ class MonitorMapon {
             infoDiv.style.background = "rgba(0, 230, 118, 0.1)";
             infoDiv.style.border = "1px solid rgba(0, 230, 118, 0.3)";
             infoDiv.style.color = "#00e676"; 
+            
+            // FILTRADO DIRECTO
             const datosFiltrados = this.datosUnidades.filter(u => {
-                let est = (this.obtenerValor(u, ['online status', 'estado', 'status']) || 'Desconocido').toString().trim();
+                let est = (u['Online status'] || 'Desconocido').toString().trim();
                 return est === estado;
             });
             this.renderizarTabla(datosFiltrados);
@@ -304,7 +284,8 @@ class MonitorMapon {
             }
         });
 
-        let rawNumSerieMapon = unidad['Núm. de serie'] || unidad['ID DISP.'] || unidad['IMEI'] || '';
+        // EXTRACCIÓN DIRECTA PARA EL ID SERIE DEL MODAL
+        let rawNumSerieMapon = unidad['Núm. de serie '] || unidad['Núm. de serie'] || unidad['ID disp.'] || unidad['IMEI'] || '';
         const numSerieMapon = String(rawNumSerieMapon).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
         
         let eqSoporteEncontrado = null;
