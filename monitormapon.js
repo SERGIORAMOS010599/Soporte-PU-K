@@ -15,8 +15,9 @@ class MonitorMapon {
     }
 
     renderizarEstructura() {
+        // AJUSTE 1 (FLECHA ROJA): Agregamos height y overflow-y: auto al contenedor principal
         this.container.innerHTML = `
-            <div style="display: flex; flex-direction: row; gap: 15px; min-height: 600px; position: relative; margin-bottom: 30px;">
+            <div style="display: flex; flex-direction: row; gap: 15px; height: calc(100vh - 110px); min-height: 600px; position: relative; margin-bottom: 30px; overflow-y: auto; overflow-x: hidden; padding-right: 5px;">
                 
                 <!-- PANEL IZQUIERDO: TABLA -->
                 <div style="flex: 2.5; background: #1a1a1a; border-radius: 8px; padding: 15px; border: 1px solid #2a2a2a; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); display: flex; flex-direction: column;">
@@ -71,9 +72,11 @@ class MonitorMapon {
                             </div>
                             <button onclick="document.getElementById('mapon-modal-detalles').style.display='none'; window.equipoEnPantallaMapon = null;" style="background: transparent; color: #aaa; border: none; font-size: 20px; cursor: pointer;">✖</button>
                         </div>
+                        
+                        <!-- AJUSTE 2 (FLECHA BLANCA): Agregamos min-height: min-content y padding-bottom a las columnas -->
                         <div style="display: flex; flex-direction: row; overflow-y: auto; max-height: calc(100vh - 100px);">
-                            <div id="modal-contenido-detalles" style="padding: 20px; color: #ddd; font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; align-content: start;"></div>
-                            <div id="modal-contenido-soporte" style="display: none; padding: 20px; background: #141414; border-left: 1px solid #333; flex: 1; flex-direction: column; gap: 15px;"></div>
+                            <div id="modal-contenido-detalles" style="padding: 20px; color: #ddd; font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; align-content: start; min-height: min-content;"></div>
+                            <div id="modal-contenido-soporte" style="display: none; padding: 20px; padding-bottom: 40px; background: #141414; border-left: 1px solid #333; flex: 1; flex-direction: column; gap: 15px; min-height: min-content;"></div>
                         </div>
                     </div>
                 </div>
@@ -89,7 +92,6 @@ class MonitorMapon {
         const tbody = document.getElementById('mapon-tbody');
         tbody.innerHTML = ''; 
 
-        // VOLVEMOS A TU CÓDIGO ORIGINAL QUE FUNCIONABA PERFECTO PARA LEER LA INFORMACIÓN
         let datosOrdenados = [...datos].sort((a, b) => {
             let compA = (a['Compañía:'] || a['Compañía'] || 'Sin asignar').toUpperCase();
             let compB = (b['Compañía:'] || b['Compañía'] || 'Sin asignar').toUpperCase();
@@ -107,7 +109,6 @@ class MonitorMapon {
         });
 
         datosOrdenados.forEach((unidad, index) => {
-            // VOLVEMOS A TU CÓDIGO ORIGINAL DE EXTRACCIÓN
             let compania = unidad['Compañía:'] || unidad['Compañía'] || 'Sin asignar';
             let economico = unidad['Economico'] || unidad['Name'] || 'S/N';
             let marcaUnidad = unidad['Marca'] || unidad['Vehicle brand'] || '-';
@@ -115,7 +116,6 @@ class MonitorMapon {
             let vin = unidad['VIN'] || unidad['Chassis number'] || '-';
             let anio = unidad['Año fabricación'] || unidad['Año'] || unidad['Year'] || '-';
             
-            // TU BUCLE ORIGINAL PARA ENCONTRAR EL ID DE SERIE
             let idSerie = 'S/N';
             for (let key in unidad) {
                 let nombreColumna = key.toLowerCase();
@@ -131,7 +131,6 @@ class MonitorMapon {
             let estado = unidad['Online status'] || 'Desconocido';
             let ultimoReporte = unidad['Last data received'] || 'Sin fecha';
 
-            // ESTILOS PREMIUM PARA EL ESTADO
             let colorTexto = '#fff';
             let colorFondo = 'rgba(158, 158, 158, 0.1)';
             let colorBorde = 'rgba(158, 158, 158, 0.3)';
@@ -288,7 +287,6 @@ class MonitorMapon {
             }
         });
 
-        // TU CÓDIGO ORIGINAL PARA EL ID SERIE DEL MODAL
         let rawNumSerieMapon = unidad['Núm. de serie'] || unidad['ID DISP.'] || unidad['IMEI'] || '';
         const numSerieMapon = String(rawNumSerieMapon).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
         
