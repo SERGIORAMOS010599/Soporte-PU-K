@@ -254,7 +254,9 @@ class MonitorMapon {
         const btnSoporte = document.getElementById('btn-mostrar-soporte');
         btnSoporte.style.display = 'none';
         btnSoporte.innerText = '🛠️ Opciones de Soporte';
-        btnSoporte.style.background = '#1976d2';
+        btnSoporte.style.background = 'rgba(25, 118, 210, 0.1)';
+        btnSoporte.style.color = '#64b5f6';
+        btnSoporte.style.border = '1px solid #1976d2';
 
         const contenedor = document.getElementById('modal-contenido-detalles');
         contenedor.innerHTML = ''; 
@@ -263,14 +265,27 @@ class MonitorMapon {
             window.equipoEnPantallaMapon = unidad;
         }
 
+        // 1. RENDERIZADO PREMIUM DE LA INFO DE MAPON
         Object.keys(unidad).forEach(key => {
             const valor = unidad[key] || '-';
             if(key.trim() !== '' && valor !== '-') {
+                let badgeStyle = "";
+                let displayValor = valor;
+
+                // Destacar el estatus online como píldora si es la columna correspondiente
+                if (key.toUpperCase() === 'ONLINE STATUS') {
+                    badgeStyle = `background: ${colorBorde}15; color: ${colorBorde}; border: 1px solid ${colorBorde}; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; letter-spacing: 0.5px;`;
+                    displayValor = `<span style="${badgeStyle}">${valor}</span>`;
+                }
+
                 const divItem = document.createElement('div');
-                divItem.style.cssText = "background: #222; padding: 10px; border-radius: 4px; border-left: 3px solid " + colorBorde + ";";
+                divItem.style.cssText = `background: #1a1a1a; padding: 12px; border-radius: 6px; border: 1px solid #2a2a2a; border-left: 3px solid ${colorBorde}; position: relative; transition: all 0.2s ease;`;
+                divItem.onmouseover = () => divItem.style.borderColor = '#444';
+                divItem.onmouseout = () => divItem.style.borderColor = '#2a2a2a';
+                
                 divItem.innerHTML = `
-                    <div style="font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 3px;">${key}</div>
-                    <div style="font-size: 13px; font-weight: bold; word-break: break-all;">${valor}</div>
+                    <div style="font-size: 9px; color: #777; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">${key}</div>
+                    <div style="font-size: 13px; font-weight: bold; color: #eee; word-break: break-all;">${displayValor}</div>
                 `;
                 contenedor.appendChild(divItem);
             }
@@ -289,6 +304,7 @@ class MonitorMapon {
             });
         }
 
+        // 2. RENDERIZADO PREMIUM DE OPCIONES DE SOPORTE
         if (eqSoporteEncontrado) {
             btnSoporte.style.display = 'block';
             
@@ -298,7 +314,6 @@ class MonitorMapon {
             const iccid = eqSoporteEncontrado.iccid || 'N/A';
             const compania = eqSoporteEncontrado.compania || '';
             
-            // LÓGICA CONDICIONAL: Solo crear el botón Jasper si la línea pertenece a Telcel
             let bloqueJasperModal = '';
             if (compania.toUpperCase().includes('TELCEL')) {
                 bloqueJasperModal = `
@@ -313,53 +328,58 @@ class MonitorMapon {
                                 onmouseout="this.style.background='#1a1a1a'; this.style.color='#00e676';">
                             <span style="font-size: 14px;">📶</span> Diagnóstico Telcel Jasper
                         </button>
-                        <!-- CAJA ÚNICA PARA EL MODAL -->
                         <div id="jasper-modal-box" style="margin-top: 10px;"></div>
                     </div>
                 `;
             }
 
             panelSoporte.innerHTML = `
-                <div style="border-bottom: 1px solid #444; padding-bottom: 5px; margin-bottom: 10px;">
-                    <h4 style="margin: 0; color: #ffb74d;">Acciones Rápidas</h4>
-                    <span style="font-size: 11px; color: #888;">Línea conectada: <b>${linea}</b></span>
+                <!-- ENCABEZADO ACCIONES RÁPIDAS -->
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Acciones Rápidas</h4>
+                    <div style="flex: 1; height: 1px; background: #333;"></div>
                 </div>
+                <div style="margin-bottom: 15px; font-size: 11px; color: #888;">Línea vinculada: <b style="color: #ccc; letter-spacing: 0.5px;">${linea}</b></div>
                 
-                <div class="panel-botones" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start;">
-                    <button class="btn-accion" style="flex: 1 1 30%; padding: 8px 5px; font-size: 9px; min-height: unset; flex-direction: row; gap: 8px; justify-content: flex-start;" onclick="appSoporte.enviarSMS('apagar', '${id}')">
-                        <div class="icono" style="background-color: #d32f2f; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">⏻</div>APAGAR
+                <!-- GRID DE BOTONES FANTASMA -->
+                <div class="panel-botones" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 25px;">
+                    <button onclick="appSoporte.enviarSMS('apagar', '${id}')" style="background: rgba(244, 67, 54, 0.1); color: #ef5350; border: 1px solid #d32f2f; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#d32f2f'; this.style.color='#fff';" onmouseout="this.style.background='rgba(244, 67, 54, 0.1)'; this.style.color='#ef5350';">
+                        <span style="font-size: 14px;">⏻</span> APAGAR
                     </button>
-                    <button class="btn-accion" style="flex: 1 1 30%; padding: 8px 5px; font-size: 9px; min-height: unset; flex-direction: row; gap: 8px; justify-content: flex-start;" onclick="appSoporte.enviarSMS('encender', '${id}')">
-                        <div class="icono" style="background-color: #388e3c; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">⏻</div>ENCENDER
+                    <button onclick="appSoporte.enviarSMS('encender', '${id}')" style="background: rgba(76, 175, 80, 0.1); color: #66bb6a; border: 1px solid #388e3c; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#388e3c'; this.style.color='#fff';" onmouseout="this.style.background='rgba(76, 175, 80, 0.1)'; this.style.color='#66bb6a';">
+                        <span style="font-size: 14px;">⏻</span> ENCENDER
                     </button>
-                    <button class="btn-accion" style="flex: 1 1 30%; padding: 8px 5px; font-size: 9px; min-height: unset; flex-direction: row; gap: 8px; justify-content: flex-start;" onclick="appSoporte.enviarSMS('configuracion', '${id}')">
-                        <div class="icono" style="background-color: #ffb74d; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">?</div>CONFIG.
+                    <button onclick="appSoporte.enviarSMS('configuracion', '${id}')" style="background: rgba(255, 152, 0, 0.1); color: #ffa726; border: 1px solid #f57c00; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#f57c00'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 152, 0, 0.1)'; this.style.color='#ffa726';">
+                        <span style="font-size: 14px;">⚙️</span> CONFIG
                     </button>
-                    <button class="btn-accion" style="flex: 1 1 30%; padding: 8px 5px; font-size: 9px; min-height: unset; flex-direction: row; gap: 8px; justify-content: flex-start;" onclick="appSoporte.enviarSMS('reiniciar', '${id}')">
-                        <div class="icono" style="background-color: #f57c00; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">⟳</div>REINICIAR
+                    <button onclick="appSoporte.enviarSMS('reiniciar', '${id}')" style="background: rgba(255, 152, 0, 0.1); color: #ffa726; border: 1px solid #f57c00; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#f57c00'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 152, 0, 0.1)'; this.style.color='#ffa726';">
+                        <span style="font-size: 14px;">⟳</span> REINICIAR
                     </button>
-                    <button class="btn-accion" style="flex: 1 1 30%; padding: 8px 5px; font-size: 9px; min-height: unset; flex-direction: row; gap: 8px; justify-content: flex-start;" onclick="appSoporte.enviarSMS('borrar', '${id}')">
-                        <div class="icono" style="background-color: #f57c00; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">🗑️</div>BORRAR
+                    <button onclick="appSoporte.enviarSMS('borrar', '${id}')" style="background: rgba(255, 87, 34, 0.1); color: #ff7043; border: 1px solid #e64a19; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#e64a19'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 87, 34, 0.1)'; this.style.color='#ff7043';">
+                        <span style="font-size: 14px;">🗑️</span> BORRAR
                     </button>
-                    <button class="btn-accion" style="flex: 1 1 30%; padding: 8px 5px; font-size: 9px; min-height: unset; flex-direction: row; gap: 8px; justify-content: flex-start;" onclick="appSoporte.enviarSMS('formatear', '${id}')">
-                        <div class="icono" style="background-color: #d32f2f; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">⌫</div>FORMATO
-                    </button>
-                </div>
-                
-                <div style="border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 15px; margin-bottom: 10px;">
-                    <h4 style="margin: 0; color: #ffb74d;">Enlaces Externos</h4>
-                </div>
-                
-                <div class="panel-botones" style="display: flex; gap: 10px;">
-                    <button class="btn-accion" style="flex: 1; padding: 8px 5px; font-size: 10px; min-height: unset; flex-direction: row; gap: 8px;" onclick="window.open('https://soporte.zeekgps.com/ZeekSoporte/', '_blank')">
-                        <div class="icono" style="background-color: #1976d2; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">🛠️</div>ZEEK
-                    </button>
-                    <button class="btn-accion" style="flex: 1; padding: 8px 5px; font-size: 10px; min-height: unset; flex-direction: row; gap: 8px;" onclick="window.open('https://mapon.com/partner/gbox_new/', '_blank')">
-                        <div class="icono" style="background-color: #00c853; width: 22px; height: 22px; font-size: 12px; line-height: 22px; margin: 0;">📍</div>MAPON
+                    <button onclick="appSoporte.enviarSMS('formatear', '${id}')" style="background: rgba(211, 47, 47, 0.1); color: #ef5350; border: 1px solid #d32f2f; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#d32f2f'; this.style.color='#fff';" onmouseout="this.style.background='rgba(211, 47, 47, 0.1)'; this.style.color='#ef5350';">
+                        <span style="font-size: 14px;">⌫</span> FORMATO
                     </button>
                 </div>
                 
-                <!-- INYECCIÓN DEL BLOQUE JASPER AL FINAL DE LAS OPCIONES DE SOPORTE -->
+                <!-- ENCABEZADO ENLACES EXTERNOS -->
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                    <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">🔗 Enlaces Externos</h4>
+                    <div style="flex: 1; height: 1px; background: #333;"></div>
+                </div>
+                
+                <!-- BOTONES ENLACES EXTERNOS -->
+                <div class="panel-botones" style="display: flex; gap: 8px;">
+                    <button onclick="window.open('https://soporte.zeekgps.com/ZeekSoporte/', '_blank')" style="flex: 1; background: rgba(33, 150, 243, 0.1); color: #42a5f5; border: 1px solid #1976d2; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.background='#1976d2'; this.style.color='#fff';" onmouseout="this.style.background='rgba(33, 150, 243, 0.1)'; this.style.color='#42a5f5';">
+                        <span style="font-size: 14px;">🛠️</span> ZEEK
+                    </button>
+                    <button onclick="window.open('https://mapon.com/partner/gbox_new/', '_blank')" style="flex: 1; background: rgba(0, 200, 83, 0.1); color: #69f0ae; border: 1px solid #00c853; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.background='#00c853'; this.style.color='#fff';" onmouseout="this.style.background='rgba(0, 200, 83, 0.1)'; this.style.color='#69f0ae';">
+                        <span style="font-size: 14px;">📍</span> MAPON
+                    </button>
+                </div>
+                
+                <!-- INYECCIÓN DEL BLOQUE JASPER -->
                 ${bloqueJasperModal}
             `;
             
@@ -367,15 +387,17 @@ class MonitorMapon {
                 if (panelSoporte.style.display === 'none') {
                     panelSoporte.style.display = 'flex';
                     modalBox.style.maxWidth = '850px'; 
-                    btnSoporte.innerText = '◀ Ocultar Soporte';
-                    btnSoporte.style.background = '#444';
-                    btnSoporte.style.border = '1px solid #666';
+                    btnSoporte.innerHTML = '◀ Ocultar Soporte';
+                    btnSoporte.style.background = 'rgba(255, 255, 255, 0.05)';
+                    btnSoporte.style.color = '#ccc';
+                    btnSoporte.style.border = '1px solid #444';
                 } else {
                     panelSoporte.style.display = 'none';
                     modalBox.style.maxWidth = '550px'; 
-                    btnSoporte.innerText = '🛠️ Opciones de Soporte';
-                    btnSoporte.style.background = '#1976d2';
-                    btnSoporte.style.border = '1px solid #115293';
+                    btnSoporte.innerHTML = '🛠️ Opciones de Soporte';
+                    btnSoporte.style.background = 'rgba(25, 118, 210, 0.1)';
+                    btnSoporte.style.color = '#64b5f6';
+                    btnSoporte.style.border = '1px solid #1976d2';
                 }
             };
         }
