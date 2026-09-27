@@ -14,10 +14,10 @@ class MonitorMapon {
         this.renderizarGrafica();
     }
 
-renderizarEstructura() {
+    renderizarEstructura() {
         this.container.innerHTML = `
-            <!-- ELIMINAMOS height Y overflow-y PARA LIBERAR EL SCROLL MAESTRO DERECHO -->
-            <div style="display: flex; flex-direction: row; gap: 15px; min-height: 600px; position: relative; margin-bottom: 50px; padding-right: 5px;">
+            <!-- SCROLL MAESTRO FORZADO: Quitamos el min-height restrictivo y usamos overflow-y: scroll -->
+            <div style="display: flex; flex-direction: row; gap: 15px; height: calc(100vh - 130px); position: relative; margin-bottom: 20px; padding-right: 5px; overflow-y: scroll; overflow-x: hidden; width: 100%;">
                 
                 <!-- PANEL IZQUIERDO: TABLA -->
                 <div style="flex: 2.5; background: #1a1a1a; border-radius: 8px; padding: 15px; border: 1px solid #2a2a2a; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); display: flex; flex-direction: column;">
@@ -62,9 +62,9 @@ renderizarEstructura() {
                     </div>
                 </div>
 
-                <!-- MODAL DE DETALLES -->
-                <div id="mapon-modal-detalles" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10; border-radius: 8px; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
-                    <div id="mapon-modal-box" style="background: #1e1e1e; border: 1px solid #ffb74d; width: 90%; max-width: 550px; max-height: 95%; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: max-width 0.3s ease;">
+                <!-- MODAL DE DETALLES (AHORA CON POSITION FIXED PARA QUE EL SCROLL NO LO DESCUADRE) -->
+                <div id="mapon-modal-detalles" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
+                    <div id="mapon-modal-box" style="background: #1e1e1e; border: 1px solid #ffb74d; width: 90%; max-width: 550px; max-height: 90vh; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: max-width 0.3s ease;">
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #333; background: #2a2a2a; border-radius: 8px 8px 0 0;">
                             <div style="display: flex; gap: 15px; align-items: center;">
                                 <h3 style="margin: 0; color: #ffb74d;" id="modal-titulo-unidad">Detalles del Equipo</h3>
@@ -73,8 +73,7 @@ renderizarEstructura() {
                             <button onclick="document.getElementById('mapon-modal-detalles').style.display='none'; window.equipoEnPantallaMapon = null;" style="background: transparent; color: #aaa; border: none; font-size: 20px; cursor: pointer;">✖</button>
                         </div>
                         
-                        <!-- AJUSTE 2 (FLECHA BLANCA): Agregamos min-height: min-content y padding-bottom a las columnas -->
-                        <div style="display: flex; flex-direction: row; overflow-y: auto; max-height: calc(100vh - 100px);">
+                        <div style="display: flex; flex-direction: row; overflow-y: auto; max-height: calc(90vh - 70px);">
                             <div id="modal-contenido-detalles" style="padding: 20px; color: #ddd; font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; align-content: start; min-height: min-content;"></div>
                             <div id="modal-contenido-soporte" style="display: none; padding: 20px; padding-bottom: 40px; background: #141414; border-left: 1px solid #333; flex: 1; flex-direction: column; gap: 15px; min-height: min-content;"></div>
                         </div>
