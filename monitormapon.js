@@ -14,17 +14,13 @@ class MonitorMapon {
         this.renderizarGrafica();
     }
 
-   renderizarEstructura() {
-        // CORRECCIÓN SCROLL: Quitamos la altura fija restrictiva y le damos un min-height para que crezca naturalmente
+    renderizarEstructura() {
         this.container.innerHTML = `
-            <div style="display: flex; flex-direction: row; gap: 15px; height: calc(100vh - 150px); min-height: 500px; position: relative;">
             <div style="display: flex; flex-direction: row; gap: 15px; min-height: 600px; position: relative; margin-bottom: 30px;">
                 
                 <!-- PANEL IZQUIERDO: TABLA -->
-                <div style="flex: 2.5; overflow-y: auto; background: #1a1a1a; border-radius: 8px; padding: 15px; border: 1px solid #2a2a2a; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); position: relative; display: flex; flex-direction: column;">
                 <div style="flex: 2.5; background: #1a1a1a; border-radius: 8px; padding: 15px; border: 1px solid #2a2a2a; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); display: flex; flex-direction: column;">
                     
-                    <!-- BARRA DE HERRAMIENTAS -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #333;">
                         <div id="mapon-filter-info" style="cursor: pointer; color: #ffb74d; font-weight: bold; font-size: 11px; padding: 6px 12px; background: rgba(255, 183, 77, 0.1); border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255, 183, 77, 0.3); transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.background='rgba(255, 183, 77, 0.2)'" onmouseout="this.style.background='rgba(255, 183, 77, 0.1)'">
                             <span>✅</span> Mostrando todos los equipos
@@ -34,8 +30,6 @@ class MonitorMapon {
                         </button>
                     </div>
 
-                    <!-- TABLA ESTILIZADA -->
-                    <div style="overflow-y: auto; flex: 1; padding-right: 5px;">
                     <div style="overflow-y: auto; max-height: 500px; padding-right: 5px;">
                         <table id="tabla-mapon-exportar" style="width: 100%; border-collapse: separate; border-spacing: 0; color: #ccc; font-size: 11px;">
                             <thead style="position: sticky; top: 0; z-index: 2;">
@@ -62,20 +56,17 @@ class MonitorMapon {
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #333;">
                         <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">📊 Distribución de Estados</h4>
                     </div>
-                    <div style="position: relative; width: 100%; flex: 1; display: flex; justify-content: center; align-items: center;">
                     <div style="position: relative; width: 100%; flex: 1; display: flex; justify-content: center; align-items: center; min-height: 300px;">
                         <canvas id="mapon-chart"></canvas>
                     </div>
                 </div>
 
-                <!-- MODAL DE DETALLES AMPLIADO PARA SOPORTE (Caja Base) -->
-                <!-- MODAL DE DETALLES AMPLIADO PARA SOPORTE -->
+                <!-- MODAL DE DETALLES -->
                 <div id="mapon-modal-detalles" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10; border-radius: 8px; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
                     <div id="mapon-modal-box" style="background: #1e1e1e; border: 1px solid #ffb74d; width: 90%; max-width: 550px; max-height: 95%; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: max-width 0.3s ease;">
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #333; background: #2a2a2a; border-radius: 8px 8px 0 0;">
                             <div style="display: flex; gap: 15px; align-items: center;">
                                 <h3 style="margin: 0; color: #ffb74d;" id="modal-titulo-unidad">Detalles del Equipo</h3>
-                                <button id="btn-mostrar-soporte" style="display: none; background: #1976d2; color: white; border: 1px solid #115293; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s;">🛠️ Opciones de Soporte</button>
                                 <button id="btn-mostrar-soporte" style="display: none; background: rgba(25, 118, 210, 0.1); color: #64b5f6; border: 1px solid #1976d2; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s;">🛠️ Opciones de Soporte</button>
                             </div>
                             <button onclick="document.getElementById('mapon-modal-detalles').style.display='none'; window.equipoEnPantallaMapon = null;" style="background: transparent; color: #aaa; border: none; font-size: 20px; cursor: pointer;">✖</button>
@@ -86,7 +77,6 @@ class MonitorMapon {
                         </div>
                     </div>
                 </div>
-
             </div>
         `;
 
@@ -99,36 +89,36 @@ class MonitorMapon {
         const tbody = document.getElementById('mapon-tbody');
         tbody.innerHTML = ''; 
 
-        // CORRECCIÓN DATOS: Restablecemos la lectura segura de las variables desde tu array
+        // VOLVEMOS A TU CÓDIGO ORIGINAL QUE FUNCIONABA PERFECTO PARA LEER LA INFORMACIÓN
         let datosOrdenados = [...datos].sort((a, b) => {
             let compA = (a['Compañía:'] || a['Compañía'] || 'Sin asignar').toUpperCase();
             let compB = (b['Compañía:'] || b['Compañía'] || 'Sin asignar').toUpperCase();
-            let compA = (a['Compañía:'] || a['Compañía'] || a['Company'] || 'Sin asignar').toUpperCase();
-            let compB = (b['Compañía:'] || b['Compañía'] || b['Company'] || 'Sin asignar').toUpperCase();
+            
             if (compA < compB) return -1;
             if (compA > compB) return 1;
 
             let estA = (a['Online status'] || 'Desconocido').toUpperCase();
             let estB = (b['Online status'] || 'Desconocido').toUpperCase();
+            
             if (estA < estB) return -1;
             if (estA > estB) return 1;
+
             return 0;
         });
 
         datosOrdenados.forEach((unidad, index) => {
+            // VOLVEMOS A TU CÓDIGO ORIGINAL DE EXTRACCIÓN
             let compania = unidad['Compañía:'] || unidad['Compañía'] || 'Sin asignar';
-            let compania = unidad['Compañía:'] || unidad['Compañía'] || unidad['Company'] || 'Sin asignar';
             let economico = unidad['Economico'] || unidad['Name'] || 'S/N';
             let marcaUnidad = unidad['Marca'] || unidad['Vehicle brand'] || '-';
             let modeloUnidad = unidad['Modelo'] || unidad['Vehicle model'] || '-';
             let vin = unidad['VIN'] || unidad['Chassis number'] || '-';
             let anio = unidad['Año fabricación'] || unidad['Año'] || unidad['Year'] || '-';
-
+            
+            // TU BUCLE ORIGINAL PARA ENCONTRAR EL ID DE SERIE
             let idSerie = 'S/N';
             for (let key in unidad) {
                 let nombreColumna = key.toLowerCase();
-                if (nombreColumna.includes('de serie')) {
-                // Tu Google Sheets original exporta "Núm. de serie" o "IMEI"
                 if (nombreColumna.includes('de serie') || nombreColumna === 'imei' || nombreColumna === 'id disp.') {
                     if (unidad[key] && String(unidad[key]).trim() !== '') {
                         idSerie = unidad[key];
@@ -136,17 +126,17 @@ class MonitorMapon {
                     }
                 }
             }
-
+            
             let modelo = unidad['Device model'] || 'Desconocido';
             let estado = unidad['Online status'] || 'Desconocido';
             let ultimoReporte = unidad['Last data received'] || 'Sin fecha';
 
-            // ESTILOS PREMIUM PARA EL ESTADO (PÍLDORAS)
+            // ESTILOS PREMIUM PARA EL ESTADO
             let colorTexto = '#fff';
             let colorFondo = 'rgba(158, 158, 158, 0.1)';
             let colorBorde = 'rgba(158, 158, 158, 0.3)';
-            let estadoUp = estado.toUpperCase();
-
+            let estadoUp = estado.toString().toUpperCase();
+            
             if (estadoUp.includes('NODATA')) { colorTexto = '#f44336'; colorFondo = 'rgba(244, 67, 54, 0.1)'; colorBorde = 'rgba(244, 67, 54, 0.3)'; } 
             else if (estadoUp === 'OK') { colorTexto = '#00e676'; colorFondo = 'rgba(0, 230, 118, 0.1)'; colorBorde = 'rgba(0, 230, 118, 0.3)'; } 
             else if (estadoUp.includes('NOGPS')) { colorTexto = '#ffeb3b'; colorFondo = 'rgba(255, 235, 59, 0.1)'; colorBorde = 'rgba(255, 235, 59, 0.3)'; } 
@@ -159,8 +149,7 @@ class MonitorMapon {
             tr.style.cssText = "cursor: pointer; transition: background 0.2s;";
             tr.onmouseover = () => tr.style.background = "#222";
             tr.onmouseout = () => tr.style.background = "transparent";
-
-            tr.onclick = () => this.abrirModalDetalles(unidad, economico, colorTexto); // Pasamos el colorTexto para el borde del modal
+            
             tr.onclick = () => this.abrirModalDetalles(unidad, economico, colorTexto);
 
             let dataOculta = Object.values(unidad).join(' ');
@@ -185,12 +174,6 @@ class MonitorMapon {
         const conteoEstados = {};
         this.datosUnidades.forEach(unidad => {
             let estado = (unidad['Online status'] || 'Desconocido').toString().trim();
-            // Validamos que el estado exista y no esté en blanco
-            let estadoBruto = unidad['Online status'];
-            if (!estadoBruto || String(estadoBruto).trim() === '') {
-                estadoBruto = 'Desconocido';
-            }
-            let estado = estadoBruto.toString().trim();
             conteoEstados[estado] = (conteoEstados[estado] || 0) + 1;
         });
 
@@ -209,7 +192,6 @@ class MonitorMapon {
         const ctx = document.getElementById('mapon-chart').getContext('2d');
         if (this.grafica) this.grafica.destroy();
 
-        // GRAFICA MÁS DELGADA Y ELEGANTE
         this.grafica = new Chart(ctx, {
             type: 'doughnut',
             data: {
@@ -218,14 +200,12 @@ class MonitorMapon {
                     data: dataValues,
                     backgroundColor: backgroundColors,
                     borderWidth: 3,
-                    borderColor: '#1a1a1a' // Mismo color del fondo para que parezcan segmentos separados
                     borderColor: '#1a1a1a' 
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '70%', // Dona más delgada
                 cutout: '70%', 
                 plugins: {
                     legend: { position: 'top', labels: { color: '#ccc', padding: 15, font: {size: 11, family: 'sans-serif'} } }
@@ -254,6 +234,7 @@ class MonitorMapon {
             infoDiv.style.background = "rgba(0, 230, 118, 0.1)";
             infoDiv.style.border = "1px solid rgba(0, 230, 118, 0.3)";
             infoDiv.style.color = "#00e676"; 
+            
             const datosFiltrados = this.datosUnidades.filter(u => (u['Online status'] || 'Desconocido') === estado);
             this.renderizarTabla(datosFiltrados);
         }
@@ -262,13 +243,13 @@ class MonitorMapon {
     abrirModalDetalles(unidad, nombreUnidad, colorBorde) {
         document.getElementById('modal-titulo-unidad').innerText = nombreUnidad;
         document.getElementById('mapon-modal-detalles').style.display = 'flex';
-
+        
         const modalBox = document.getElementById('mapon-modal-box');
         modalBox.style.maxWidth = '550px'; 
-
+        
         const panelSoporte = document.getElementById('modal-contenido-soporte');
         panelSoporte.style.display = 'none';
-
+        
         const btnSoporte = document.getElementById('btn-mostrar-soporte');
         btnSoporte.style.display = 'none';
         btnSoporte.innerText = '🛠️ Opciones de Soporte';
@@ -283,14 +264,12 @@ class MonitorMapon {
             window.equipoEnPantallaMapon = unidad;
         }
 
-        // 1. RENDERIZADO PREMIUM DE LA INFO DE MAPON
         Object.keys(unidad).forEach(key => {
             const valor = unidad[key] || '-';
             if(key.trim() !== '' && valor !== '-') {
                 let badgeStyle = "";
                 let displayValor = valor;
 
-                // Destacar el estatus online como píldora si es la columna correspondiente
                 if (key.toUpperCase() === 'ONLINE STATUS') {
                     badgeStyle = `background: ${colorBorde}15; color: ${colorBorde}; border: 1px solid ${colorBorde}; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; letter-spacing: 0.5px;`;
                     displayValor = `<span style="${badgeStyle}">${valor}</span>`;
@@ -300,7 +279,7 @@ class MonitorMapon {
                 divItem.style.cssText = `background: #1a1a1a; padding: 12px; border-radius: 6px; border: 1px solid #2a2a2a; border-left: 3px solid ${colorBorde}; position: relative; transition: all 0.2s ease;`;
                 divItem.onmouseover = () => divItem.style.borderColor = '#444';
                 divItem.onmouseout = () => divItem.style.borderColor = '#2a2a2a';
-
+                
                 divItem.innerHTML = `
                     <div style="font-size: 9px; color: #777; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">${key}</div>
                     <div style="font-size: 13px; font-weight: bold; color: #eee; word-break: break-all;">${displayValor}</div>
@@ -309,11 +288,12 @@ class MonitorMapon {
             }
         });
 
+        // TU CÓDIGO ORIGINAL PARA EL ID SERIE DEL MODAL
         let rawNumSerieMapon = unidad['Núm. de serie'] || unidad['ID DISP.'] || unidad['IMEI'] || '';
         const numSerieMapon = String(rawNumSerieMapon).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
-
+        
         let eqSoporteEncontrado = null;
-
+        
         if (window.appSoporte && window.appSoporte.equipos && numSerieMapon && numSerieMapon !== 's/n' && numSerieMapon !== 'sindato') {
             eqSoporteEncontrado = window.appSoporte.equipos.find(e => {
                 const idSalida = String(e.id).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
@@ -322,16 +302,14 @@ class MonitorMapon {
             });
         }
 
-        // 2. RENDERIZADO PREMIUM DE OPCIONES DE SOPORTE
         if (eqSoporteEncontrado) {
             btnSoporte.style.display = 'block';
-
+            
             const id = eqSoporteEncontrado.id;
             const linea = eqSoporteEncontrado.linea || 'N/A';
-            const imei = eqSoporteEncontrado.imei || 'N/A';
             const iccid = eqSoporteEncontrado.iccid || 'N/A';
             const compania = eqSoporteEncontrado.compania || '';
-
+            
             let bloqueJasperModal = '';
             if (compania.toUpperCase().includes('TELCEL')) {
                 bloqueJasperModal = `
@@ -352,14 +330,12 @@ class MonitorMapon {
             }
 
             panelSoporte.innerHTML = `
-                <!-- ENCABEZADO ACCIONES RÁPIDAS -->
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
                     <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Acciones Rápidas</h4>
                     <div style="flex: 1; height: 1px; background: #333;"></div>
                 </div>
                 <div style="margin-bottom: 15px; font-size: 11px; color: #888;">Línea vinculada: <b style="color: #ccc; letter-spacing: 0.5px;">${linea}</b></div>
                 
-                <!-- GRID DE BOTONES FANTASMA -->
                 <div class="panel-botones" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 25px;">
                     <button onclick="appSoporte.enviarSMS('apagar', '${id}')" style="background: rgba(244, 67, 54, 0.1); color: #ef5350; border: 1px solid #d32f2f; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#d32f2f'; this.style.color='#fff';" onmouseout="this.style.background='rgba(244, 67, 54, 0.1)'; this.style.color='#ef5350';">
                         <span style="font-size: 14px;">⏻</span> APAGAR
@@ -381,13 +357,11 @@ class MonitorMapon {
                     </button>
                 </div>
                 
-                <!-- ENCABEZADO ENLACES EXTERNOS -->
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
                     <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">🔗 Enlaces Externos</h4>
                     <div style="flex: 1; height: 1px; background: #333;"></div>
                 </div>
                 
-                <!-- BOTONES ENLACES EXTERNOS -->
                 <div class="panel-botones" style="display: flex; gap: 8px;">
                     <button onclick="window.open('https://soporte.zeekgps.com/ZeekSoporte/', '_blank')" style="flex: 1; background: rgba(33, 150, 243, 0.1); color: #42a5f5; border: 1px solid #1976d2; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.background='#1976d2'; this.style.color='#fff';" onmouseout="this.style.background='rgba(33, 150, 243, 0.1)'; this.style.color='#42a5f5';">
                         <span style="font-size: 14px;">🛠️</span> ZEEK
@@ -397,10 +371,9 @@ class MonitorMapon {
                     </button>
                 </div>
                 
-                <!-- INYECCIÓN DEL BLOQUE JASPER -->
                 ${bloqueJasperModal}
             `;
-
+            
             btnSoporte.onclick = () => {
                 if (panelSoporte.style.display === 'none') {
                     panelSoporte.style.display = 'flex';
@@ -420,4 +393,4 @@ class MonitorMapon {
             };
         }
     }
-}
+}s
