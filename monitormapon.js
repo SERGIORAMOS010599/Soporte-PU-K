@@ -302,12 +302,19 @@ class MonitorMapon {
             let bloqueJasperModal = '';
             if (compania.toUpperCase().includes('TELCEL')) {
                 bloqueJasperModal = `
-                    <div style="margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
-                        <button onclick="appSoporte.consultarJasperLinea('${iccid}', 'jasper-modal-box')" style="background: #00c853; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%; transition: background 0.2s;" onmouseover="this.style.background='#00e676'" onmouseout="this.style.background='#00c853'">
-                            📡 Consultar Estado en Telcel Jasper
+                    <div style="margin-top: 25px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                            <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">📡 Conectividad M2M</h4>
+                            <div style="flex: 1; height: 1px; background: #333;"></div>
+                        </div>
+                        <button onclick="appSoporte.consultarJasperLinea('${iccid}', 'jasper-modal-box')" 
+                                style="background: #1a1a1a; color: #00e676; border: 1px solid #00c853; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" 
+                                onmouseover="this.style.background='#00c853'; this.style.color='#fff';" 
+                                onmouseout="this.style.background='#1a1a1a'; this.style.color='#00e676';">
+                            <span style="font-size: 14px;">📶</span> Diagnóstico Telcel Jasper
                         </button>
                         <!-- CAJA ÚNICA PARA EL MODAL -->
-                        <div id="jasper-modal-box"></div>
+                        <div id="jasper-modal-box" style="margin-top: 10px;"></div>
                     </div>
                 `;
             }
