@@ -27,58 +27,61 @@ class SoporteTecnico {
                 throw new Error(data.error);
             }
 
-            let colorEstadoSim = '#4caf50'; 
-            if (data.status !== 'ACTIVATED') {
-                colorEstadoSim = '#f44336'; 
-            }
+            // 1. Colores y estilos translúcidos tipo "Píldora"
+            let colorEstadoSim = data.status === 'ACTIVATED' ? '#00e676' : '#f44336';
+            let bgEstadoSim = data.status === 'ACTIVATED' ? 'rgba(0, 230, 118, 0.1)' : 'rgba(244, 67, 54, 0.1)';
 
             const enSesionBadge = data.enSesion 
-                ? '<span style="background: #4caf50; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">SESIÓN</span>' 
-                : '<span style="background: #f44336; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">SIN SESIÓN</span>';
+                ? '<span style="background: rgba(0, 230, 118, 0.15); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; letter-spacing: 0.5px;">🟢 EN SESIÓN</span>' 
+                : '<span style="background: rgba(244, 67, 54, 0.15); color: #f44336; border: 1px solid rgba(244, 67, 54, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; letter-spacing: 0.5px;">🔴 SIN SESIÓN</span>';
             
             const consumoMB = data.consumoMB !== "No disponible" ? `${data.consumoMB} MB` : "N/A";
             
             const limiteUso = data.limiteAlcanzado 
-                ? '<span style="color:#f44336; font-weight: bold;">⚠️ SÍ (Alcanzado)</span>' 
-                : '<span style="color:#4caf50;">✅ NO (Normal)</span>';
+                ? '<span style="color:#f44336; font-weight: bold;">⚠️ Alcanzado</span>' 
+                : '<span style="color:#aaa;">Normal</span>';
                 
-            const bloqueoSIM = '<span style="color:#aaa;">Solo visible en Portal Web</span>';
+            const bloqueoSIM = '<span style="color:#777; font-style: italic;">Portal web</span>';
 
+            // 2. Renderizado de la UI Profesional
             if (contenedorResultado) {
                 contenedorResultado.innerHTML = `
-                    <div style="background: #141414; border: 1px solid #444; padding: 12px; border-radius: 6px; font-size: 12px; text-align: left; margin-top: 10px;">
+                    <div style="background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 8px; font-size: 11px; color: #bbb; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
                         
-                        <!-- CABECERA COMPACTA -->
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 8px; gap: 5px;">
-                            <span style="color: #ffb74d; font-weight: bold; font-size: 11px;">📡 TELCEL</span>
-                            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
-                                <span style="color: #ccc; font-size: 10px;">💳 ${data.ratePlan || 'N/A'}</span>
-                                <span style="color: #64b5f6; font-weight: bold; font-size: 11px;">📊 ${consumoMB}</span>
+                        <!-- CABECERA DE LA TARJETA -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span style="color: #fff; font-weight: bold; font-size: 13px; letter-spacing: 0.5px;">LÍNEA TELCEL</span>
+                                <span style="background: ${bgEstadoSim}; color: ${colorEstadoSim}; border: 1px solid ${colorEstadoSim}; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; letter-spacing: 0.5px;">${data.status || 'DESCONOCIDO'}</span>
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span style="color: #90caf9; font-weight: bold; font-size: 12px; background: rgba(144, 202, 249, 0.1); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(144, 202, 249, 0.2);">📊 ${consumoMB}</span>
                                 ${enSesionBadge}
-                                <span style="background: ${colorEstadoSim}; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">${data.status || 'DESCONOCIDO'}</span>
                             </div>
                         </div>
                         
-                        <!-- CUERPO DE DATOS -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; color: #ccc; margin-bottom: 12px; font-size: 11px;">
-                            <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <div>📞 <b>Msisdn:</b> ${data.msisdn || 'N/A'}</div>
-                                <div style="word-break: break-all;">🏷️ <b>ICCID:</b> ${data.iccid || iccidUnidad}</div>
-                                <div style="color: #888;">📅 <b>Activación:</b> ${data.dateActivated ? data.dateActivated.split('T')[0] : 'N/A'}</div>
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <div>📱 <b>IMEI Red:</b> ${data.imei || 'N/A'}</div>
-                                <div>🚫 <b>Límite de uso:</b> ${limiteUso}</div>
-                                <div>🔐 <b>Bloqueo SIM:</b> ${bloqueoSIM}</div>
-                            </div>
+                        <!-- CUADRÍCULA DE DATOS INTERNA -->
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; background: #222; padding: 12px; border-radius: 6px; border: 1px solid #2a2a2a; margin-bottom: 15px;">
+                            <div><span style="color: #777;">📞 MSISDN:</span> <b style="color: #fff;">${data.msisdn || 'N/A'}</b></div>
+                            <div><span style="color: #777;">💳 PLAN:</span> <b style="color: #fff;">${data.ratePlan || 'N/A'}</b></div>
+                            <div style="grid-column: span 2;"><span style="color: #777;">🏷️ ICCID:</span> <b style="color: #fff; letter-spacing: 0.5px;">${data.iccid || iccidUnidad}</b></div>
+                            <div style="grid-column: span 2;"><span style="color: #777;">📱 IMEI RED:</span> <b style="color: #fff; letter-spacing: 0.5px;">${data.imei || 'N/A'}</b></div>
+                            <div><span style="color: #777;">🚫 LÍMITE:</span> ${limiteUso}</div>
+                            <div><span style="color: #777;">🔐 BLOQUEO:</span> ${bloqueoSIM}</div>
                         </div>
 
-                        <!-- BOTONES DE CONTROL (Le pasamos el containerId) -->
-                        <div style="display: flex; gap: 8px; border-top: 1px dashed #333; padding-top: 10px;">
-                            <button onclick="appSoporte.cambiarEstadoSim('${iccidUnidad}', 'ACTIVATED', '${containerId}')" style="flex: 1; background: #2e7d32; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold;">
+                        <!-- BOTONES DE CONTROL DE ESTADO -->
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="appSoporte.cambiarEstadoSim('${iccidUnidad}', 'ACTIVATED', '${containerId}')" 
+                                    style="flex: 1; background: rgba(0, 200, 83, 0.1); color: #00e676; border: 1px solid #00c853; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease;"
+                                    onmouseover="this.style.background='#00c853'; this.style.color='#fff';"
+                                    onmouseout="this.style.background='rgba(0, 200, 83, 0.1)'; this.style.color='#00e676';">
                                 ▶ Activar SIM
                             </button>
-                            <button onclick="appSoporte.cambiarEstadoSim('${iccidUnidad}', 'DEACTIVATED', '${containerId}')" style="flex: 1; background: #c62828; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold;">
+                            <button onclick="appSoporte.cambiarEstadoSim('${iccidUnidad}', 'DEACTIVATED', '${containerId}')" 
+                                    style="flex: 1; background: rgba(244, 67, 54, 0.1); color: #f44336; border: 1px solid #d32f2f; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease;"
+                                    onmouseover="this.style.background='#d32f2f'; this.style.color='#fff';"
+                                    onmouseout="this.style.background='rgba(244, 67, 54, 0.1)'; this.style.color='#f44336';">
                                 ⏹ Desactivar SIM
                             </button>
                         </div>
