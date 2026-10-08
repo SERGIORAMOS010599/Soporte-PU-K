@@ -307,7 +307,34 @@ class MonitorMapon {
             const linea = eqSoporteEncontrado.linea || 'N/A';
             const iccid = eqSoporteEncontrado.iccid || 'N/A';
             const compania = eqSoporteEncontrado.compania || '';
+            // --- DETECCIÓN DINÁMICA DE PLATAFORMA ---
+            let modeloUpper = (modelo || '').toUpperCase();
+            let btnPlataformaNombre = '';
+            let btnPlataformaURL = '';
+            let btnPlataformaColor = ''; 
             
+            if (modeloUpper.includes('SUNTECH') || modeloUpper.includes('ST4') || modeloUpper.includes('ST3') || modeloUpper.includes('ST8')) {
+                btnPlataformaNombre = 'SCUTI WEB';
+                btnPlataformaURL = 'https://www.suntechscuti.com/scuti/Login';
+                btnPlataformaColor = '#ff9800'; // Naranja
+            } else if (modeloUpper.includes('TELTONIKA') || modeloUpper.includes('FMC') || modeloUpper.includes('FMB')) {
+                btnPlataformaNombre = 'FOTA WEB';
+                btnPlataformaURL = 'https://fota.teltonika.lt/devices?root=27623';
+                btnPlataformaColor = '#03a9f4'; // Azul
+            } else if (modeloUpper.includes('RUPTELA') || modeloUpper.includes('HCV') || modeloUpper.includes('PRO') || modeloUpper.includes('TRACE')) {
+                btnPlataformaNombre = 'DMP WEB';
+                btnPlataformaURL = 'https://dmp.ruptela.com/login';
+                btnPlataformaColor = '#e91e63'; // Rosa/Rojo
+            }
+
+            let btnPlataformaHTML = '';
+            if (btnPlataformaNombre !== '') {
+                btnPlataformaHTML = `
+                    <button onclick="window.open('${btnPlataformaURL}', '_blank')" style="flex: 1; background: rgba(255, 255, 255, 0.05); color: ${btnPlataformaColor}; border: 1px solid ${btnPlataformaColor}; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.background='${btnPlataformaColor}'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.color='${btnPlataformaColor}';">
+                        <span style="font-size: 14px;">☁️</span> ${btnPlataformaNombre}
+                    </button>
+                `;
+            }
             let bloqueJasperModal = '';
             if (compania.toUpperCase().includes('TELCEL')) {
                 bloqueJasperModal = `
