@@ -307,8 +307,11 @@ class MonitorMapon {
             const linea = eqSoporteEncontrado.linea || 'N/A';
             const iccid = eqSoporteEncontrado.iccid || 'N/A';
             const compania = eqSoporteEncontrado.compania || '';
-            // --- DETECCIÓN DINÁMICA DE PLATAFORMA ---
-            let modeloUpper = (modelo || '').toUpperCase();
+            
+            // Extracción segura del modelo desde el objeto de Mapon O el objeto de Soporte
+            const modeloSeguro = unidad['Device model'] || unidad['Modelo'] || eqSoporteEncontrado.modelo || '';
+            const modeloUpper = String(modeloSeguro).toUpperCase();
+            
             let btnPlataformaNombre = '';
             let btnPlataformaURL = '';
             let btnPlataformaColor = ''; 
@@ -335,6 +338,7 @@ class MonitorMapon {
                     </button>
                 `;
             }
+            
             let bloqueJasperModal = '';
             if (compania.toUpperCase().includes('TELCEL')) {
                 bloqueJasperModal = `
