@@ -1,3 +1,5 @@
+// js/soporte.js
+
 class SoporteTecnico {
     // --- CONSULTA Y CONTROL EN VIVO DE JASPER / TELCEL ---
     async consultarJasperLinea(iccidUnidad, containerId = 'jasper-resultado-box') {
@@ -45,7 +47,8 @@ class SoporteTecnico {
 
             // 2. Renderizado de la UI Profesional
             if (contenedorResultado) {
-               
+                // CORRECCIÓN: Se agrega innerHTML = `
+                contenedorResultado.innerHTML = `
                     <div style="background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 8px; font-size: 11px; color: #bbb; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
                         
                         <!-- CABECERA DE LA TARJETA -->
@@ -351,12 +354,11 @@ class SoporteTecnico {
         }
 
         // Buscamos si ya existe el contenedor de Enlaces Externos en la vista de Soporte para inyectar el botón
+        // Aquí asumí que el contenedor tiene la clase '.enlaces-externos .panel-botones'
+        // Si no tienes esa clase en tu HTML, es posible que el botón no se dibuje aquí.
         const cajaEnlacesSoporte = document.querySelector('.enlaces-externos .panel-botones'); 
-        // Nota: asumo la clase '.enlaces-externos .panel-botones' según convenciones. 
-        // Si no se inyecta, me pasas el HTML de tu menú derecho de soporte y lo cuadramos.
         
         if (cajaEnlacesSoporte && btnPlataformaNombre !== '') {
-            // Limpiamos botones inyectados previamente
             const oldBtn = document.getElementById('btn-plataforma-dinamico');
             if (oldBtn) oldBtn.remove();
             
@@ -612,7 +614,6 @@ class SoporteTecnico {
         }
 
         if (comando) {
-            // encodeURIComponent se asegura de que caracteres especiales se traduzcan bien en el navegador del teléfono
             window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
         }
     }
