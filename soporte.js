@@ -45,7 +45,7 @@ class SoporteTecnico {
 
             // 2. Renderizado de la UI Profesional
             if (contenedorResultado) {
-                contenedorResultado. = `
+               
                     <div style="background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 8px; font-size: 11px; color: #bbb; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
                         
                         <!-- CABECERA DE LA TARJETA -->
