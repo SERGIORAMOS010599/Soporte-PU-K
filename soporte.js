@@ -275,6 +275,37 @@ class SoporteTecnico {
         equiposFiltrados.forEach(eq => {
             const tarjeta = document.createElement('div');
             tarjeta.className = 'tarjeta-gps';
+            
+            // --- DETECCIÓN DINÁMICA DE PLATAFORMA PARA LOS MONITORES GLOBALES ---
+            let modeloUpper = (eq.marca || '').toUpperCase() + ' ' + (eq.modelo || '').toUpperCase();
+            let btnPlataformaNombre = '';
+            let btnPlataformaURL = '';
+            let btnPlataformaClaseColor = ''; // Usamos clases si es posible, o colores directos
+            
+            if (modeloUpper.includes('SUNTECH') || modeloUpper.includes('ST4') || modeloUpper.includes('ST3') || modeloUpper.includes('ST8')) {
+                btnPlataformaNombre = 'SCUTI WEB';
+                btnPlataformaURL = 'https://www.suntechscuti.com/scuti/Login';
+                btnPlataformaClaseColor = 'background: #ff9800; color: #fff;'; // Naranja
+            } else if (modeloUpper.includes('TELTONIKA') || modeloUpper.includes('FMC') || modeloUpper.includes('FMB')) {
+                btnPlataformaNombre = 'FOTA WEB';
+                btnPlataformaURL = 'https://fota.teltonika.lt/devices?root=27623';
+                btnPlataformaClaseColor = 'background: #03a9f4; color: #fff;'; // Azul
+            } else if (modeloUpper.includes('RUPTELA') || modeloUpper.includes('HCV') || modeloUpper.includes('PRO') || modeloUpper.includes('TRACE')) {
+                btnPlataformaNombre = 'DMP WEB';
+                btnPlataformaURL = 'https://dmp.ruptela.com/login';
+                btnPlataformaClaseColor = 'background: #e91e63; color: #fff;'; // Rosa
+            }
+
+            // Creamos el HTML del botón solo si se reconoció la marca
+            let htmlBotonPlataforma = '';
+            if (btnPlataformaNombre !== '') {
+                htmlBotonPlataforma = `
+                    <div class="accion-btn" style="${btnPlataformaClaseColor} border:none;" onclick="event.stopPropagation(); window.open('${btnPlataformaURL}', '_blank')">
+                        ${btnPlataformaNombre} <span class="circulo"></span>
+                    </div>
+                `;
+            }
+
             tarjeta.innerHTML = `
                 <div class="tarjeta-unidad">${eq.unidad}</div>
                 <div class="tarjeta-cliente">${eq.cliente} (${eq.id})</div>
@@ -284,6 +315,7 @@ class SoporteTecnico {
                 <div class="tarjeta-acciones">
                     <div class="accion-btn rojo" onclick="event.stopPropagation(); appSoporte.enviarSMS('apagar', '${eq.id}')">APAGAR <span class="circulo"></span></div>
                     <div class="accion-btn verde" onclick="event.stopPropagation(); appSoporte.enviarSMS('encender', '${eq.id}')">ENCENDER <span class="circulo"></span></div>
+                    ${htmlBotonPlataforma}
                 </div>
             `;
             tarjeta.onclick = () => this.abrirDetalles(eq);
