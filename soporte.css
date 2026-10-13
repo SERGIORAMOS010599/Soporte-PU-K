@@ -222,18 +222,22 @@ body.con-panel-abierto .vista-cuadricula {
 .modelo-sub { font-size: 0.9em; font-weight: bold; color: var(--color-gris); margin: 5px 0 15px 0; }
 
 /* Panel Lateral Deslizable Ultra Fluido */
+/* Panel Lateral Deslizable Ultra Fluido */
 .panel-lateral {
     position: fixed;
-    top: 0;
+    /* Bajamos el panel para que no tape la barra superior */
+    top: 60px; /* Misma altura que tiene tu .navbar-principal */
     right: 0;
     width: 50%;
-    height: 100vh;
+    /* Ajustamos el alto para que no se salga de la pantalla por haberlo bajado */
+    height: calc(100vh - 60px); 
     background-color: var(--bg-fondo);
     border-left: 2px solid var(--borde);
     overflow-y: auto;
     overflow-x: hidden;
     z-index: 100;
-    padding: 20px;
+    /* Ajustamos un poco el padding inferior para compensar el margen extra */
+    padding: 20px 20px 60px 20px; 
     
     /* Magia de rendimiento: Usamos transform y GPU en lugar de cambiar el ancho */
     will-change: transform;
