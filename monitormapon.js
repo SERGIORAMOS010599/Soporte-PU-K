@@ -9,23 +9,15 @@ class MonitorMapon {
     }
 
     // =========================================================
-    // DESTRUCTOR DE FORMATOS (EL SALVAVIDAS ANTI-TEXTO PLANO)
+    // DESTRUCTOR DE FORMATOS (ANTI-TEXTO PLANO)
     // =========================================================
     extraerDato(unidad, posiblesNombres) {
-        // Pase 1: Coincidencia exacta (para evitar que "modelo" jale "modelo de equipo")
         for (let n of posiblesNombres) {
-            let nLimpio = n.toLowerCase().replace(/[^a-z0-9]/g, "");
+            let nLimpio = String(n).toLowerCase().replace(/[^a-z0-9]/g, "");
             for (let key in unidad) {
-                let k = key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
-                if (k === nLimpio) return unidad[key];
-            }
-        }
-        // Pase 2: Coincidencia parcial (includes)
-        for (let n of posiblesNombres) {
-            let nLimpio = n.toLowerCase().replace(/[^a-z0-9]/g, "");
-            for (let key in unidad) {
-                let k = key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
-                if (k.includes(nLimpio)) return unidad[key];
+                let k = String(key).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+                // Busca coincidencia exacta o parcial
+                if (k === nLimpio || k.includes(nLimpio)) return unidad[key];
             }
         }
         return null;
@@ -113,6 +105,39 @@ class MonitorMapon {
         const tbody = document.getElementById('mapon-tbody');
         tbody.innerHTML = ''; 
 
+        if (!datos || datos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 20px; color: #ff4c4c;">No hay datos disponibles en el monitor.</td></tr>';
+            return;
+        }
+
+        // --- SISTEMA DE DETECCIÓN DE ERRORES DE ENCABEZADO ---
+        let primeraUnidad = datos[0];
+        let checkColumna = this.extraerDato(primeraUnidad, ["compania", "company", "cliente", "economico", "vin", "numdeserie", "serie"]);
+        
+        // Si no detectamos NI UNA SOLA columna válida, mostramos la alerta de emergencia
+        if (!checkColumna) {
+            let llavesRecibidas = Object.keys(primeraUnidad).join(" | ");
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="10" style="text-align:center; padding: 40px; background: rgba(255, 183, 77, 0.05);">
+                        <h3 style="margin-top:0; color:#ffb74d;">⚠️ Alerta de Formato en Google Sheets</h3>
+                        <p style="color:#ddd; font-size:14px; max-width: 600px; margin: 0 auto;">
+                            PU-K está recibiendo datos, pero <b>no encuentra los nombres de las columnas</b>. Al cambiar el formato a "Texto sin formato", es probable que se haya borrado la Fila 1 de encabezados o que Python mandó la información sucia.
+                        </p>
+                        <div style="background: #111; padding: 15px; border-radius: 6px; border: 1px dashed #ffb74d; color: #00e676; margin: 20px auto; max-width: 700px; word-break: break-word; text-align: left; font-family: monospace; font-size: 11px;">
+                            <span style="color:#aaa; font-weight:bold; display:block; margin-bottom:10px;">LO QUE PU-K ESTÁ LEYENDO COMO ENCABEZADOS (Fila 1):</span>
+                            ${llavesRecibidas || 'El sistema leyó una fila vacía.'}
+                        </div>
+                        <p style="color:#ffb74d; font-size:13px; font-weight: bold; margin-bottom: 0;">
+                            SOLUCIÓN: Ve a tu Google Sheet (Pestaña MONITOR MAPON), asegúrate de que la Fila 1 tenga los títulos correctos (Compañía, Economico, etc.) y vuelve a ejecutar el código de Python.
+                        </p>
+                    </td>
+                </tr>
+            `;
+            return; 
+        }
+
+        // Si pasó el chequeo, renderizamos normalmente
         let datosOrdenados = [...datos].sort((a, b) => {
             let compA = (this.extraerDato(a, ["compania", "company", "cliente"]) || 'Sin asignar').toString().toUpperCase();
             let compB = (this.extraerDato(b, ["compania", "company", "cliente"]) || 'Sin asignar').toString().toUpperCase();
@@ -130,7 +155,6 @@ class MonitorMapon {
         });
 
         datosOrdenados.forEach((unidad, index) => {
-            // EXTRACCIÓN BLINDADA
             let compania = this.extraerDato(unidad, ["compania", "company", "cliente"]) || 'Sin asignar';
             let economico = this.extraerDato(unidad, ["economico", "name", "unidad"]) || 'S/N';
             let marcaUnidad = this.extraerDato(unidad, ["marca", "vehiclebrand"]) || '-';
@@ -154,7 +178,7 @@ class MonitorMapon {
             else if (estadoUp.includes('NOPOWER')) { colorTexto = '#ff9800'; colorFondo = 'rgba(255, 152, 0, 0.1)'; colorBorde = 'rgba(255, 152, 0, 0.3)'; } 
             else { colorTexto = '#9e9e9e'; }
 
-            let badgeEstado = `<span style="background: ${colorFondo}; color: ${colorTexto}; border: 1px solid ${colorBorde}; padding: 4px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;">${estado}</span>`;
+            let badgeEstado = `<span style="background: ${colorFondo}; color:${colorTexto}; border: 1px solid ${colorBorde}; padding: 4px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;">${estado}</span>`;
 
             const tr = document.createElement('tr');
             tr.style.cssText = "cursor: pointer; transition: background 0.2s;";
@@ -286,7 +310,7 @@ class MonitorMapon {
                 
                 let kLimpia = key.toLowerCase().replace(/[^a-z0-9]/g, "");
                 if (kLimpia.includes('onlinestatus') || kLimpia.includes('estado')) {
-                    badgeStyle = `background: ${colorBorde}15; color: ${colorBorde}; border: 1px solid ${colorBorde}; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; letter-spacing: 0.5px;`;
+                    badgeStyle = `background: ${colorBorde}15; color: ${colorBorde}; border: 1px solid${colorBorde}; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; letter-spacing: 0.5px;`;
                     displayValor = `<span style="${badgeStyle}">${valor}</span>`;
                 }
 
@@ -351,7 +375,7 @@ class MonitorMapon {
             let btnPlataformaHTML = '';
             if (btnPlataformaNombre !== '') {
                 btnPlataformaHTML = `
-                    <button onclick="window.open('${btnPlataformaURL}', '_blank')" style="flex: 1; background: rgba(255, 255, 255, 0.05); color: ${btnPlataformaColor}; border: 1px solid ${btnPlataformaColor}; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.background='${btnPlataformaColor}'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.color='${btnPlataformaColor}';">
+                    <button onclick="window.open('${btnPlataformaURL}', '_blank')" style="flex: 1; background: rgba(255, 255, 255, 0.05); color: ${btnPlataformaColor}; border: 1px solid${btnPlataformaColor}; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.background='${btnPlataformaColor}'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.color='${btnPlataformaColor}';">
                         <span style="font-size: 14px;">☁️</span> ${btnPlataformaNombre}
                     </button>
                 `;
@@ -393,52 +417,4 @@ class MonitorMapon {
                     <button onclick="appSoporte.enviarSMS('configuracion', '${id}')" style="background: rgba(255, 152, 0, 0.1); color: #ffa726; border: 1px solid #f57c00; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#f57c00'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 152, 0, 0.1)'; this.style.color='#ffa726';">
                         <span style="font-size: 14px;">⚙️</span> CONFIG
                     </button>
-                    <button onclick="appSoporte.enviarSMS('reiniciar', '${id}')" style="background: rgba(255, 152, 0, 0.1); color: #ffa726; border: 1px solid #f57c00; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#f57c00'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 152, 0, 0.1)'; this.style.color='#ffa726';">
-                        <span style="font-size: 14px;">⟳</span> REINICIAR
-                    </button>
-                    <button onclick="appSoporte.enviarSMS('borrar', '${id}')" style="background: rgba(255, 87, 34, 0.1); color: #ff7043; border: 1px solid #e64a19; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#e64a19'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 87, 34, 0.1)'; this.style.color='#ff7043';">
-                        <span style="font-size: 14px;">🗑️</span> BORRAR
-                    </button>
-                    <button onclick="appSoporte.enviarSMS('formatear', '${id}')" style="background: rgba(211, 47, 47, 0.1); color: #ef5350; border: 1px solid #d32f2f; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#d32f2f'; this.style.color='#fff';" onmouseout="this.style.background='rgba(211, 47, 47, 0.1)'; this.style.color='#ef5350';">
-                        <span style="font-size: 14px;">⌫</span> FORMATO
-                    </button>
-                </div>
-                
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-                    <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">🔗 Enlaces Externos</h4>
-                    <div style="flex: 1; height: 1px; background: #333;"></div>
-                </div>
-                
-                <div class="panel-botones" style="display: flex; gap: 8px;">
-                    <button onclick="window.open('https://soporte.zeekgps.com/ZeekSoporte/', '_blank')" style="flex: 1; background: rgba(33, 150, 243, 0.1); color: #42a5f5; border: 1px solid #1976d2; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.background='#1976d2'; this.style.color='#fff';" onmouseout="this.style.background='rgba(33, 150, 243, 0.1)'; this.style.color='#42a5f5';">
-                        <span style="font-size: 14px;">🛠️</span> ZEEK
-                    </button>
-                    <button onclick="window.open('https://mapon.com/partner/gbox_new/', '_blank')" style="flex: 1; background: rgba(0, 200, 83, 0.1); color: #69f0ae; border: 1px solid #00c853; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.background='#00c853'; this.style.color='#fff';" onmouseout="this.style.background='rgba(0, 200, 83, 0.1)'; this.style.color='#69f0ae';">
-                        <span style="font-size: 14px;">📍</span> MAPON
-                    </button>
-                    ${btnPlataformaHTML}
-                </div>
-                
-                ${bloqueJasperModal}
-            `;
-            
-            btnSoporte.onclick = () => {
-                if (panelSoporte.style.display === 'none') {
-                    panelSoporte.style.display = 'flex';
-                    modalBox.style.maxWidth = '850px'; 
-                    btnSoporte.innerHTML = '◀ Ocultar Soporte';
-                    btnSoporte.style.background = 'rgba(255, 255, 255, 0.05)';
-                    btnSoporte.style.color = '#ccc';
-                    btnSoporte.style.border = '1px solid #444';
-                } else {
-                    panelSoporte.style.display = 'none';
-                    modalBox.style.maxWidth = '550px'; 
-                    btnSoporte.innerHTML = '🛠️ Opciones de Soporte';
-                    btnSoporte.style.background = 'rgba(25, 118, 210, 0.1)';
-                    btnSoporte.style.color = '#64b5f6';
-                    btnSoporte.style.border = '1px solid #1976d2';
-                }
-            };
-        }
-    }
-}
+                    <button
