@@ -209,6 +209,16 @@
                 alert("⚠️ Ocurrió un error al intentar descargar el Excel: " + error.message);
                 console.error(error);
             }
+            document.addEventListener('DOMContentLoaded', () => {
+            // ... (el código que ya tienes ahí) ...
+            
+            // INICIALIZAR EL SISTEMA DE DIAGNÓSTICO
+            if (typeof DiagnosticoEnVivo !== 'undefined') {
+                window.appDiagnostico = new DiagnosticoEnVivo('vista-diagnostico');
+            }
+            
+            cargarDatosMaponDirecto(); 
+        });
         };
 
         async function cargarDatosMaponDirecto() {
