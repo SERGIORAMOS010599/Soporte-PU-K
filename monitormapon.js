@@ -9,12 +9,14 @@ class MonitorMapon {
     }
 
     // =========================================================
-    // DESTRUCTOR DE FORMATOS (ANTI-TEXTO PLANO)
+    // DESTRUCTOR DE FORMATOS (ANTI-TEXTO PLANO Y COLUMNAS GENÉRICAS)
     // =========================================================
     extraerDato(unidad, posiblesNombres) {
         for (let n of posiblesNombres) {
+            // Limpiamos la llave que buscamos (ej. "columna0")
             let nLimpio = String(n).toLowerCase().replace(/[^a-z0-9]/g, "");
             for (let key in unidad) {
+                // Limpiamos la llave que viene de Google Sheets (ej. "Columna_0" -> "columna0")
                 let k = String(key).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
                 if (k === nLimpio || k.includes(nLimpio)) return unidad[key];
             }
@@ -109,9 +111,9 @@ class MonitorMapon {
             return;
         }
 
-        // --- SISTEMA DE DETECCIÓN DE ERRORES DE ENCABEZADO ---
         let primeraUnidad = datos[0];
-        let checkColumna = this.extraerDato(primeraUnidad, ["compania", "company", "cliente", "economico", "vin", "numdeserie", "serie"]);
+        // Ahora buscamos también las Columnas 0 y 1 para dar el pase libre
+        let checkColumna = this.extraerDato(primeraUnidad, ["compania", "company", "cliente", "economico", "vin", "numdeserie", "serie", "columna0", "columna1"]);
         
         if (!checkColumna) {
             let llavesRecibidas = Object.keys(primeraUnidad).join(" | ");
@@ -119,16 +121,10 @@ class MonitorMapon {
                 <tr>
                     <td colspan="10" style="text-align:center; padding: 40px; background: rgba(255, 183, 77, 0.05);">
                         <h3 style="margin-top:0; color:#ffb74d;">⚠️ Alerta de Formato en Google Sheets</h3>
-                        <p style="color:#ddd; font-size:14px; max-width: 600px; margin: 0 auto;">
-                            PU-K está recibiendo datos, pero <b>no encuentra los nombres de las columnas</b>. Al cambiar el formato a "Texto sin formato", es probable que se haya borrado la Fila 1 de encabezados o que Python mandó la información sucia.
-                        </p>
-                        <div style="background: #111; padding: 15px; border-radius: 6px; border: 1px dashed #ffb74d; color: #00e676; margin: 20px auto; max-width: 700px; word-break: break-word; text-align: left; font-family: monospace; font-size: 11px;">
-                            <span style="color:#aaa; font-weight:bold; display:block; margin-bottom:10px;">LO QUE PU-K ESTÁ LEYENDO COMO ENCABEZADOS (Fila 1):</span>
-                            ${llavesRecibidas || 'El sistema leyó una fila vacía.'}
+                        <p style="color:#ddd; font-size:14px; max-width: 600px; margin: 0 auto;">No se encontraron columnas válidas.</p>
+                        <div style="background: #111; padding: 15px; border-radius: 6px; border: 1px dashed #ffb74d; color: #00e676; margin: 20px auto; max-width: 700px; word-break: break-word; font-family: monospace; font-size: 11px;">
+                            ${llavesRecibidas}
                         </div>
-                        <p style="color:#ffb74d; font-size:13px; font-weight: bold; margin-bottom: 0;">
-                            SOLUCIÓN: Ve a tu Google Sheet (Pestaña MONITOR MAPON), asegúrate de que la Fila 1 tenga los títulos correctos (Compañía, Economico, etc.) y vuelve a ejecutar el código de Python.
-                        </p>
                     </td>
                 </tr>
             `;
@@ -136,13 +132,13 @@ class MonitorMapon {
         }
 
         let datosOrdenados = [...datos].sort((a, b) => {
-            let compA = (this.extraerDato(a, ["compania", "company", "cliente"]) || 'Sin asignar').toString().toUpperCase();
-            let compB = (this.extraerDato(b, ["compania", "company", "cliente"]) || 'Sin asignar').toString().toUpperCase();
+            let compA = (this.extraerDato(a, ["compania", "company", "cliente", "columna0"]) || 'Sin asignar').toString().toUpperCase();
+            let compB = (this.extraerDato(b, ["compania", "company", "cliente", "columna0"]) || 'Sin asignar').toString().toUpperCase();
             if (compA < compB) return -1;
             if (compA > compB) return 1;
 
-            let estA = (this.extraerDato(a, ["onlinestatus", "estado"]) || 'Desconocido').toString().toUpperCase();
-            let estB = (this.extraerDato(b, ["onlinestatus", "estado"]) || 'Desconocido').toString().toUpperCase();
+            let estA = (this.extraerDato(a, ["onlinestatus", "estado", "columna14"]) || 'Desconocido').toString().toUpperCase();
+            let estB = (this.extraerDato(b, ["onlinestatus", "estado", "columna14"]) || 'Desconocido').toString().toUpperCase();
             if (estA < estB) return -1;
             if (estA > estB) return 1;
 
@@ -150,17 +146,19 @@ class MonitorMapon {
         });
 
         datosOrdenados.forEach((unidad, index) => {
-            let compania = this.extraerDato(unidad, ["compania", "company", "cliente"]) || 'Sin asignar';
-            let economico = this.extraerDato(unidad, ["economico", "name", "unidad"]) || 'S/N';
-            let marcaUnidad = this.extraerDato(unidad, ["marca", "vehiclebrand"]) || '-';
-            let modeloUnidad = this.extraerDato(unidad, ["modelo", "vehiclemodel"]) || '-';
-            let vin = this.extraerDato(unidad, ["vin", "chassisnumber", "chasis"]) || '-';
-            let anio = this.extraerDato(unidad, ["anofabricacion", "ano", "year"]) || '-';
+            // APLICAMOS EL MAPA EXACTO BASADO EN TU INFORMACIÓN DE COLUMNAS
+            let compania = this.extraerDato(unidad, ["compania", "company", "cliente", "columna0"]) || 'Sin asignar';
+            let economico = this.extraerDato(unidad, ["economico", "name", "unidad", "columna1"]) || 'S/N';
+            let marcaUnidad = this.extraerDato(unidad, ["marca", "vehiclebrand", "columna2"]) || '-';
+            let modeloUnidad = this.extraerDato(unidad, ["modelo", "vehiclemodel", "columna3"]) || '-';
+            let vin = this.extraerDato(unidad, ["vin", "chassisnumber", "chasis", "columna4"]) || '-';
+            let anio = this.extraerDato(unidad, ["anofabricacion", "ano", "year", "columna5"]) || '-';
             
-            let idSerie = this.extraerDato(unidad, ["numdeserie", "serie", "imei", "iddisp"]) || 'S/N';
-            let modelo = this.extraerDato(unidad, ["devicemodel", "modeloequipo", "gps"]) || 'Desconocido';
-            let estado = this.extraerDato(unidad, ["onlinestatus", "estado"]) || 'Desconocido';
-            let ultimoReporte = this.extraerDato(unidad, ["lastdatareceived", "ultimoreporte", "reporte"]) || 'Sin fecha';
+            // Combinamos las posibilidades de Serie, IMEI o ID Disp que están en las columnas 10, 8 y 6
+            let idSerie = this.extraerDato(unidad, ["numdeserie", "serie", "imei", "iddisp", "columna10", "columna8", "columna6"]) || 'S/N';
+            let modelo = this.extraerDato(unidad, ["devicemodel", "modeloequipo", "gps", "columna7"]) || 'Desconocido';
+            let estado = this.extraerDato(unidad, ["onlinestatus", "estado", "columna14"]) || 'Desconocido';
+            let ultimoReporte = this.extraerDato(unidad, ["lastdatareceived", "ultimoreporte", "reporte", "columna15"]) || 'Sin fecha';
 
             let colorTexto = '#fff';
             let colorFondo = 'rgba(158, 158, 158, 0.1)';
@@ -203,7 +201,7 @@ class MonitorMapon {
     Grafica() {
         const conteoEstados = {};
         this.datosUnidades.forEach(unidad => {
-            let estado = (this.extraerDato(unidad, ["onlinestatus", "estado"]) || 'Desconocido').toString().trim();
+            let estado = (this.extraerDato(unidad, ["onlinestatus", "estado", "columna14"]) || 'Desconocido').toString().trim();
             conteoEstados[estado] = (conteoEstados[estado] || 0) + 1;
         });
 
@@ -266,7 +264,7 @@ class MonitorMapon {
             infoDiv.style.color = "#00e676"; 
             
             const datosFiltrados = this.datosUnidades.filter(u => {
-                let e = this.extraerDato(u, ["onlinestatus", "estado"]) || 'Desconocido';
+                let e = this.extraerDato(u, ["onlinestatus", "estado", "columna14"]) || 'Desconocido';
                 return e === estado;
             });
             this.Tabla(datosFiltrados);
@@ -304,10 +302,25 @@ class MonitorMapon {
                 let displayValor = valor;
                 
                 let kLimpia = key.toLowerCase().replace(/[^a-z0-9]/g, "");
-                if (kLimpia.includes('onlinestatus') || kLimpia.includes('estado')) {
+                // También marcamos como estado la "columna14"
+                if (kLimpia.includes('onlinestatus') || kLimpia.includes('estado') || kLimpia === 'columna14') {
                     badgeStyle = `background: ${colorBorde}15; color: ${colorBorde}; border: 1px solid ${colorBorde}; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; letter-spacing: 0.5px;`;
                     displayValor = `<span style="${badgeStyle}">${valor}</span>`;
                 }
+
+                // Intentar ponerle el nombre real a la columna en el modal si viene como "columnaX"
+                let nombreKeyMostrado = key;
+                if(kLimpia === 'columna0') nombreKeyMostrado = "Compañía";
+                if(kLimpia === 'columna1') nombreKeyMostrado = "Económico";
+                if(kLimpia === 'columna2') nombreKeyMostrado = "Marca";
+                if(kLimpia === 'columna3') nombreKeyMostrado = "Modelo";
+                if(kLimpia === 'columna4') nombreKeyMostrado = "VIN";
+                if(kLimpia === 'columna5') nombreKeyMostrado = "Año Fabricación";
+                if(kLimpia === 'columna10') nombreKeyMostrado = "Núm. de Serie";
+                if(kLimpia === 'columna8') nombreKeyMostrado = "IMEI";
+                if(kLimpia === 'columna7') nombreKeyMostrado = "Device Model";
+                if(kLimpia === 'columna14') nombreKeyMostrado = "Online Status";
+                if(kLimpia === 'columna15') nombreKeyMostrado = "Último Reporte";
 
                 const divItem = document.createElement('div');
                 divItem.style.cssText = `background: #1a1a1a; padding: 12px; border-radius: 6px; border: 1px solid #2a2a2a; border-left: 3px solid ${colorBorde}; position: relative; transition: all 0.2s ease;`;
@@ -315,7 +328,7 @@ class MonitorMapon {
                 divItem.onmouseout = () => divItem.style.borderColor = '#2a2a2a';
                 
                 divItem.innerHTML = `
-                    <div style="font-size: 9px; color: #777; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">${key}</div>
+                    <div style="font-size: 9px; color: #777; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">${nombreKeyMostrado}</div>
                     <div style="font-size: 13px; font-weight: bold; color: #eee; word-break: break-all;">${displayValor}</div>
                 `;
                 contenedor.appendChild(divItem);
@@ -323,7 +336,7 @@ class MonitorMapon {
         });
 
         // CRUCE CON SOPORTE
-        let rawNumSerieMapon = this.extraerDato(unidad, ["numdeserie", "serie", "imei", "iddisp"]) || '';
+        let rawNumSerieMapon = this.extraerDato(unidad, ["numdeserie", "serie", "imei", "iddisp", "columna10", "columna8", "columna6"]) || '';
         const numSerieMapon = String(rawNumSerieMapon).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
         
         let eqSoporteEncontrado = null;
@@ -344,8 +357,8 @@ class MonitorMapon {
             const iccid = eqSoporteEncontrado.iccid || 'N/A';
             const compania = eqSoporteEncontrado.compania || '';
             
-            const m1 = this.extraerDato(unidad, ["devicemodel", "modeloequipo"]);
-            const m2 = this.extraerDato(unidad, ["modelo", "vehiclemodel"]);
+            const m1 = this.extraerDato(unidad, ["devicemodel", "modeloequipo", "columna7"]);
+            const m2 = this.extraerDato(unidad, ["modelo", "vehiclemodel", "columna3"]);
             const modeloSeguro = m1 || m2 || eqSoporteEncontrado.modelo || '';
             const modeloUpper = String(modeloSeguro).toUpperCase();
             
@@ -461,4 +474,3 @@ class MonitorMapon {
         }
     }
 }
-// >>>>>>>> FIN DEL ARCHIVO: NO BORRES LA LLAVE DE ARRIBA <<<<<<<<<<
