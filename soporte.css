@@ -261,28 +261,28 @@ body.con-panel-abierto .vista-cuadricula {
 .btn-cerrar { background: rgba(255,255,255,0.05); border: 1px solid #444; border-radius: 50%; width: 35px; height: 35px; color: var(--color-gris); font-size: 1.2em; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; }
 .btn-cerrar:hover { background: #f44336; color: #fff; border-color: #f44336; }
 
-/* --- BOTONES DE ACCIÓN MODERNOS (PILLS/CHIPS) --- */
-/* Transformamos los viejos círculos en botones rectangulares alargados */
+/* --- BOTONES DE ACCIÓN MODERNOS (CUADRÍCULA COMPACTA) --- */
 .panel-botones { 
     display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); 
-    gap: 12px; 
+    /* Crea columnas automáticas. Al bajar a 85px, caben de 4 a 5 botones por fila */
+    grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); 
+    gap: 10px; 
     margin-bottom: 35px; 
 }
 
 .btn-accion { 
     display: flex; 
-    flex-direction: row; /* Icono y texto lado a lado */
+    flex-direction: column; /* Icono arriba, texto abajo */
     align-items: center; 
     justify-content: flex-start;
     background: rgba(255, 255, 255, 0.05); 
     border: 1px solid #444; 
-    border-radius: 8px;
+    border-radius: 10px; /* Bordes un poco más curvos */
     color: #ddd; 
     cursor: pointer; 
-    padding: 8px 12px;
-    font-size: 0.7rem; 
-    text-align: left; 
+    padding: 12px 6px;
+    font-size: 0.65rem; /* Letra más pequeña para que encaje bien */
+    text-align: center; 
     font-weight: 800; 
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -295,22 +295,22 @@ body.con-panel-abierto .vista-cuadricula {
     background: rgba(255, 183, 77, 0.1);
     border-color: var(--color-naranja);
     color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
 }
 
-/* Modificamos el icono interno para que encaje perfecto en el nuevo botón */
+/* El icono regresa a ser el protagonista central */
 .btn-accion .icono { 
-    width: 26px; 
-    height: 26px; 
-    border-radius: 6px; /* Cuadrito con bordes curvos en vez de círculo perfecto */
+    width: 32px; 
+    height: 32px; 
+    border-radius: 8px; /* Forma de cuadrito moderno en vez de círculo */
     display: flex; 
     align-items: center; 
     justify-content: center; 
     font-size: 1.1em; 
     color: white; 
-    margin-right: 10px; /* Espacio entre icono y texto */
-    margin-bottom: 0; /* Quitamos el margen viejo */
+    margin-right: 0; /* Quitamos el margen derecho que los hacía ver como lista */
+    margin-bottom: 8px; /* Agregamos separación hacia el texto de abajo */
     flex-shrink: 0;
 }
 
