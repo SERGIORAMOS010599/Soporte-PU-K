@@ -237,7 +237,7 @@ async analizarEquipoIndividual(index) {
 
         try {
             // ¡PON TU URL DE APPS SCRIPT AQUÍ!
-            const URL_APPS_SCRIPT = "TU_URL_DE_APPS_SCRIPT_AQUI"; 
+            const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxechSb9x2TtDrI_E8egBEkGjZOOFGMXNl5UiBjB9s8n_hJwH6qGHe5aEMMENaEO39H/exec"; 
             
             const respuesta = await fetch(URL_APPS_SCRIPT, {
                 method: 'POST',
