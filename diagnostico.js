@@ -212,49 +212,86 @@ class DiagnosticoEnVivo {
     // 2. PREPARACIÓN DEL PROMPT PARA LA IA
     // ==========================================
     
-    async analizarEquipoIndividual(index) {
-        // OJO: Tomamos el equipo de `equiposConFalla` pero hay que asegurarse de que index coincida.
-        // Como implementamos el filtro, es más seguro buscar por ID de caja, pero por ahora usaremos la unidad global.
+async analizarEquipoIndividual(index) {
         const unidad = this.equiposConFalla[index];
         if(!unidad) return;
         
         const idCaja = `ia-resp-${index}`;
         const caja = document.getElementById(idCaja);
-        if (caja) {
-            caja.style.display = 'block';
-            caja.innerHTML = '<span style="color: #64b5f6;">🐕 Analizando manuales y estado del equipo...</span>';
+        if (!caja) return;
 
-            // AQUÍ ESTÁ EL PROMPT MAESTRO QUE ENVIAREMOS A GEMINI DESPUÉS
-            const promptMaestro = `
-            Eres PU-K, ingeniero experto en telemetría de IDT Tecnologías.
-            Un cliente reportó un equipo desconectado. Aquí tienes la radiografía del equipo:
+        caja.style.display = 'block';
+        caja.innerHTML = '<span style="color: #64b5f6;">🐕 PU-K analizando manuales y estado del equipo...</span>';
+
+        // 1. Preparamos el paquete exacto para Apps Script
+        const payload = {
+            accion: 'diagnostico_puk',
+            compania: unidad._compania,
+            economico: unidad._economico,
+            idSerie: unidad._idSerie,
+            modelo: unidad._marca + ' ' + unidad._modelo,
+            linea: unidad._lineaAsignada,
+            estado: unidad._estado,
+            ultimoReporte: unidad._ultimoReporte
+        };
+
+        try {
+            // ¡PON TU URL DE APPS SCRIPT AQUÍ!
+            const URL_APPS_SCRIPT = "TU_URL_DE_APPS_SCRIPT_AQUI"; 
             
-            - Económico: ${unidad._economico}
-            - Compañía: ${unidad._compania}
-            - ID/Serie: ${unidad._idSerie}
-            - Marca/Modelo: ${unidad._marca} ${unidad._modelo}
-            - Línea Celular M2M: ${unidad._lineaAsignada}
-            - Estado en Mapon: ${unidad._estado}
-            - Última vez conectado: ${unidad._ultimoReporte}
+            const respuesta = await fetch(URL_APPS_SCRIPT, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
 
-            Instrucciones: Consulta tu manual de procedimientos. Dame un diagnóstico técnico profesional, directo y al punto (máximo 3 líneas) sobre cuál podría ser el problema exacto. Si el manual dicta que se debe enviar un comando SMS para esta falla, indícalo.
-            `;
+            // Recibimos la respuesta JSON
+            const dataJSON = await respuesta.json();
+            
+            if (!dataJSON.success) {
+                throw new Error(dataJSON.error || "Falla desconocida en el servidor");
+            }
 
-            // Simulador visual de respuesta profesional (Lo que verás mientras conectamos el backend)
-            setTimeout(() => {
-                caja.innerHTML = `
-                    <div style="margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px;">
-                        <b style="color: #ffb74d;">Diagnóstico de PU-K:</b>
-                    </div>
-                    El equipo <b>${unidad._modelo}</b> presenta un corte de reporte catalogado como <b>${unidad._estado}</b>. Según el manual de telemetría, esto indica una interrupción en el suministro de energía principal (batería del vehículo o fusible dañado). 
-                    <br><br>
-                    <i>Acción recomendada:</i> Solicitar a campo revisión física del arnés de voltaje. Para descartar bloqueo de memoria, puedes ejecutar un reinicio forzado por SMS a la línea ${unidad._lineaAsignada}.
-                    <br><br>
-                    <button onclick="appSoporte.enviarSMS('reiniciar', '${unidad._idSerie}')" style="background: rgba(76, 175, 80, 0.1); color: #4caf50; border: 1px solid #4caf50; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; width: 100%; transition: 0.2s;">
-                        📡 ENVIAR SMS REINICIO
+            let textoGemini = dataJSON.respuesta;
+
+            // 2. Extractor Mágico de Botones SMS
+            const regexBotones = /\[BOTON:\s*([^\]]+)\]/gi;
+            let botonesHTML = '';
+            let match;
+            
+            while ((match = regexBotones.exec(textoGemini)) !== null) {
+                let comando = match[1].trim().toLowerCase();
+                let colorBase = '#ffb74d';
+                let icono = '📡';
+                
+                if(comando === 'reiniciar') { colorBase = '#f57c00'; icono = '⟳'; }
+                if(comando === 'configuracion') { colorBase = '#ffb74d'; icono = '⚙️'; }
+                if(comando === 'apagar') { colorBase = '#d32f2f'; icono = '⏻'; }
+                if(comando === 'encender') { colorBase = '#388e3c'; icono = '⏻'; }
+
+                botonesHTML += `
+                    <button onclick="appSoporte.enviarSMS('${comando}', '${unidad._idSerie}')" style="background: ${colorBase}20; color: ${colorBase}; border: 1px solid ${colorBase}; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; width: 100%; transition: 0.2s; margin-top: 8px;" onmouseover="this.style.background='${colorBase}'; this.style.color='#111';" onmouseout="this.style.background='${colorBase}20'; this.style.color='${colorBase}';">
+                        ${icono} ENVIAR SMS: ${comando.toUpperCase()}
                     </button>
                 `;
-            }, 1800);
+            }
+
+            // Ocultamos las etiquetas de texto puro y dejamos el diagnóstico limpio
+            let textoLimpio = textoGemini.replace(regexBotones, '').trim();
+
+            // 3. Pintamos el resultado final con los botones funcionales
+            caja.innerHTML = `
+                <div style="margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+                    <b style="color: #ffb74d;">Diagnóstico de PU-K:</b>
+                </div>
+                ${textoLimpio.replace(/\n/g, '<br>')}
+                
+                <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px;">
+                    ${botonesHTML}
+                </div>
+            `;
+
+        } catch (error) {
+            caja.innerHTML = `<span style="color: #f44336;">❌ Ocurrió un error al contactar a PU-K: ${error.message}</span>`;
         }
     }
 
