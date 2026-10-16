@@ -159,6 +159,8 @@ class SoporteTecnico {
             document.getElementById('vista-soporte').classList.remove('vista-oculta');
             document.getElementById('vista-soporte').classList.add('vista-activa');
             botones[0].classList.add('activo');
+            // Re-renderizamos Soporte al volver a la pestaña por si Mapon ya terminó de cargar
+            this.renderizar();
         } 
         else if (vistaDestino === 'monitores') {
             document.getElementById('vista-monitores').classList.remove('vista-oculta');
@@ -261,6 +263,15 @@ class SoporteTecnico {
         if (!this.container) return;
         this.container.innerHTML = '';
         const query = this.Actual.toLowerCase().trim();
+
+        // 1. BÚSQUEDA INTELIGENTE DE MAPON EN MEMORIA GLOBAL
+        let maponData = [];
+        for (let key in window) {
+            if (window[key] && window[key].datosUnidades && Array.isArray(window[key].datosUnidades)) {
+                maponData = window[key].datosUnidades;
+                break;
+            }
+        }
         
         const equiposFiltrados = this.equipos.filter(eq => {
             if (query === '') return true;
@@ -274,14 +285,55 @@ class SoporteTecnico {
         equiposFiltrados.forEach(eq => {
             const tarjeta = document.createElement('div');
             tarjeta.className = 'tarjeta-gps';
+
+            // --- 2. LÓGICA DE CRUCE CON MAPON ---
+            let estadoServicioFinal = eq.estadoServicio;
+            let unidadFinal = eq.unidad;
+            let marcaModeloUnidadFinal = eq.marcaModeloUnidad;
+            let anioFinal = eq.anio;
+            let numSerieFinal = eq.numSerie;
+            let clienteFinal = eq.cliente;
+
+            if (maponData && maponData.length > 0) {
+                let idSoporte = String(eq.id).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
+                let imeiSoporte = String(eq.imei).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
+
+                // Buscar coincidencias
+                let eqMapon = maponData.find(m => {
+                    let rawMapon = m['Núm. de serie '] || m['Núm. de serie'] || m['ID disp.'] || m['IMEI'] || '';
+                    let idM = String(rawMapon).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
+                    return (idM !== '' && idM !== 's/n') && (idM === idSoporte || idM === imeiSoporte);
+                });
+
+                if (eqMapon) {
+                    estadoServicioFinal = 'INSTALADO';
+                    unidadFinal = eqMapon['Economico'] || eqMapon['Name'] || eq.unidad;
+                    let mMarca = eqMapon['Marca'] || eqMapon['Vehicle brand'] || '';
+                    let mModelo = eqMapon['Modelo'] || eqMapon['Vehicle model'] || '';
+                    marcaModeloUnidadFinal = `${mMarca} ${mModelo}`.trim() || eq.marcaModeloUnidad;
+                    anioFinal = eqMapon['Año fabricación'] || eqMapon['Año'] || eqMapon['Year'] || eq.anio;
+                    numSerieFinal = eqMapon['VIN'] || eqMapon['Chassis number'] || eq.numSerie;
+                    clienteFinal = eqMapon['Compañía:'] || eqMapon['Compañía'] || eqMapon['Company'] || eq.cliente;
+                } else {
+                    estadoServicioFinal = 'PENDIENTE';
+                }
+            }
+
+            // Guardamos las variables "Visible" para el modal y la tarjeta (No afectará la Base de datos al guardar)
+            eq.estadoServicioVisible = estadoServicioFinal;
+            eq.unidadVisible = unidadFinal;
+            eq.clienteVisible = clienteFinal;
+            eq.marcaModeloUnidadVisible = marcaModeloUnidadFinal;
+            eq.anioVisible = anioFinal;
+            eq.numSerieVisible = numSerieFinal;
             
             // Tarjeta LIMPIA, sin botones de acción
             tarjeta.innerHTML = `
-                <div class="tarjeta-unidad">${eq.unidad}</div>
-                <div class="tarjeta-cliente">${eq.cliente} (${eq.id})</div>
+                <div class="tarjeta-unidad">${eq.unidadVisible}</div>
+                <div class="tarjeta-cliente">${eq.clienteVisible} (${eq.id})</div>
                 <h2 class="tarjeta-marca">${eq.marca}</h2>
                 <div class="tarjeta-modelo">${eq.modelo}</div>
-                <div class="tarjeta-servicio">${eq.estadoServicio}</div>
+                <div class="tarjeta-servicio">${eq.estadoServicioVisible}</div>
             `;
             tarjeta.onclick = () => this.abrirDetalles(eq);
             this.container.appendChild(tarjeta);
@@ -293,8 +345,9 @@ class SoporteTecnico {
         document.getElementById('panel-detalles').classList.add('abierto');
         this.equipoSeleccionado = eq;
 
+        // INYECCIÓN DE LA INFORMACIÓN CRUZADA VISUAL EN EL PANEL
         document.getElementById('det-titulo-contenedor').innerHTML = `
-            <h1 class="titulo-detalles" id="det-titulo">${eq.unidad}</h1>
+            <h1 class="titulo-detalles" id="det-titulo">${eq.unidadVisible || eq.unidad}</h1>
             <span class="icono-editar" onclick="appSoporte.activarEdicionGeneral()">✏️</span>
         `;
         document.getElementById('det-id').innerText = eq.id;
@@ -303,12 +356,12 @@ class SoporteTecnico {
         document.getElementById('det-imei').innerText = eq.imei;
         document.getElementById('det-marca').innerText = eq.marca;
         document.getElementById('det-modelo').innerText = eq.modelo;
-        document.getElementById('det-cliente').innerText = eq.cliente;
+        document.getElementById('det-cliente').innerText = eq.clienteVisible || eq.cliente;
         document.getElementById('det-tipo-servicio').innerText = eq.tipoServicio;
-        document.getElementById('det-servicio').innerText = eq.estadoServicio;
-        document.getElementById('det-marcaModeloUnidad').innerText = eq.marcaModeloUnidad;
-        document.getElementById('det-anio').innerText = eq.anio;
-        document.getElementById('det-numSerie').innerText = eq.numSerie;
+        document.getElementById('det-servicio').innerText = eq.estadoServicioVisible || eq.estadoServicio;
+        document.getElementById('det-marcaModeloUnidad').innerText = eq.marcaModeloUnidadVisible || eq.marcaModeloUnidad;
+        document.getElementById('det-anio').innerText = eq.anioVisible || eq.anio;
+        document.getElementById('det-numSerie').innerText = eq.numSerieVisible || eq.numSerie;
 
         // --- DETECCIÓN DINÁMICA DE PLATAFORMA PARA BOTONES REDONDOS ---
         let modeloUpper = (eq.marca || '').toUpperCase() + ' ' + (eq.modelo || '').toUpperCase();
@@ -321,30 +374,28 @@ class SoporteTecnico {
             btnPlataformaNombre = 'SCUTI WEB';
             comandoDinamicoNombre = 'COMANDO SCUTI';
             btnPlataformaURL = 'https://www.suntechscuti.com/scuti/Login';
-            btnPlataformaColor = '#ffb74d'; // Naranja/Dorado
+            btnPlataformaColor = '#ffb74d'; 
         } else if (modeloUpper.includes('TELTONIKA') || modeloUpper.includes('FMC') || modeloUpper.includes('FMB')) {
             btnPlataformaNombre = 'FOTA WEB';
-            comandoDinamicoNombre = 'COMANDO FOTA WEB';
+            comandoDinamicoNombre = 'COMANDO FOTA';
             btnPlataformaURL = 'https://fota.teltonika.lt/devices?root=27623';
             btnPlataformaColor = '#ffb74d'; 
         } else if (modeloUpper.includes('RUPTELA') || modeloUpper.includes('HCV') || modeloUpper.includes('PRO') || modeloUpper.includes('TRACE')) {
             btnPlataformaNombre = 'DMP WEB';
-            comandoDinamicoNombre = 'COMANDO DMP WEB';
+            comandoDinamicoNombre = 'COMANDO DMP';
             btnPlataformaURL = 'https://dmp.ruptela.com/login';
             btnPlataformaColor = '#ffb74d'; 
         }
 
-        // Si existe el panel de botones redondos, inyectamos o actualizamos los botones dinámicos
         const cajaBotonesRedondos = document.querySelector('.panel-botones');
         
         if (cajaBotonesRedondos && btnPlataformaNombre !== '') {
-            // Limpiamos los botones dinámicos anteriores si existen
             const btnWebOld = document.getElementById('btn-dinamico-web');
             const btnComandoOld = document.getElementById('btn-dinamico-comando');
             if (btnWebOld) btnWebOld.remove();
             if (btnComandoOld) btnComandoOld.remove();
             
-            // Creamos el botón "PLATAFORMA WEB" (Icono de Texto 'T' de tu imagen)
+            // Botón de plataforma web (Icono Texto T)
             const btnWeb = document.createElement('button');
             btnWeb.id = 'btn-dinamico-web';
             btnWeb.className = 'btn-accion';
@@ -354,7 +405,7 @@ class SoporteTecnico {
                 ${btnPlataformaNombre}
             `;
             
-            // Creamos el botón "COMANDO PLATAFORMA" (Icono de Ventana de tu imagen)
+            // Botón de comando dinámico (Icono Ventana)
             const btnComando = document.createElement('button');
             btnComando.id = 'btn-dinamico-comando';
             btnComando.className = 'btn-accion';
@@ -368,14 +419,11 @@ class SoporteTecnico {
             cajaBotonesRedondos.appendChild(btnComando);
         }
 
-        // INYECCIÓN CORRECTA DEL BOTÓN DE JASPER DENTRO DEL ASISTENTE O ABAJO DE LA TABLA
+        // INYECCIÓN CORRECTA DEL BOTÓN DE JASPER 
         const contenedorAsistenteBody = document.querySelector('.comandos-body');
-        
         let botonJasperExistente = document.getElementById('contenedor-jasper-panel');
-        
         const companiaUpper = (eq.compania || '').toUpperCase();
         
-        // Solo inyectar Jasper si la compañía incluye TELCEL
         if (companiaUpper.includes('TELCEL')) {
             if (!botonJasperExistente && contenedorAsistenteBody) {
                 const wrapperJasper = document.createElement('div');
@@ -393,7 +441,6 @@ class SoporteTecnico {
                 document.getElementById('jasper-resultado-box').innerHTML = ''; 
             }
         } else if (botonJasperExistente) {
-            // Si el equipo no es Telcel, removemos el botón de Jasper que se haya inyectado antes
             botonJasperExistente.remove();
         }
 
@@ -591,7 +638,6 @@ class SoporteTecnico {
 
         const marca = eq.marca.toUpperCase().trim();
         const modelo = eq.modelo.toUpperCase().trim();
-        // Usamos trim() para eliminar cualquier espacio oculto que traiga el ID desde Excel
         const id = String(eq.id).trim(); 
         let comando = "";
 
@@ -600,7 +646,6 @@ class SoporteTecnico {
             else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Enable1`;
             else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Enable1`;
             else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;01`;
-            // Quitamos el espacio inicial erróneo de Teltonika
             else if (marca === "TELTONIKA") comando = "  setdigout 1 0"; 
         }
         else if (accion === 'encender') {
@@ -608,7 +653,6 @@ class SoporteTecnico {
             else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Disable1`;
             else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Disable1`;
             else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;02`;
-            // Quitamos el espacio inicial erróneo
             else if (marca === "TELTONIKA") comando = "  setdigout 0 0";
         } 
         else if (accion === 'reiniciar') {
@@ -621,10 +665,8 @@ class SoporteTecnico {
             if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;PresetA`;
             else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;PresetA`;
             else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;PresetA`;
-            // El comando de Suntech para ST43xx es exacto, no tiene espacios dentro
             else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};03;05`;
             else if (marca.startsWith("TELTONIKA")) comando = "  getparam 2001:;2002:;2003:;2004:;2005:;2006:;1004:";
-            // Corrección CRÍTICA de Ruptela (sin el espacio inicial)
             else if (marca.startsWith("RUPTELA")) comando = " getapn";
             else if (marca.startsWith("CONCOX" ) || marca.startsWith("JIMIIOT")) comando = "GPRSSET#";
         }
@@ -636,7 +678,6 @@ class SoporteTecnico {
             else if (marca.startsWith("RUPTELA")) comando = " delrecords";
             else if (marca.startsWith("TELTONIKA")) comando = "  deleterecords";
         }
-        // NUEVA ACCIÓN: CONECTAR A PLATAFORMA DE GESTIÓN (Scuti, Fota, DMP)
         else if (accion === 'comando_plataforma') {
             if (marca === "SUNTECH") comando = `CMD;${id};01;01`;
             else if (marca === "TELTONIKA") comando = "  web_connect";
@@ -644,7 +685,6 @@ class SoporteTecnico {
         }
 
         if (comando) {
-            // EncodeURIComponent preserva perfectamente los espacios iniciales en el SMS
             window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
         }
     }
