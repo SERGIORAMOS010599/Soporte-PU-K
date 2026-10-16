@@ -131,6 +131,14 @@ class MonitorMapon {
             return; 
         }
 
+        // ===============================================
+        // ¡AGREGADO: ALIMENTAR EL DIAGNÓSTICO EN VIVO!
+        // ===============================================
+        if (window.appDiagnostico) {
+            window.appDiagnostico.actualizarDatos(datos);
+        }
+        // ===============================================
+
         let datosOrdenados = [...datos].sort((a, b) => {
             let compA = (this.extraerDato(a, ["compania", "company", "cliente", "columna0"]) || 'Sin asignar').toString().toUpperCase();
             let compB = (this.extraerDato(b, ["compania", "company", "cliente", "columna0"]) || 'Sin asignar').toString().toUpperCase();
