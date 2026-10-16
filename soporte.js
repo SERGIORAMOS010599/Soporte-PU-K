@@ -145,27 +145,38 @@ class SoporteTecnico {
     }
 
     // --- FUNCION PARA CAMBIAR ENTRE PESTAÑAS ---
+    // --- FUNCION PARA CAMBIAR ENTRE PESTAÑAS ---
     cambiarVista(vistaDestino) {
+        // 1. Ocultar todas las vistas
         document.getElementById('vista-soporte').classList.add('vista-oculta');
         document.getElementById('vista-soporte').classList.remove('vista-activa');
         
         document.getElementById('vista-monitores').classList.add('vista-oculta');
         document.getElementById('vista-monitores').classList.remove('vista-activa');
+        
+        document.getElementById('vista-diagnostico').classList.add('vista-oculta');
+        document.getElementById('vista-diagnostico').classList.remove('vista-activa');
 
+        // 2. Quitar clase "activo" de todos los botones
         const botones = document.querySelectorAll('.tab-btn');
         botones.forEach(btn => btn.classList.remove('activo'));
 
+        // 3. Activar la vista seleccionada
         if (vistaDestino === 'soporte') {
             document.getElementById('vista-soporte').classList.remove('vista-oculta');
             document.getElementById('vista-soporte').classList.add('vista-activa');
             botones[0].classList.add('activo');
-            // Re-renderizamos Soporte al volver a la pestaña por si Mapon ya terminó de cargar
             this.renderizar();
         } 
         else if (vistaDestino === 'monitores') {
             document.getElementById('vista-monitores').classList.remove('vista-oculta');
             document.getElementById('vista-monitores').classList.add('vista-activa');
             botones[1].classList.add('activo');
+        }
+        else if (vistaDestino === 'diagnostico') {
+            document.getElementById('vista-diagnostico').classList.remove('vista-oculta');
+            document.getElementById('vista-diagnostico').classList.add('vista-activa');
+            botones[2].classList.add('activo'); // El tercer botón
         }
     }
 
