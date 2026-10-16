@@ -153,7 +153,12 @@
                 <div id="contenedor-zeek"></div>
             </div>
         </div>
-
+        <!-- ========================================== -->
+        <!-- VISTA 3: DIAGNÓSTICO EN VIVO               -->
+        <!-- ========================================== -->
+        <div id="vista-diagnostico" class="vista-oculta" style="flex-grow: 1; overflow-y: auto;">
+            <!-- El contenido se generará automáticamente por diagnostico.js -->
+        </div>
     </div> <!-- CIERRE DEL CONTENEDOR DE VISTAS -->
 
     <!-- ========================================== -->
@@ -173,10 +178,11 @@
             <button onclick="appSoporte.enviarMensajeChat()">Enviar</button>
         </div>
     </div>
-    
-<!-- Carga del Cerebro OOP y Scripts -->
+
+    <!-- Carga del Cerebro OOP y Scripts -->
     <script src="soporte.js"></script>
     <script src="monitormapon.js"></script>
+    <script src="js/diagnostico.js"></script> 
     
     <script>
         // ==========================================
