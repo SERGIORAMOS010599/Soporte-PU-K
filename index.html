@@ -276,11 +276,19 @@
                 }
             }, 50);
 
-            // INICIALIZAR EL SISTEMA DE DIAGNÓSTICO EN VIVO
+           // INICIALIZAR EL SISTEMA DE DIAGNÓSTICO EN VIVO
             if (typeof DiagnosticoEnVivo !== 'undefined') {
                 window.appDiagnostico = new DiagnosticoEnVivo('vista-diagnostico');
-            }
-            
+            } else {
+                // Si el archivo no cargó, mostramos un error gigante en lugar de pantalla vacía
+                document.getElementById('vista-diagnostico').innerHTML = `
+                    <div style="padding: 50px; text-align: center;">
+                        <span style="font-size: 4rem;">🚨</span>
+                        <h2 style="color: #f44336; margin-top: 20px;">¡El archivo diagnostico.js no cargó!</h2>
+                        <p style="color: #ccc; font-size: 1.2rem;">El navegador no encuentra el archivo. Por favor, asegúrate de que creaste el archivo <b>diagnostico.js</b> y lo guardaste exactamente en la misma carpeta donde está tu <b>index.html</b> y <b>soporte.js</b>.</p>
+                    </div>
+                `;
+            }   
             cargarDatosMaponDirecto(); 
         });
     </script>
