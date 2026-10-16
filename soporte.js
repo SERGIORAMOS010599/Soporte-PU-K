@@ -47,7 +47,6 @@ class SoporteTecnico {
 
             // 2. Renderizado de la UI Profesional
             if (contenedorResultado) {
-                // CORRECCIÓN: Se agrega innerHTML = `
                 contenedorResultado.innerHTML = `
                     <div style="background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 8px; font-size: 11px; color: #bbb; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
                         
@@ -276,47 +275,13 @@ class SoporteTecnico {
             const tarjeta = document.createElement('div');
             tarjeta.className = 'tarjeta-gps';
             
-            // --- DETECCIÓN DINÁMICA DE PLATAFORMA PARA LOS MONITORES GLOBALES ---
-            let modeloUpper = (eq.marca || '').toUpperCase() + ' ' + (eq.modelo || '').toUpperCase();
-            let btnPlataformaNombre = '';
-            let btnPlataformaURL = '';
-            let btnPlataformaClaseColor = ''; // Usamos clases si es posible, o colores directos
-            
-            if (modeloUpper.includes('SUNTECH') || modeloUpper.includes('ST4') || modeloUpper.includes('ST3') || modeloUpper.includes('ST8')) {
-                btnPlataformaNombre = 'SCUTI WEB';
-                btnPlataformaURL = 'https://www.suntechscuti.com/scuti/Login';
-                btnPlataformaClaseColor = 'background: #ff9800; color: #fff;'; // Naranja
-            } else if (modeloUpper.includes('TELTONIKA') || modeloUpper.includes('FMC') || modeloUpper.includes('FMB')) {
-                btnPlataformaNombre = 'FOTA WEB';
-                btnPlataformaURL = 'https://fota.teltonika.lt/devices?root=27623';
-                btnPlataformaClaseColor = 'background: #03a9f4; color: #fff;'; // Azul
-            } else if (modeloUpper.includes('RUPTELA') || modeloUpper.includes('HCV') || modeloUpper.includes('PRO') || modeloUpper.includes('TRACE')) {
-                btnPlataformaNombre = 'DMP WEB';
-                btnPlataformaURL = 'https://dmp.ruptela.com/login';
-                btnPlataformaClaseColor = 'background: #e91e63; color: #fff;'; // Rosa
-            }
-
-            // Creamos el HTML del botón solo si se reconoció la marca
-            let htmlBotonPlataforma = '';
-            if (btnPlataformaNombre !== '') {
-                htmlBotonPlataforma = `
-                    <div class="accion-btn" style="${btnPlataformaClaseColor} border:none;" onclick="event.stopPropagation(); window.open('${btnPlataformaURL}', '_blank')">
-                        ${btnPlataformaNombre} <span class="circulo"></span>
-                    </div>
-                `;
-            }
-
+            // Tarjeta LIMPIA, sin botones de acción
             tarjeta.innerHTML = `
                 <div class="tarjeta-unidad">${eq.unidad}</div>
                 <div class="tarjeta-cliente">${eq.cliente} (${eq.id})</div>
                 <h2 class="tarjeta-marca">${eq.marca}</h2>
                 <div class="tarjeta-modelo">${eq.modelo}</div>
                 <div class="tarjeta-servicio">${eq.estadoServicio}</div>
-                <div class="tarjeta-acciones">
-                    <div class="accion-btn rojo" onclick="event.stopPropagation(); appSoporte.enviarSMS('apagar', '${eq.id}')">APAGAR <span class="circulo"></span></div>
-                    <div class="accion-btn verde" onclick="event.stopPropagation(); appSoporte.enviarSMS('encender', '${eq.id}')">ENCENDER <span class="circulo"></span></div>
-                    ${htmlBotonPlataforma}
-                </div>
             `;
             tarjeta.onclick = () => this.abrirDetalles(eq);
             this.container.appendChild(tarjeta);
@@ -345,64 +310,91 @@ class SoporteTecnico {
         document.getElementById('det-anio').innerText = eq.anio;
         document.getElementById('det-numSerie').innerText = eq.numSerie;
 
-        // INYECCIÓN CORRECTA DEL BOTÓN DE JASPER DENTRO DEL ASISTENTE O ABAJO DE LA TABLA
-        const contenedorAsistenteBody = document.querySelector('.comandos-body');
-        
-        let botonJasperExistente = document.getElementById('contenedor-jasper-panel');
-        if (!botonJasperExistente && contenedorAsistenteBody) {
-            const wrapperJasper = document.createElement('div');
-            wrapperJasper.id = 'contenedor-jasper-panel';
-            wrapperJasper.style.cssText = "margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; text-align: center;";
-            wrapperJasper.innerHTML = `
-                <button onclick="appSoporte.consultarJasperLinea('${eq.iccid}')" style="background: #00c853; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%;">
-                    📡 Consultar Estado en Telcel Jasper
-                </button>
-                <div id="jasper-resultado-box"></div>
-            `;
-            contenedorAsistenteBody.appendChild(wrapperJasper);
-        } else if (botonJasperExistente) {
-            botonJasperExistente.querySelector('button').setAttribute('onclick', `appSoporte.consultarJasperLinea('${eq.iccid}')`);
-            document.getElementById('jasper-resultado-box').innerHTML = ''; 
-        }
-
-        // --- INYECCIÓN DE BOTONES DE PLATAFORMA (SCUTI, FOTA, DMP) ---
+        // --- DETECCIÓN DINÁMICA DE PLATAFORMA PARA BOTONES REDONDOS ---
         let modeloUpper = (eq.marca || '').toUpperCase() + ' ' + (eq.modelo || '').toUpperCase();
         let btnPlataformaNombre = '';
         let btnPlataformaURL = '';
         let btnPlataformaColor = ''; 
+        let comandoDinamicoNombre = '';
         
         if (modeloUpper.includes('SUNTECH') || modeloUpper.includes('ST4') || modeloUpper.includes('ST3') || modeloUpper.includes('ST8')) {
             btnPlataformaNombre = 'SCUTI WEB';
+            comandoDinamicoNombre = 'COMANDO SCUTI';
             btnPlataformaURL = 'https://www.suntechscuti.com/scuti/Login';
-            btnPlataformaColor = '#ff9800'; 
+            btnPlataformaColor = '#ffb74d'; // Naranja/Dorado
         } else if (modeloUpper.includes('TELTONIKA') || modeloUpper.includes('FMC') || modeloUpper.includes('FMB')) {
             btnPlataformaNombre = 'FOTA WEB';
+            comandoDinamicoNombre = 'COMANDO FOTA WEB';
             btnPlataformaURL = 'https://fota.teltonika.lt/devices?root=27623';
-            btnPlataformaColor = '#03a9f4'; 
+            btnPlataformaColor = '#ffb74d'; 
         } else if (modeloUpper.includes('RUPTELA') || modeloUpper.includes('HCV') || modeloUpper.includes('PRO') || modeloUpper.includes('TRACE')) {
             btnPlataformaNombre = 'DMP WEB';
+            comandoDinamicoNombre = 'COMANDO DMP WEB';
             btnPlataformaURL = 'https://dmp.ruptela.com/login';
-            btnPlataformaColor = '#e91e63'; 
+            btnPlataformaColor = '#ffb74d'; 
         }
 
-        // Buscamos si ya existe el contenedor de Enlaces Externos en la vista de Soporte para inyectar el botón
-        // Aquí asumí que el contenedor tiene la clase '.enlaces-externos .panel-botones'
-        // Si no tienes esa clase en tu HTML, es posible que el botón no se dibuje aquí.
-        const cajaEnlacesSoporte = document.querySelector('.enlaces-externos .panel-botones'); 
+        // Si existe el panel de botones redondos, inyectamos o actualizamos los botones dinámicos
+        const cajaBotonesRedondos = document.querySelector('.panel-botones');
         
-        if (cajaEnlacesSoporte && btnPlataformaNombre !== '') {
-            const oldBtn = document.getElementById('btn-plataforma-dinamico');
-            if (oldBtn) oldBtn.remove();
+        if (cajaBotonesRedondos && btnPlataformaNombre !== '') {
+            // Limpiamos los botones dinámicos anteriores si existen
+            const btnWebOld = document.getElementById('btn-dinamico-web');
+            const btnComandoOld = document.getElementById('btn-dinamico-comando');
+            if (btnWebOld) btnWebOld.remove();
+            if (btnComandoOld) btnComandoOld.remove();
             
-            const nuevoBoton = document.createElement('button');
-            nuevoBoton.id = 'btn-plataforma-dinamico';
-            nuevoBoton.onclick = () => window.open(btnPlataformaURL, '_blank');
-            nuevoBoton.style.cssText = `flex: 1; background: rgba(255, 255, 255, 0.05); color: ${btnPlataformaColor}; border: 1px solid ${btnPlataformaColor}; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px; width: 100%;`;
-            nuevoBoton.onmouseover = () => { nuevoBoton.style.background = btnPlataformaColor; nuevoBoton.style.color = '#fff'; };
-            nuevoBoton.onmouseout = () => { nuevoBoton.style.background = 'rgba(255, 255, 255, 0.05)'; nuevoBoton.style.color = btnPlataformaColor; };
-            nuevoBoton.innerHTML = `<span style="font-size: 14px;">☁️</span> ${btnPlataformaNombre}`;
+            // Creamos el botón "PLATAFORMA WEB" (Icono de Texto 'T' de tu imagen)
+            const btnWeb = document.createElement('button');
+            btnWeb.id = 'btn-dinamico-web';
+            btnWeb.className = 'btn-accion';
+            btnWeb.onclick = () => window.open(btnPlataformaURL, '_blank');
+            btnWeb.innerHTML = `
+                <div class="icono" style="background-color: ${btnPlataformaColor}; color: #111;">T</div>
+                ${btnPlataformaNombre}
+            `;
             
-            cajaEnlacesSoporte.appendChild(nuevoBoton);
+            // Creamos el botón "COMANDO PLATAFORMA" (Icono de Ventana de tu imagen)
+            const btnComando = document.createElement('button');
+            btnComando.id = 'btn-dinamico-comando';
+            btnComando.className = 'btn-accion';
+            btnComando.onclick = () => appSoporte.enviarSMS('comando_plataforma', eq.id);
+            btnComando.innerHTML = `
+                <div class="icono" style="background-color: ${btnPlataformaColor}; color: #111;">🗔</div>
+                ${comandoDinamicoNombre}
+            `;
+            
+            cajaBotonesRedondos.appendChild(btnWeb);
+            cajaBotonesRedondos.appendChild(btnComando);
+        }
+
+        // INYECCIÓN CORRECTA DEL BOTÓN DE JASPER DENTRO DEL ASISTENTE O ABAJO DE LA TABLA
+        const contenedorAsistenteBody = document.querySelector('.comandos-body');
+        
+        let botonJasperExistente = document.getElementById('contenedor-jasper-panel');
+        
+        const companiaUpper = (eq.compania || '').toUpperCase();
+        
+        // Solo inyectar Jasper si la compañía incluye TELCEL
+        if (companiaUpper.includes('TELCEL')) {
+            if (!botonJasperExistente && contenedorAsistenteBody) {
+                const wrapperJasper = document.createElement('div');
+                wrapperJasper.id = 'contenedor-jasper-panel';
+                wrapperJasper.style.cssText = "margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; text-align: center;";
+                wrapperJasper.innerHTML = `
+                    <button onclick="appSoporte.consultarJasperLinea('${eq.iccid}')" style="background: #00c853; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%;">
+                        📡 Consultar Estado en Telcel Jasper
+                    </button>
+                    <div id="jasper-resultado-box"></div>
+                `;
+                contenedorAsistenteBody.appendChild(wrapperJasper);
+            } else if (botonJasperExistente) {
+                botonJasperExistente.querySelector('button').setAttribute('onclick', `appSoporte.consultarJasperLinea('${eq.iccid}')`);
+                document.getElementById('jasper-resultado-box').innerHTML = ''; 
+            }
+        } else if (botonJasperExistente) {
+            // Si el equipo no es Telcel, removemos el botón de Jasper que se haya inyectado antes
+            botonJasperExistente.remove();
         }
 
         this.iniciarAsistente();
@@ -609,7 +601,7 @@ class SoporteTecnico {
             else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Enable1`;
             else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;01`;
             // Quitamos el espacio inicial erróneo de Teltonika
-            else if (marca === "TELTONIKA") comando = "setdigout 1 0"; 
+            else if (marca === "TELTONIKA") comando = "  setdigout 1 0"; 
         }
         else if (accion === 'encender') {
             if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Disable1`;
@@ -617,12 +609,12 @@ class SoporteTecnico {
             else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Disable1`;
             else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;02`;
             // Quitamos el espacio inicial erróneo
-            else if (marca === "TELTONIKA") comando = "setdigout 0 0";
+            else if (marca === "TELTONIKA") comando = "  setdigout 0 0";
         } 
         else if (accion === 'reiniciar') {
             if (marca === "SUNTECH") comando = `CMD;${id};03;03`;
-            else if (marca === "TELTONIKA") comando = "cpureset";
-            else if (marca === "RUPTELA") comando = "reset";
+            else if (marca === "TELTONIKA") comando = "  cpureset";
+            else if (marca === "RUPTELA") comando = " reset";
             else if (marca === "CONCOX" || marca === "JIMIIOT") comando = "REBOOT#";
         }
         else if (accion === 'configuracion') {
@@ -631,9 +623,9 @@ class SoporteTecnico {
             else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;PresetA`;
             // El comando de Suntech para ST43xx es exacto, no tiene espacios dentro
             else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};03;05`;
-            else if (marca.startsWith("TELTONIKA")) comando = "getparam 2001:;2002:;2003:;2004:;2005:;2006:;1004:";
+            else if (marca.startsWith("TELTONIKA")) comando = "  getparam 2001:;2002:;2003:;2004:;2005:;2006:;1004:";
             // Corrección CRÍTICA de Ruptela (sin el espacio inicial)
-            else if (marca.startsWith("RUPTELA")) comando = "getapn";
+            else if (marca.startsWith("RUPTELA")) comando = " getapn";
             else if (marca.startsWith("CONCOX" ) || marca.startsWith("JIMIIOT")) comando = "GPRSSET#";
         }
         else if (accion === 'borrar') {
@@ -641,11 +633,18 @@ class SoporteTecnico {
             else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;EraseAll`;
             else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;EraseAll`;
             else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};05;02`;
-            else if (marca.startsWith("RUPTELA")) comando = "delrecords";
-            else if (marca.startsWith("TELTONIKA")) comando = "deleterecords";
+            else if (marca.startsWith("RUPTELA")) comando = " delrecords";
+            else if (marca.startsWith("TELTONIKA")) comando = "  deleterecords";
+        }
+        // NUEVA ACCIÓN: CONECTAR A PLATAFORMA DE GESTIÓN (Scuti, Fota, DMP)
+        else if (accion === 'comando_plataforma') {
+            if (marca === "SUNTECH") comando = `CMD;${id};01;01`;
+            else if (marca === "TELTONIKA") comando = "  web_connect";
+            else if (marca === "RUPTELA") comando = " dmpfconnect";
         }
 
         if (comando) {
+            // EncodeURIComponent preserva perfectamente los espacios iniciales en el SMS
             window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
         }
     }
