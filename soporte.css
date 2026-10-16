@@ -261,7 +261,83 @@ body.con-panel-abierto .vista-cuadricula {
 .btn-cerrar { background: rgba(255,255,255,0.05); border: 1px solid #444; border-radius: 50%; width: 35px; height: 35px; color: var(--color-gris); font-size: 1.2em; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; }
 .btn-cerrar:hover { background: #f44336; color: #fff; border-color: #f44336; }
 
-BOTONES DE ACCIÓN MODERNOS
+/* --- BOTONES DE ACCIÓN (DISEÑO PROFESIONAL "APP TILES") --- */
+.panel-botones { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 15px; /* Separación perfecta entre cuadros */
+    margin-bottom: 30px; 
+    justify-content: flex-start; 
+}
+
+.btn-accion { 
+    /* Matamos el diseño feo por defecto del navegador */
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    font-family: inherit;
+    
+    /* Estructura interna */
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    
+    /* Colores y diseño Dark Mode Profesional */
+    background: linear-gradient(145deg, #1e1e1e, #141414); /* Degradado oscuro elegante */
+    border: 1px solid #333; 
+    border-radius: 12px; /* Bordes redondeados modernos */
+    color: #9e9e9e; /* Texto gris claro que no cansa la vista */
+    cursor: pointer; 
+    
+    /* Dimensiones como cuadritos perfectos */
+    width: 95px; 
+    height: 100px; 
+    padding: 10px 5px; 
+    
+    /* Tipografía */
+    font-size: 0.65rem; 
+    text-align: center; 
+    font-weight: 800; 
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+    
+    /* Animaciones de interacción */
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+}
+
+/* Efecto al pasar el ratón (Hover) */
+.btn-accion:hover {
+    background: linear-gradient(145deg, #282828, #1a1a1a); /* Se aclara sutilmente */
+    border-color: var(--color-naranja); /* El borde brilla en naranja */
+    color: #ffffff; /* El texto resalta en blanco puro */
+    transform: translateY(-4px); /* La tarjeta "flota" hacia arriba */
+    box-shadow: 0 8px 15px rgba(255, 183, 77, 0.15), 0 4px 10px rgba(0,0,0,0.5);
+}
+
+/* El bloque de color que envuelve al icono */
+.btn-accion .icono { 
+    width: 38px; 
+    height: 38px; 
+    border-radius: 10px; /* Forma de app (cuadrado con bordes curvos) */
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 1.2rem; 
+    color: #ffffff !important; /* Forzamos que el icono sea blanco siempre */
+    margin-bottom: 10px; /* Lo separamos bien del texto */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.6); /* Sombrita interna */
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+}
+
+/* El icono "palpita" cuando pones el ratón sobre el botón */
+.btn-accion:hover .icono {
+    transform: scale(1.15); 
+}
+
 /* TABLA DE INFORMACIÓN MODERNA */
 .tabla-info { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.95em; }
 .tabla-info td { padding: 12px 10px; border-bottom: 1px solid #2a2a2a; }
