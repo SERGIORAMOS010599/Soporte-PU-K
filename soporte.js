@@ -144,8 +144,7 @@ class SoporteTecnico {
         this.iniciar();
     }
 
-    // --- FUNCION PARA CAMBIAR ENTRE PESTAÑAS ---
-    // --- FUNCION PARA CAMBIAR ENTRE PESTAÑAS ---
+// --- FUNCION PARA CAMBIAR ENTRE PESTAÑAS ---
     cambiarVista(vistaDestino) {
         // 1. Ocultar todas las vistas
         document.getElementById('vista-soporte').classList.add('vista-oculta');
@@ -154,8 +153,12 @@ class SoporteTecnico {
         document.getElementById('vista-monitores').classList.add('vista-oculta');
         document.getElementById('vista-monitores').classList.remove('vista-activa');
         
-        document.getElementById('vista-diagnostico').classList.add('vista-oculta');
-        document.getElementById('vista-diagnostico').classList.remove('vista-activa');
+        // Agregamos la ocultación de la nueva vista
+        const vistaDiag = document.getElementById('vista-diagnostico');
+        if(vistaDiag) {
+            vistaDiag.classList.add('vista-oculta');
+            vistaDiag.classList.remove('vista-activa');
+        }
 
         // 2. Quitar clase "activo" de todos los botones
         const botones = document.querySelectorAll('.tab-btn');
@@ -165,18 +168,20 @@ class SoporteTecnico {
         if (vistaDestino === 'soporte') {
             document.getElementById('vista-soporte').classList.remove('vista-oculta');
             document.getElementById('vista-soporte').classList.add('vista-activa');
-            botones[0].classList.add('activo');
+            if(botones[0]) botones[0].classList.add('activo');
             this.renderizar();
         } 
         else if (vistaDestino === 'monitores') {
             document.getElementById('vista-monitores').classList.remove('vista-oculta');
             document.getElementById('vista-monitores').classList.add('vista-activa');
-            botones[1].classList.add('activo');
+            if(botones[1]) botones[1].classList.add('activo');
         }
         else if (vistaDestino === 'diagnostico') {
-            document.getElementById('vista-diagnostico').classList.remove('vista-oculta');
-            document.getElementById('vista-diagnostico').classList.add('vista-activa');
-            botones[2].classList.add('activo'); // El tercer botón
+            if(vistaDiag) {
+                vistaDiag.classList.remove('vista-oculta');
+                vistaDiag.classList.add('vista-activa');
+            }
+            if(botones[2]) botones[2].classList.add('activo'); 
         }
     }
 
