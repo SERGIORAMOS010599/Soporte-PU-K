@@ -115,4 +115,174 @@
                         <tr><td>Marca</td><td id="det-marca">---</td></tr>
                         <tr><td>Modelo</td><td id="det-modelo">---</td></tr>
                         <tr><td>Cliente</td><td id="det-cliente">---</td></tr>
-                        <tr><td>Tipo de servicio</td><td id="det-tipo-servicio" style="text-transform: uppercase; font-weight: bold;">---
+                        <tr><td>Tipo de servicio</td><td id="det-tipo-servicio" style="text-transform: uppercase; font-weight: bold;">---</td></tr>
+                        <tr><td>Estado del Servicio</td><td id="det-servicio">---</td></tr>
+                        <tr><td>Marca/Mod. Unidad</td><td id="det-marcaModeloUnidad">---</td></tr>
+                        <tr><td>Año Unidad</td><td id="det-anio">---</td></tr>
+                        <tr><td>Nº Serie Unidad</td><td id="det-numSerie">---</td></tr>
+                    </table>
+
+                    <div class="panel-comandos-box">
+                        <div class="comandos-header">
+                            <h3>Asistente de Configuración</h3>
+                            <span class="badge" id="asistente-badge-marca">Marca</span>
+                        </div>
+                        <div class="comandos-body" style="padding: 15px; text-align: left;">
+                            <input type="text" id="buscador-asistente" placeholder="Escribe tu duda o comando...">
+                            <div id="asistente-sugerencias" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;"></div>
+                            <div id="asistente-interactivo" style="border-top: 1px dashed #444; padding-top: 15px; display: none;"></div>
+                        </div>
+                    </div>
+                </div> 
+            </div> 
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VISTA 2: MONITORES GLOBALES                -->
+        <!-- ========================================== -->
+        <div id="vista-monitores" class="vista-oculta">
+            <div class="header-vista" style="padding: 20px 20px 0 20px;">
+                <h2 style="color: #fff; margin-bottom: 5px;">Monitores de Telemetría</h2>
+                <p style="color: #888; margin-top: 0;">Radiografía global de equipos en plataforma</p>
+            </div>
+            <div class="dashboard-monitores" style="padding: 20px;">
+                <!-- Monitor Mapon -->
+                <div id="contenedor-mapon"></div>
+                <!-- Monitor Zeek -->
+                <div id="contenedor-zeek"></div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VISTA 3: DIAGNÓSTICO EN VIVO               -->
+        <!-- ========================================== -->
+        <div id="vista-diagnostico" class="vista-oculta" style="flex-grow: 1; overflow-y: auto;">
+            <!-- Aquí diagnostico.js inyectará todo el contenido -->
+        </div>
+
+    </div> <!-- CIERRE DEL CONTENEDOR DE VISTAS -->
+
+    <!-- ========================================== -->
+    <!-- ASISTENTE GLOBAL PU-K                      -->
+    <!-- ========================================== -->
+    <div id="puk-boton-flotante" onclick="appSoporte.toggleChatPUK()">🐶</div>
+    <div id="puk-panel-chat" class="puk-oculto">
+        <div class="puk-header">
+            <span>🐶 Asistente PU-K</span>
+            <button onclick="appSoporte.toggleChatPUK()">✖</button>
+        </div>
+        <div id="puk-mensajes">
+            <div class="puk-mensaje puk-ia">¡Guau! Hola, soy PU-K. ¿En qué te ayudo con los equipos de telemetría hoy?</div>
+        </div>
+        <div class="puk-input-area">
+            <input type="text" id="puk-input-chat" placeholder="Pregunta algo al manual..." onkeypress="appSoporte.manejarEnterChat(event)">
+            <button onclick="appSoporte.enviarMensajeChat()">Enviar</button>
+        </div>
+    </div>
+
+    <!-- Carga del Cerebro OOP y Scripts -->
+    <script src="soporte.js"></script>
+    <script src="monitormapon.js"></script>
+    <script src="js/diagnostico.js"></script> 
+    
+    <script>
+        // ==========================================
+        // FUNCIONES GLOBALES Y CONEXIÓN
+        // ==========================================
+        window.descargarExcelMapon = function() {
+            try {
+                let tabla = document.getElementById("tabla-mapon-exportar"); 
+                let nombreFiltro = "Todos_Los_Equipos";
+                let divFiltro = document.getElementById("mapon-filter-info");
+                
+                if (divFiltro && divFiltro.innerText.includes("Filtrando")) {
+                    let textoRaw = divFiltro.innerText;
+                    let fragmento = textoRaw.split("por:")[1]; 
+                    if (fragmento) {
+                        let estadoBruto = fragmento.split("(Clic")[0].trim();
+                        nombreFiltro = estadoBruto.replace(/[^a-zA-Z0-9]/g, '_');
+                    }
+                }
+
+                let libro = XLSX.utils.table_to_book(tabla, { sheet: "Monitor Mapon" });
+                XLSX.writeFile(libro, `Reporte_Mapon_${nombreFiltro}.xlsx`);
+            } catch (error) {
+                alert("⚠️ Ocurrió un error al intentar descargar el Excel: " + error.message);
+                console.error(error);
+            }
+        };
+
+        async function cargarDatosMaponDirecto() {
+            const divMapon = document.getElementById('contenedor-mapon');
+            if (!divMapon) return;
+            
+            divMapon.innerHTML = '<h3 style="color: #ffb74d; text-align: center; padding: 50px;">⏳ Descargando datos directo de Sheets...</h3>';
+            
+            try {
+                const sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM';
+                const query = encodeURIComponent('select *');
+                const sheetName = encodeURIComponent('MONITOR MAPON');
+                
+                const urlMapon = 'https://docs.google.com/spreadsheets/d/' + sheetId + '/gviz/tq?tqx=out:json&tq=' + query + '&sheet=' + sheetName;
+                
+                const respuesta = await fetch(urlMapon);
+                const texto = await respuesta.text();
+                const jsonString = texto.substring(47).slice(0, -2);
+                const jsonGviz = JSON.parse(jsonString);
+                
+                const headers = jsonGviz.table.cols.map(function(col, index) {
+                    return col.label ? col.label : 'Columna_' + index;
+                });
+                
+                const datosFormateados = jsonGviz.table.rows.map(function(row) {
+                    let obj = {};
+                    row.c.forEach(function(celda, i) {
+                        if (celda && celda.f) obj[headers[i]] = String(celda.f);
+                        else if (celda && celda.v !== null && celda.v !== undefined) obj[headers[i]] = String(celda.v);
+                        else obj[headers[i]] = '';
+                    });
+                    return obj;
+                });
+                
+                divMapon.innerHTML = ''; 
+                new MonitorMapon('contenedor-mapon', datosFormateados);
+                
+            } catch (error) {
+                divMapon.innerHTML = '<h3 style="color: #f44336; text-align: center; padding: 50px;">❌ Error de conexión directa: ' + error.message + '</h3>';
+                console.error("Error al procesar GVIZ:", error);
+            }
+        }
+
+        function verificarPestanaMonitores() {
+            const vistaMonitores = document.getElementById('vista-monitores');
+            if (vistaMonitores && vistaMonitores.classList.contains('vista-activa') && document.getElementById('contenedor-mapon').innerHTML.trim() === '') {
+                cargarDatosMaponDirecto();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Esperamos de forma segura a que appSoporte exista en el entorno global
+            const intentarConexionSoporte = setInterval(() => {
+                if (typeof appSoporte !== 'undefined' && appSoporte && typeof appSoporte.cambiarVista === 'function') {
+                    clearInterval(intentarConexionSoporte);
+                    
+                    const cambiarVistaOriginal = appSoporte.cambiarVista.bind(appSoporte);
+                    appSoporte.cambiarVista = function(vista) {
+                        cambiarVistaOriginal(vista);
+                        if(vista === 'monitores') {
+                            setTimeout(verificarPestanaMonitores, 100);
+                        }
+                    };
+                }
+            }, 50);
+
+            // INICIALIZAR EL SISTEMA DE DIAGNÓSTICO EN VIVO
+            if (typeof DiagnosticoEnVivo !== 'undefined') {
+                window.appDiagnostico = new DiagnosticoEnVivo('vista-diagnostico');
+            }
+            
+            cargarDatosMaponDirecto(); 
+        });
+    </script>
+</body>
+</html>
