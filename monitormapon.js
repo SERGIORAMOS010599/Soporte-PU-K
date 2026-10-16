@@ -16,7 +16,6 @@ class MonitorMapon {
             let nLimpio = String(n).toLowerCase().replace(/[^a-z0-9]/g, "");
             for (let key in unidad) {
                 let k = String(key).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
-                // Busca coincidencia exacta o parcial
                 if (k === nLimpio || k.includes(nLimpio)) return unidad[key];
             }
         }
@@ -114,7 +113,6 @@ class MonitorMapon {
         let primeraUnidad = datos[0];
         let checkColumna = this.extraerDato(primeraUnidad, ["compania", "company", "cliente", "economico", "vin", "numdeserie", "serie"]);
         
-        // Si no detectamos NI UNA SOLA columna válida, mostramos la alerta de emergencia
         if (!checkColumna) {
             let llavesRecibidas = Object.keys(primeraUnidad).join(" | ");
             tbody.innerHTML = `
@@ -137,17 +135,14 @@ class MonitorMapon {
             return; 
         }
 
-        // Si pasó el chequeo, renderizamos normalmente
         let datosOrdenados = [...datos].sort((a, b) => {
             let compA = (this.extraerDato(a, ["compania", "company", "cliente"]) || 'Sin asignar').toString().toUpperCase();
             let compB = (this.extraerDato(b, ["compania", "company", "cliente"]) || 'Sin asignar').toString().toUpperCase();
-            
             if (compA < compB) return -1;
             if (compA > compB) return 1;
 
             let estA = (this.extraerDato(a, ["onlinestatus", "estado"]) || 'Desconocido').toString().toUpperCase();
             let estB = (this.extraerDato(b, ["onlinestatus", "estado"]) || 'Desconocido').toString().toUpperCase();
-            
             if (estA < estB) return -1;
             if (estA > estB) return 1;
 
@@ -317,4 +312,153 @@ class MonitorMapon {
                 const divItem = document.createElement('div');
                 divItem.style.cssText = `background: #1a1a1a; padding: 12px; border-radius: 6px; border: 1px solid #2a2a2a; border-left: 3px solid ${colorBorde}; position: relative; transition: all 0.2s ease;`;
                 divItem.onmouseover = () => divItem.style.borderColor = '#444';
-                divItem.onmouseout = () => divItem.style
+                divItem.onmouseout = () => divItem.style.borderColor = '#2a2a2a';
+                
+                divItem.innerHTML = `
+                    <div style="font-size: 9px; color: #777; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">${key}</div>
+                    <div style="font-size: 13px; font-weight: bold; color: #eee; word-break: break-all;">${displayValor}</div>
+                `;
+                contenedor.appendChild(divItem);
+            }
+        });
+
+        // CRUCE CON SOPORTE
+        let rawNumSerieMapon = this.extraerDato(unidad, ["numdeserie", "serie", "imei", "iddisp"]) || '';
+        const numSerieMapon = String(rawNumSerieMapon).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
+        
+        let eqSoporteEncontrado = null;
+        
+        if (window.appSoporte && window.appSoporte.equipos && numSerieMapon && numSerieMapon !== 's/n' && numSerieMapon !== 'sindato') {
+            eqSoporteEncontrado = window.appSoporte.equipos.find(e => {
+                const idSalida = String(e.id).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
+                return idSalida === numSerieMapon || 
+                       (e.imei && String(e.imei).replace(/\s+/g, '').toLowerCase() === numSerieMapon);
+            });
+        }
+
+        if (eqSoporteEncontrado) {
+            btnSoporte.style.display = 'block';
+            
+            const id = eqSoporteEncontrado.id;
+            const linea = eqSoporteEncontrado.linea || 'N/A';
+            const iccid = eqSoporteEncontrado.iccid || 'N/A';
+            const compania = eqSoporteEncontrado.compania || '';
+            
+            const m1 = this.extraerDato(unidad, ["devicemodel", "modeloequipo"]);
+            const m2 = this.extraerDato(unidad, ["modelo", "vehiclemodel"]);
+            const modeloSeguro = m1 || m2 || eqSoporteEncontrado.modelo || '';
+            const modeloUpper = String(modeloSeguro).toUpperCase();
+            
+            let btnPlataformaNombre = '';
+            let btnPlataformaURL = '';
+            let btnPlataformaColor = ''; 
+            
+            if (modeloUpper.includes('SUNTECH') || modeloUpper.includes('ST4') || modeloUpper.includes('ST3') || modeloUpper.includes('ST8')) {
+                btnPlataformaNombre = 'SCUTI WEB';
+                btnPlataformaURL = 'https://www.suntechscuti.com/scuti/Login';
+                btnPlataformaColor = '#ff9800'; 
+            } else if (modeloUpper.includes('TELTONIKA') || modeloUpper.includes('FMC') || modeloUpper.includes('FMB')) {
+                btnPlataformaNombre = 'FOTA WEB';
+                btnPlataformaURL = 'https://fota.teltonika.lt/devices?root=27623';
+                btnPlataformaColor = '#03a9f4'; 
+            } else if (modeloUpper.includes('RUPTELA') || modeloUpper.includes('HCV') || modeloUpper.includes('PRO') || modeloUpper.includes('TRACE')) {
+                btnPlataformaNombre = 'DMP WEB';
+                btnPlataformaURL = 'https://dmp.ruptela.com/login';
+                btnPlataformaColor = '#e91e63'; 
+            }
+
+            let btnPlataformaHTML = '';
+            if (btnPlataformaNombre !== '') {
+                btnPlataformaHTML = `
+                    <button onclick="window.open('${btnPlataformaURL}', '_blank')" style="flex: 1; background: rgba(255, 255, 255, 0.05); color: ${btnPlataformaColor}; border: 1px solid ${btnPlataformaColor}; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.background='${btnPlataformaColor}'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.color='${btnPlataformaColor}';">
+                        <span style="font-size: 14px;">☁️</span> ${btnPlataformaNombre}
+                    </button>
+                `;
+            }
+            
+            let bloqueJasperModal = '';
+            if (compania.toUpperCase().includes('TELCEL')) {
+                bloqueJasperModal = `
+                    <div style="margin-top: 25px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                            <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">📡 Conectividad M2M</h4>
+                            <div style="flex: 1; height: 1px; background: #333;"></div>
+                        </div>
+                        <button onclick="appSoporte.consultarJasperLinea('${iccid}', 'jasper-modal-box')" 
+                                style="background: #1a1a1a; color: #00e676; border: 1px solid #00c853; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" 
+                                onmouseover="this.style.background='#00c853'; this.style.color='#fff';" 
+                                onmouseout="this.style.background='#1a1a1a'; this.style.color='#00e676';">
+                            <span style="font-size: 14px;">📶</span> Diagnóstico Telcel Jasper
+                        </button>
+                        <div id="jasper-modal-box" style="margin-top: 10px;"></div>
+                    </div>
+                `;
+            }
+
+            panelSoporte.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Acciones Rápidas</h4>
+                    <div style="flex: 1; height: 1px; background: #333;"></div>
+                </div>
+                <div style="margin-bottom: 15px; font-size: 11px; color: #888;">Línea vinculada: <b style="color: #ccc; letter-spacing: 0.5px;">${linea}</b></div>
+                
+                <div class="panel-botones" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 25px;">
+                    <button onclick="appSoporte.enviarSMS('apagar', '${id}')" style="background: rgba(244, 67, 54, 0.1); color: #ef5350; border: 1px solid #d32f2f; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#d32f2f'; this.style.color='#fff';" onmouseout="this.style.background='rgba(244, 67, 54, 0.1)'; this.style.color='#ef5350';">
+                        <span style="font-size: 14px;">⏻</span> APAGAR
+                    </button>
+                    <button onclick="appSoporte.enviarSMS('encender', '${id}')" style="background: rgba(76, 175, 80, 0.1); color: #66bb6a; border: 1px solid #388e3c; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#388e3c'; this.style.color='#fff';" onmouseout="this.style.background='rgba(76, 175, 80, 0.1)'; this.style.color='#66bb6a';">
+                        <span style="font-size: 14px;">⏻</span> ENCENDER
+                    </button>
+                    <button onclick="appSoporte.enviarSMS('configuracion', '${id}')" style="background: rgba(255, 152, 0, 0.1); color: #ffa726; border: 1px solid #f57c00; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#f57c00'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 152, 0, 0.1)'; this.style.color='#ffa726';">
+                        <span style="font-size: 14px;">⚙️</span> CONFIG
+                    </button>
+                    <button onclick="appSoporte.enviarSMS('reiniciar', '${id}')" style="background: rgba(255, 152, 0, 0.1); color: #ffa726; border: 1px solid #f57c00; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#f57c00'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 152, 0, 0.1)'; this.style.color='#ffa726';">
+                        <span style="font-size: 14px;">⟳</span> REINICIAR
+                    </button>
+                    <button onclick="appSoporte.enviarSMS('borrar', '${id}')" style="background: rgba(255, 87, 34, 0.1); color: #ff7043; border: 1px solid #e64a19; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#e64a19'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 87, 34, 0.1)'; this.style.color='#ff7043';">
+                        <span style="font-size: 14px;">🗑️</span> BORRAR
+                    </button>
+                    <button onclick="appSoporte.enviarSMS('formatear', '${id}')" style="background: rgba(211, 47, 47, 0.1); color: #ef5350; border: 1px solid #d32f2f; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#d32f2f'; this.style.color='#fff';" onmouseout="this.style.background='rgba(211, 47, 47, 0.1)'; this.style.color='#ef5350';">
+                        <span style="font-size: 14px;">⌫</span> FORMATO
+                    </button>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                    <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">🔗 Enlaces Externos</h4>
+                    <div style="flex: 1; height: 1px; background: #333;"></div>
+                </div>
+                
+                <div class="panel-botones" style="display: flex; gap: 8px;">
+                    <button onclick="window.open('https://soporte.zeekgps.com/ZeekSoporte/', '_blank')" style="flex: 1; background: rgba(33, 150, 243, 0.1); color: #42a5f5; border: 1px solid #1976d2; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.background='#1976d2'; this.style.color='#fff';" onmouseout="this.style.background='rgba(33, 150, 243, 0.1)'; this.style.color='#42a5f5';">
+                        <span style="font-size: 14px;">🛠️</span> ZEEK
+                    </button>
+                    <button onclick="window.open('https://mapon.com/partner/gbox_new/', '_blank')" style="flex: 1; background: rgba(0, 200, 83, 0.1); color: #69f0ae; border: 1px solid #00c853; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.background='#00c853'; this.style.color='#fff';" onmouseout="this.style.background='rgba(0, 200, 83, 0.1)'; this.style.color='#69f0ae';">
+                        <span style="font-size: 14px;">📍</span> MAPON
+                    </button>
+                    ${btnPlataformaHTML}
+                </div>
+                
+                ${bloqueJasperModal}
+            `;
+            
+            btnSoporte.onclick = () => {
+                if (panelSoporte.style.display === 'none') {
+                    panelSoporte.style.display = 'flex';
+                    modalBox.style.maxWidth = '850px'; 
+                    btnSoporte.innerHTML = '◀ Ocultar Soporte';
+                    btnSoporte.style.background = 'rgba(255, 255, 255, 0.05)';
+                    btnSoporte.style.color = '#ccc';
+                    btnSoporte.style.border = '1px solid #444';
+                } else {
+                    panelSoporte.style.display = 'none';
+                    modalBox.style.maxWidth = '550px'; 
+                    btnSoporte.innerHTML = '🛠️ Opciones de Soporte';
+                    btnSoporte.style.background = 'rgba(25, 118, 210, 0.1)';
+                    btnSoporte.style.color = '#64b5f6';
+                    btnSoporte.style.border = '1px solid #1976d2';
+                }
+            };
+        }
+    }
+}
+// >>>>>>>> FIN DEL ARCHIVO: NO BORRES LA LLAVE DE ARRIBA <<<<<<<<<<
