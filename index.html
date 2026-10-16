@@ -138,32 +138,40 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- VISTA 2: MONITORES GLOBALES (Nuevo)        -->
-        <!-- ========================================== -->
-        <div id="vista-monitores" class="vista-oculta">
-            <div class="header-vista" style="padding: 20px 20px 0 20px;">
-                <h2 style="color: #fff; margin-bottom: 5px;">Monitores de Telemetría</h2>
-                <p style="color: #888; margin-top: 0;">Radiografía global de equipos en plataforma</p>
-            </div>
-            <div class="dashboard-monitores" style="padding: 20px;">
-                <!-- Monitor Mapon -->
-                <div id="contenedor-mapon"></div>
-                
-                <!-- Monitor Zeek -->
-                <div id="contenedor-zeek"></div>
-            </div>
-        </div>
-        <!-- ========================================== -->
-        <!-- VISTA 3: DIAGNÓSTICO EN VIVO               -->
-        <!-- ========================================== -->
-        <div id="vista-diagnostico" class="vista-oculta" style="flex-grow: 1; overflow-y: auto;">
-            <!-- El contenido se generará automáticamente por diagnostico.js -->
-        </div>
-    </div> <!-- CIERRE DEL CONTENEDOR DE VISTAS -->
+        <!-- VISTA 2: MONITORES GLOBALES                -->
+        <!-- ========================================== -->
+        <div id="vista-monitores" class="vista-oculta">
+            <div class="header-vista" style="padding: 20px 20px 0 20px;">
+                <h2 style="color: #fff; margin-bottom: 5px;">Monitores de Telemetría</h2>
+                <p style="color: #888; margin-top: 0;">Radiografía global de equipos en plataforma</p>
+            </div>
+            <div class="dashboard-monitores" style="padding: 20px;">
+                <!-- Monitor Mapon -->
+                <div id="contenedor-mapon"></div>
+                <!-- Monitor Zeek -->
+                <div id="contenedor-zeek"></div>
+            </div>
+        </div>
 
-    <!-- ========================================== -->
-    <!-- ASISTENTE GLOBAL PU-K                      -->
-    <!-- ========================================== -->
+        <!-- ========================================== -->
+        <!-- VISTA 3: DIAGNÓSTICO EN VIVO (AGREGA ESTO) -->
+        <!-- ========================================== -->
+        <div id="vista-diagnostico" class="vista-oculta" style="flex-grow: 1; overflow-y: auto;">
+            <!-- Aquí diagnostico.js inyectará todo el contenido -->
+        </div>
+
+    </div> <!-- CIERRE DEL CONTENEDOR DE VISTAS -->
+
+    <!-- ========================================== -->
+    <!-- ASISTENTE GLOBAL PU-K                      -->
+    <!-- ========================================== -->
+    <!-- ... (tu código del chat flotante) ... -->
+
+<!-- Carga del Cerebro OOP y Scripts -->
+    <script src="soporte.js"></script>
+    <script src="monitormapon.js"></script>
+    <!-- AGREGA ESTA LÍNEA AQUÍ ABAJO -->
+    <script src="js/diagnostico.js"></script>
     <div id="puk-boton-flotante" onclick="appSoporte.toggleChatPUK()">🐶</div>
     <div id="puk-panel-chat" class="puk-oculto">
         <div class="puk-header">
@@ -210,16 +218,25 @@
                 console.error(error);
             }
             document.addEventListener('DOMContentLoaded', () => {
-            // ... (el código que ya tienes ahí) ...
-            
-            // INICIALIZAR EL SISTEMA DE DIAGNÓSTICO
-            if (typeof DiagnosticoEnVivo !== 'undefined') {
-                window.appDiagnostico = new DiagnosticoEnVivo('vista-diagnostico');
-            }
-            
-            cargarDatosMaponDirecto(); 
-        });
-        };
+            setTimeout(() => {
+                if (typeof appSoporte !== 'undefined') {
+                    const cambiarVistaOriginal = appSoporte.cambiarVista.bind(appSoporte);
+                    appSoporte.cambiarVista = function(vista) {
+                        cambiarVistaOriginal(vista);
+                        if(vista === 'monitores') {
+                            setTimeout(verificarPestanaMonitores, 100);
+                        }
+                    }
+                }
+            }, 500);
+
+            // INICIALIZAR EL DIAGNÓSTICO EN VIVO (AGREGA ESTO)
+            if (typeof DiagnosticoEnVivo !== 'undefined') {
+                window.appDiagnostico = new DiagnosticoEnVivo('vista-diagnostico');
+            }
+            
+            cargarDatosMaponDirecto(); 
+        });
 
         async function cargarDatosMaponDirecto() {
             const divMapon = document.getElementById('contenedor-mapon');
