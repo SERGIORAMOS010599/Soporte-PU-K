@@ -202,18 +202,19 @@ class DiagnosticoEnVivo {
         
         const idCaja = `ia-resp-${index}`;
         const caja = document.getElementById(idCaja);
-        caja.style.display = 'block';
-        caja.innerHTML = '<span style="color: #64b5f6;">🐕 PU-K olfateando este equipo...</span>';
+        if (caja) {
+            caja.style.display = 'block';
+            caja.innerHTML = '<span style="color: #64b5f6;">🐕 PU-K olfateando este equipo...</span>';
 
-        // ... AQUÍ CONECTAREMOS CON TU APPS SCRIPT DE GEMINI ...
-        // Simularemos una respuesta por ahora:
-        setTimeout(() => {
-            caja.innerHTML = `
-                <b style="color: #ffb74d;">Diagnóstico Inteligente:</b><br>
-                El equipo perdió comunicación. Te sugiero enviar el comando de reinicio:<br>
-                <button style="margin-top:5px; background:#4caf50; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.75rem;">Enviar SMS Reinicio</button>
-            `;
-        }, 1500);
+            // Simularemos una respuesta por ahora:
+            setTimeout(() => {
+                caja.innerHTML = `
+                    <b style="color: #ffb74d;">Diagnóstico Inteligente:</b><br>
+                    El equipo perdió comunicación. Te sugiero enviar el comando de reinicio:<br>
+                    <button style="margin-top:5px; background:#4caf50; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.75rem;">Enviar SMS Reinicio</button>
+                `;
+            }, 1500);
+        }
     }
 
     async iniciarAnalisisEnCola() {
@@ -225,28 +226,32 @@ class DiagnosticoEnVivo {
 
         this.analisisEnProgreso = true;
         const btn = document.getElementById('btn-iniciar-analisis');
-        btn.innerHTML = '⏳ Analizando en cola...';
-        btn.style.background = '#64b5f6';
+        if (btn) {
+            btn.innerHTML = '⏳ Analizando en cola...';
+            btn.style.background = '#64b5f6';
+        }
 
         let resueltos = 0;
         const contadorResueltos = document.getElementById('diag-count-resueltos');
 
-        // Iteramos con un for asíncrono para que espere a que termine un equipo antes de pasar al siguiente
+        // Iteramos con un for asíncrono
         for (let i = 0; i < this.equiposConFalla.length; i++) {
             await this.analizarEquipoIndividual(i);
             resueltos++;
-            contadorResueltos.innerText = resueltos;
+            if (contadorResueltos) contadorResueltos.innerText = resueltos;
             
-            // Pequeña pausa entre peticiones para no saturar la API
+            // Pausa entre peticiones
             await new Promise(resolve => setTimeout(resolve, 1000)); 
         }
 
         this.analisisEnProgreso = false;
-        btn.innerHTML = '✅ Análisis Completado';
-        btn.style.background = '#4caf50';
-        setTimeout(() => {
-            btn.innerHTML = '▶ Iniciar Análisis Inteligente';
-            btn.style.background = '#ffb74d';
-        }, 3000);
+        if (btn) {
+            btn.innerHTML = '✅ Análisis Completado';
+            btn.style.background = '#4caf50';
+            setTimeout(() => {
+                btn.innerHTML = '▶ Iniciar Análisis Inteligente';
+                btn.style.background = '#ffb74d';
+            }, 3000);
+        }
     }
-}s
+}
