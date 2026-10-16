@@ -29,16 +29,16 @@ class DiagnosticoEnVivo {
         this.renderizarEstructura();
     }
 
-    // Esta función será llamada desde tu script principal o desde monitormapon.js cada vez que haya datos nuevos
+    // Esta función será llamada desde monitormapon.js cada vez que haya datos nuevos
     actualizarDatos(datosMapon) {
         if (!datosMapon || datosMapon.length === 0) return;
 
         // Limpiador de formato rápido
         const extraer = (unidad, posibles) => {
             for(let n of posibles) {
-                let nLimpio = n.replace(/[^a-z0-9]/gi, "").toLowerCase();
+                let nLimpio = String(n).replace(/[^a-z0-9]/gi, "").toLowerCase();
                 for(let k in unidad) {
-                    let kLimpio = k.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/gi, "").toLowerCase();
+                    let kLimpio = String(k).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/gi, "").toLowerCase();
                     if(kLimpio === nLimpio || kLimpio.includes(nLimpio)) return unidad[k];
                 }
             }
@@ -50,7 +50,7 @@ class DiagnosticoEnVivo {
             let estado = extraer(unidad, ["onlinestatus", "estado", "columna14"]);
             let eLimpio = (estado || "").toString().trim().toUpperCase();
             // Ignoramos los OK y los que dicen OK (NOGPS) a menos que quieras considerarlos falla también
-            return eLimpio !== "OK" && eLimpio !== "OK (NOGPS)" && eLimpio !== "" && eLimpio !== "SIN ASIGNAR";
+            return eLimpio !== "OK" && eLimpio !== "OK (NOGPS)" && eLimpio !== "" && eLimpio !== "SIN ASIGNAR" && eLimpio !== "DESCONOCIDO";
         });
 
         this.renderizarTarjetas();
@@ -112,9 +112,9 @@ class DiagnosticoEnVivo {
             // Reusamos el destructor de formatos local
             const extraer = (u, posibles) => {
                 for(let n of posibles) {
-                    let nLimpio = n.replace(/[^a-z0-9]/gi, "").toLowerCase();
+                    let nLimpio = String(n).replace(/[^a-z0-9]/gi, "").toLowerCase();
                     for(let k in u) {
-                        let kLimpio = k.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/gi, "").toLowerCase();
+                        let kLimpio = String(k).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/gi, "").toLowerCase();
                         if(kLimpio === nLimpio || kLimpio.includes(nLimpio)) return u[k];
                     }
                 }
@@ -132,7 +132,7 @@ class DiagnosticoEnVivo {
             let estadoUp = estado.toString().toUpperCase().trim();
             
             // Evaluamos el Triaje
-            let datosTriaje = this.triaje[estadoUp] || { color: '#f44336', mensaje: 'Falla no catalogada.' };
+            let datosTriaje = this.triaje[estadoUp] || { color: '#f44336', mensaje: 'Falla no catalogada. Se requiere análisis manual.' };
             
             // Buscamos si tenemos más info en nuestro inventario de soporte
             let linea = 'Desconocida';
@@ -231,7 +231,7 @@ class DiagnosticoEnVivo {
         let resueltos = 0;
         const contadorResueltos = document.getElementById('diag-count-resueltos');
 
-        // Iteramos con un for..of asíncrono para que espere a que termine un equipo antes de pasar al siguiente
+        // Iteramos con un for asíncrono para que espere a que termine un equipo antes de pasar al siguiente
         for (let i = 0; i < this.equiposConFalla.length; i++) {
             await this.analizarEquipoIndividual(i);
             resueltos++;
@@ -249,4 +249,4 @@ class DiagnosticoEnVivo {
             btn.style.background = '#ffb74d';
         }, 3000);
     }
-}
+}s
