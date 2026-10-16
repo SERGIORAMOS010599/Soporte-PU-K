@@ -8,15 +8,37 @@ class MonitorMapon {
         this.inicializar();
     }
 
+    // =========================================================
+    // DESTRUCTOR DE FORMATOS (EL SALVAVIDAS ANTI-TEXTO PLANO)
+    // =========================================================
+    extraerDato(unidad, posiblesNombres) {
+        // Pase 1: Coincidencia exacta (para evitar que "modelo" jale "modelo de equipo")
+        for (let n of posiblesNombres) {
+            let nLimpio = n.toLowerCase().replace(/[^a-z0-9]/g, "");
+            for (let key in unidad) {
+                let k = key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+                if (k === nLimpio) return unidad[key];
+            }
+        }
+        // Pase 2: Coincidencia parcial (includes)
+        for (let n of posiblesNombres) {
+            let nLimpio = n.toLowerCase().replace(/[^a-z0-9]/g, "");
+            for (let key in unidad) {
+                let k = key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+                if (k.includes(nLimpio)) return unidad[key];
+            }
+        }
+        return null;
+    }
+
     inicializar() {
         this.renderizarEstructura();
-        this.renderizarTabla(this.datosUnidades);
-        this.renderizarGrafica();
+        this.Tabla(this.datosUnidades);
+        this.Grafica();
     }
 
     renderizarEstructura() {
         this.container.innerHTML = `
-            <!-- ELIMINAMOS los overflow restrictivos. Ahora el dashboard se adapta y deja que el navegador ponga la barra maestra si es necesario -->
             <div style="display: flex; flex-direction: row; gap: 15px; position: relative; margin-bottom: 20px;">
                 
                 <!-- PANEL IZQUIERDO: TABLA -->
@@ -52,12 +74,11 @@ class MonitorMapon {
                     </div>
                 </div>
 
-                <!-- PANEL DERECHO: GRÁFICA (SIN BARRA DE SCROLL FEA) -->
+                <!-- PANEL DERECHO: GRÁFICA -->
                 <div style="flex: 1; display: flex; flex-direction: column; background: #1a1a1a; border-radius: 8px; padding: 15px; border: 1px solid #2a2a2a; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); min-width: 300px; height: fit-content;">
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #333;">
                         <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">📊 Distribución de Estados</h4>
                     </div>
-                    <!-- Aumentamos un poco el min-height del canvas para que quepa bien sin forzar scroll -->
                     <div style="position: relative; width: 100%; flex: 1; display: flex; justify-content: center; align-items: center; min-height: 350px;">
                         <canvas id="mapon-chart"></canvas>
                     </div>
@@ -88,19 +109,19 @@ class MonitorMapon {
         });
     }
 
-    renderizarTabla(datos) {
+    Tabla(datos) {
         const tbody = document.getElementById('mapon-tbody');
         tbody.innerHTML = ''; 
 
         let datosOrdenados = [...datos].sort((a, b) => {
-            let compA = (a['Compañía:'] || a['Compañía'] || 'Sin asignar').toUpperCase();
-            let compB = (b['Compañía:'] || b['Compañía'] || 'Sin asignar').toUpperCase();
+            let compA = (this.extraerDato(a, ["compania", "company", "cliente"]) || 'Sin asignar').toString().toUpperCase();
+            let compB = (this.extraerDato(b, ["compania", "company", "cliente"]) || 'Sin asignar').toString().toUpperCase();
             
             if (compA < compB) return -1;
             if (compA > compB) return 1;
 
-            let estA = (a['Online status'] || 'Desconocido').toUpperCase();
-            let estB = (b['Online status'] || 'Desconocido').toUpperCase();
+            let estA = (this.extraerDato(a, ["onlinestatus", "estado"]) || 'Desconocido').toString().toUpperCase();
+            let estB = (this.extraerDato(b, ["onlinestatus", "estado"]) || 'Desconocido').toString().toUpperCase();
             
             if (estA < estB) return -1;
             if (estA > estB) return 1;
@@ -109,27 +130,18 @@ class MonitorMapon {
         });
 
         datosOrdenados.forEach((unidad, index) => {
-            let compania = unidad['Compañía:'] || unidad['Compañía'] || 'Sin asignar';
-            let economico = unidad['Economico'] || unidad['Name'] || 'S/N';
-            let marcaUnidad = unidad['Marca'] || unidad['Vehicle brand'] || '-';
-            let modeloUnidad = unidad['Modelo'] || unidad['Vehicle model'] || '-';
-            let vin = unidad['VIN'] || unidad['Chassis number'] || '-';
-            let anio = unidad['Año fabricación'] || unidad['Año'] || unidad['Year'] || '-';
+            // EXTRACCIÓN BLINDADA
+            let compania = this.extraerDato(unidad, ["compania", "company", "cliente"]) || 'Sin asignar';
+            let economico = this.extraerDato(unidad, ["economico", "name", "unidad"]) || 'S/N';
+            let marcaUnidad = this.extraerDato(unidad, ["marca", "vehiclebrand"]) || '-';
+            let modeloUnidad = this.extraerDato(unidad, ["modelo", "vehiclemodel"]) || '-';
+            let vin = this.extraerDato(unidad, ["vin", "chassisnumber", "chasis"]) || '-';
+            let anio = this.extraerDato(unidad, ["anofabricacion", "ano", "year"]) || '-';
             
-            let idSerie = 'S/N';
-            for (let key in unidad) {
-                let nombreColumna = key.toLowerCase();
-                if (nombreColumna.includes('de serie') || nombreColumna === 'imei' || nombreColumna === 'id disp.') {
-                    if (unidad[key] && String(unidad[key]).trim() !== '') {
-                        idSerie = unidad[key];
-                        break; 
-                    }
-                }
-            }
-            
-            let modelo = unidad['Device model'] || 'Desconocido';
-            let estado = unidad['Online status'] || 'Desconocido';
-            let ultimoReporte = unidad['Last data received'] || 'Sin fecha';
+            let idSerie = this.extraerDato(unidad, ["numdeserie", "serie", "imei", "iddisp"]) || 'S/N';
+            let modelo = this.extraerDato(unidad, ["devicemodel", "modeloequipo", "gps"]) || 'Desconocido';
+            let estado = this.extraerDato(unidad, ["onlinestatus", "estado"]) || 'Desconocido';
+            let ultimoReporte = this.extraerDato(unidad, ["lastdatareceived", "ultimoreporte", "reporte"]) || 'Sin fecha';
 
             let colorTexto = '#fff';
             let colorFondo = 'rgba(158, 158, 158, 0.1)';
@@ -169,10 +181,10 @@ class MonitorMapon {
         });
     }
 
-    renderizarGrafica() {
+    Grafica() {
         const conteoEstados = {};
         this.datosUnidades.forEach(unidad => {
-            let estado = (unidad['Online status'] || 'Desconocido').toString().trim();
+            let estado = (this.extraerDato(unidad, ["onlinestatus", "estado"]) || 'Desconocido').toString().trim();
             conteoEstados[estado] = (conteoEstados[estado] || 0) + 1;
         });
 
@@ -227,15 +239,18 @@ class MonitorMapon {
             infoDiv.style.background = "rgba(255, 183, 77, 0.1)";
             infoDiv.style.border = "1px solid rgba(255, 183, 77, 0.3)";
             infoDiv.style.color = "#ffb74d";
-            this.renderizarTabla(this.datosUnidades);
+            this.Tabla(this.datosUnidades);
         } else {
             infoDiv.innerHTML = `<span>🔍</span> Filtrando: <b style="color:#fff;">${estado}</b> <span style="font-size:10px; margin-left:4px;">(✖)</span>`;
             infoDiv.style.background = "rgba(0, 230, 118, 0.1)";
             infoDiv.style.border = "1px solid rgba(0, 230, 118, 0.3)";
             infoDiv.style.color = "#00e676"; 
             
-            const datosFiltrados = this.datosUnidades.filter(u => (u['Online status'] || 'Desconocido') === estado);
-            this.renderizarTabla(datosFiltrados);
+            const datosFiltrados = this.datosUnidades.filter(u => {
+                let e = this.extraerDato(u, ["onlinestatus", "estado"]) || 'Desconocido';
+                return e === estado;
+            });
+            this.Tabla(datosFiltrados);
         }
     }
 
@@ -268,8 +283,9 @@ class MonitorMapon {
             if(key.trim() !== '' && valor !== '-') {
                 let badgeStyle = "";
                 let displayValor = valor;
-
-                if (key.toUpperCase() === 'ONLINE STATUS') {
+                
+                let kLimpia = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+                if (kLimpia.includes('onlinestatus') || kLimpia.includes('estado')) {
                     badgeStyle = `background: ${colorBorde}15; color: ${colorBorde}; border: 1px solid ${colorBorde}; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; letter-spacing: 0.5px;`;
                     displayValor = `<span style="${badgeStyle}">${valor}</span>`;
                 }
@@ -287,7 +303,8 @@ class MonitorMapon {
             }
         });
 
-        let rawNumSerieMapon = unidad['Núm. de serie'] || unidad['ID DISP.'] || unidad['IMEI'] || '';
+        // CRUCE CON SOPORTE
+        let rawNumSerieMapon = this.extraerDato(unidad, ["numdeserie", "serie", "imei", "iddisp"]) || '';
         const numSerieMapon = String(rawNumSerieMapon).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
         
         let eqSoporteEncontrado = null;
@@ -308,8 +325,9 @@ class MonitorMapon {
             const iccid = eqSoporteEncontrado.iccid || 'N/A';
             const compania = eqSoporteEncontrado.compania || '';
             
-            // Extracción segura del modelo desde el objeto de Mapon O el objeto de Soporte
-            const modeloSeguro = unidad['Device model'] || unidad['Modelo'] || eqSoporteEncontrado.modelo || '';
+            const m1 = this.extraerDato(unidad, ["devicemodel", "modeloequipo"]);
+            const m2 = this.extraerDato(unidad, ["modelo", "vehiclemodel"]);
+            const modeloSeguro = m1 || m2 || eqSoporteEncontrado.modelo || '';
             const modeloUpper = String(modeloSeguro).toUpperCase();
             
             let btnPlataformaNombre = '';
@@ -319,15 +337,15 @@ class MonitorMapon {
             if (modeloUpper.includes('SUNTECH') || modeloUpper.includes('ST4') || modeloUpper.includes('ST3') || modeloUpper.includes('ST8')) {
                 btnPlataformaNombre = 'SCUTI WEB';
                 btnPlataformaURL = 'https://www.suntechscuti.com/scuti/Login';
-                btnPlataformaColor = '#ff9800'; // Naranja
+                btnPlataformaColor = '#ff9800'; 
             } else if (modeloUpper.includes('TELTONIKA') || modeloUpper.includes('FMC') || modeloUpper.includes('FMB')) {
                 btnPlataformaNombre = 'FOTA WEB';
                 btnPlataformaURL = 'https://fota.teltonika.lt/devices?root=27623';
-                btnPlataformaColor = '#03a9f4'; // Azul
+                btnPlataformaColor = '#03a9f4'; 
             } else if (modeloUpper.includes('RUPTELA') || modeloUpper.includes('HCV') || modeloUpper.includes('PRO') || modeloUpper.includes('TRACE')) {
                 btnPlataformaNombre = 'DMP WEB';
                 btnPlataformaURL = 'https://dmp.ruptela.com/login';
-                btnPlataformaColor = '#e91e63'; // Rosa/Rojo
+                btnPlataformaColor = '#e91e63'; 
             }
 
             let btnPlataformaHTML = '';
