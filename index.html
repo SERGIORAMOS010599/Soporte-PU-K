@@ -1,476 +1,289 @@
-// js/monitormapon.js
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Importar Chart.js para las gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soporte PU-K - IDT Tecnologías</title>
+    <link rel="stylesheet" href="soporte.css">
+    
+    <!-- ESTILOS DE LOS NUEVOS MONITORES OOP -->
+    <link rel="stylesheet" href="css/monitormapon.css">
+    <link rel="stylesheet" href="css/monitorzeek.css">
+    
+    <style>
+        .dashboard-monitores {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+    </style>
+    
+    <!-- DETECTOR DE ERRORES EN PANTALLA -->
+    <script>
+        window.onerror = function(msg, url, line) {
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = "background:red; color:white; padding:20px; font-weight:bold; text-align:center; position:fixed; top:0; width:100%; z-index:9999;";
+            errorDiv.innerText = `¡ERROR DETECTADO! Archivo: ${url.split('/').pop()} | Línea: ${line} | Detalle: ${msg}`;
+            document.body.appendChild(errorDiv);
+        };
+    </script>
+</head>
+<body>
+    
+    <!-- NUEVA BARRA DE NAVEGACIÓN (Pestañas y Buscador Universal) -->
+    <div class="navbar-principal" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #1a1a1a; border-bottom: 2px solid #ffb74d;">
+        
+        <div style="display: flex; align-items: center; gap: 30px;">
+            <div class="logo-app" style="color: #ffb74d; font-weight: bold; font-size: 1.2rem;">IDT TECNOLOGÍAS - PU-K</div>
+            <div class="menu-tabs" style="display: flex; gap: 10px;">
+                <button class="tab-btn activo" onclick="appSoporte.cambiarVista('soporte')">Soporte Técnico</button>
+                <button class="tab-btn" onclick="appSoporte.cambiarVista('monitores')">Monitores Globales</button>
+                <button class="tab-btn" onclick="appSoporte.cambiarVista('diagnostico')">Diagnóstico en Vivo</button>
+            </div>
+        </div>
 
-class MonitorMapon {
-    constructor(containerId, datosFila) {
-        this.container = document.getElementById(containerId);
-        this.datosUnidades = datosFila; 
-        this.grafica = null; 
-        this.inicializar();
-    }
+        <!-- BARRA DE BÚSQUEDA UNIVERSAL MOVIDA AQUÍ -->
+        <div class="buscador-container" style="position: relative; min-width: 300px;">
+            <input type="text" id="buscador-global" placeholder="Buscar por IMEI, ID, Cliente o Unidad..." oninput="appSoporte.buscarGlobal(this.value)" style="width: 100%; padding: 10px 35px 10px 15px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff;">
+            <span id="btn-limpiar-busqueda" onclick="appSoporte.limpiarBusqueda()" style="display: none; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #ffb74d; font-weight: bold;">✖</span>
+        </div>
 
-    // =========================================================
-    // DESTRUCTOR DE FORMATOS (ANTI-TEXTO PLANO Y COLUMNAS GENÉRICAS)
-    // =========================================================
-    extraerDato(unidad, posiblesNombres) {
-        for (let n of posiblesNombres) {
-            // Limpiamos la llave que buscamos (ej. "columna0")
-            let nLimpio = String(n).toLowerCase().replace(/[^a-z0-9]/g, "");
-            for (let key in unidad) {
-                // Limpiamos la llave que viene de Google Sheets (ej. "Columna_0" -> "columna0")
-                let k = String(key).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
-                if (k === nLimpio || k.includes(nLimpio)) return unidad[key];
-            }
-        }
-        return null;
-    }
+    </div>
 
-    inicializar() {
-        this.renderizarEstructura();
-        this.Tabla(this.datosUnidades);
-        this.Grafica();
-    }
+    <!-- CONTENEDOR DE VISTAS (Alterna entre Soporte y Monitores) -->
+    <div class="vistas-container">
+        
+        <!-- ========================================== -->
+        <!-- VISTA 1: SOPORTE TÉCNICO (Tu vista original) -->
+        <!-- ========================================== -->
+        <div id="vista-soporte" class="vista-activa">
 
-    renderizarEstructura() {
-        this.container.innerHTML = `
-            <div style="display: flex; flex-direction: row; gap: 15px; position: relative; margin-bottom: 20px;">
-                
-                <!-- PANEL IZQUIERDO: TABLA -->
-                <div style="flex: 2.5; background: #1a1a1a; border-radius: 8px; padding: 15px; border: 1px solid #2a2a2a; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); display: flex; flex-direction: column;">
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #333;">
-                        <div id="mapon-filter-info" style="cursor: pointer; color: #ffb74d; font-weight: bold; font-size: 11px; padding: 6px 12px; background: rgba(255, 183, 77, 0.1); border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255, 183, 77, 0.3); transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.background='rgba(255, 183, 77, 0.2)'" onmouseout="this.style.background='rgba(255, 183, 77, 0.1)'">
-                            <span>✅</span> Mostrando todos los equipos
-                        </div>
-                        <button onclick="window.descargarExcelMapon()" style="background: rgba(0, 200, 83, 0.1); color: #00e676; border: 1px solid #00c853; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px;" title="Descargar vista actual en Excel" onmouseover="this.style.background='#00c853'; this.style.color='#fff';" onmouseout="this.style.background='rgba(0, 200, 83, 0.1)'; this.style.color='#00e676';">
-                            <span>📊</span> EXCEL
-                        </button>
-                    </div>
+            <!-- CUADRÍCULA MAESTRA -->
+                <div class="vista-cuadricula" style="overflow-y: auto; max-height: calc(100vh - 120px); padding-bottom: 20px; padding-right: 10px;">
+                    <div id="grid-salidas" class="grid-tarjetas"></div>
+                </div>
 
-                    <div style="overflow-y: auto; max-height: 500px; padding-right: 5px;">
-                        <table id="tabla-mapon-exportar" style="width: 100%; border-collapse: separate; border-spacing: 0; color: #ccc; font-size: 11px;">
-                            <thead style="position: sticky; top: 0; z-index: 2;">
-                                <tr>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">Compañía</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">Económico</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">Marca</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">Modelo</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">VIN</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">Año</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">ID Serie</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">GPS</th>
-                                    <th style="padding: 12px 10px; text-align: center; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">Estado</th>
-                                    <th style="padding: 12px 10px; text-align: left; color: #888; border-bottom: 1px solid #444; background: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px;">Últ. Reporte</th>
-                                </tr>
-                            </thead>
-                            <tbody id="mapon-tbody"></tbody>
-                        </table>
-                    </div>
-                </div>
+                <!-- PANEL DE DETALLES -->
+                <div id="panel-detalles" class="panel-lateral">
+                    <div class="encabezado-panel">
+                        <div id="det-titulo-contenedor" style="display: flex; align-items: center; gap: 10px;">
+                            <h1 class="titulo-detalles" id="det-titulo">CARGANDO...</h1>
+                            <span class="icono-editar" onclick="appSoporte.activarEdicionGeneral()">✏️</span>
+                        </div>
+                        <button class="btn-cerrar" onclick="appSoporte.cerrarDetalles()">✖</button>
+                    </div>
+                    
+                    <div class="panel-botones" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                        <button class="btn-accion" onclick="appSoporte.enviarSMS('apagar')">
+                            <div class="icono" style="background-color: #d32f2f;">⏻</div>APAGAR<br>MOTOR
+                        </button>
+                        <button class="btn-accion" onclick="appSoporte.enviarSMS('encender')">
+                            <div class="icono" style="background-color: #388e3c;">⏻</div>ENCENDER<br>MOTOR
+                        </button>
+                        <button class="btn-accion" onclick="appSoporte.enviarSMS('configuracion')">
+                            <div class="icono" style="background-color: #ffb74d;">?</div>CONFIGURACION<br>DEL EQUIPO
+                        </button>
+                        <button class="btn-accion" onclick="appSoporte.enviarSMS('reiniciar')">
+                            <div class="icono" style="background-color: #f57c00;">⟳</div>REINICIAR<br>EQUIPO
+                        </button>
+                        <button class="btn-accion" onclick="appSoporte.enviarSMS('borrar')">
+                            <div class="icono" style="background-color: #f57c00;">🗑️</div>BORRADO DE<br>MEMORIA
+                        </button>
+                        <button class="btn-accion" onclick="appSoporte.enviarSMS('formatear')">
+                            <div class="icono" style="background-color: #d32f2f;">⌫</div>FORMATEAR<br>EQUIPO
+                        </button>
+                        <button class="btn-accion" onclick="window.open('https://soporte.zeekgps.com/ZeekSoporte/', '_blank')">
+                            <div class="icono" style="background-color: #1976d2;">🛠️</div>ZEEK<br>SOPORTE
+                        </button>
+                        <button class="btn-accion" onclick="window.open('https://mapon.com/partner/gbox_new/', '_blank')">
+                            <div class="icono" style="background-color: #00c853;">📍</div>MAPON<br>SOPORTE
+                        </button>
+                        <button class="btn-accion" onclick="appSoporte.abrirDiagnostico()">
+                            <div class="icono" style="background-color: #9c27b0;">🩺</div>DIAGNÓSTICO<br>EN VIVO
+                        </button>
+                    </div>
+                    
+                    <table class="tabla-info">
+                        <tr><td>ID</td><td id="det-id">---</td></tr>
+                        <tr><td>Línea</td><td id="det-linea">---</td></tr>
+                        <tr><td>ICCID</td><td id="det-iccid">---</td></tr>
+                        <tr><td>IMEI</td><td id="det-imei">---</td></tr>
+                        <tr><td>Marca</td><td id="det-marca">---</td></tr>
+                        <tr><td>Modelo</td><td id="det-modelo">---</td></tr>
+                        <tr><td>Cliente</td><td id="det-cliente">---</td></tr>
+                        <tr><td>Tipo de servicio</td><td id="det-tipo-servicio" style="text-transform: uppercase; font-weight: bold;">---</td></tr>
+                        <tr><td>Estado del Servicio</td><td id="det-servicio">---</td></tr>
+                        <tr><td>Marca/Mod. Unidad</td><td id="det-marcaModeloUnidad">---</td></tr>
+                        <tr><td>Año Unidad</td><td id="det-anio">---</td></tr>
+                        <tr><td>Nº Serie Unidad</td><td id="det-numSerie">---</td></tr>
+                    </table>
 
-                <!-- PANEL DERECHO: GRÁFICA -->
-                <div style="flex: 1; display: flex; flex-direction: column; background: #1a1a1a; border-radius: 8px; padding: 15px; border: 1px solid #2a2a2a; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); min-width: 300px; height: fit-content;">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #333;">
-                        <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">📊 Distribución de Estados</h4>
-                    </div>
-                    <div style="position: relative; width: 100%; flex: 1; display: flex; justify-content: center; align-items: center; min-height: 350px;">
-                        <canvas id="mapon-chart"></canvas>
-                    </div>
-                </div>
+                    <div class="panel-comandos-box">
+                        <div class="comandos-header">
+                            <h3>Asistente de Configuración</h3>
+                            <span class="badge" id="asistente-badge-marca">Marca</span>
+                        </div>
+                        <div class="comandos-body" style="padding: 15px; text-align: left;">
+                            <input type="text" id="buscador-asistente" placeholder="Escribe tu duda o comando...">
+                            <div id="asistente-sugerencias" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;"></div>
+                            <div id="asistente-interactivo" style="border-top: 1px dashed #444; padding-top: 15px; display: none;"></div>
+                        </div>
+                    </div>
+                </div> 
+            </div> 
+        </div>
 
-                <!-- MODAL DE DETALLES -->
-                <div id="mapon-modal-detalles" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
-                    <div id="mapon-modal-box" style="background: #1e1e1e; border: 1px solid #ffb74d; width: 90%; max-width: 550px; max-height: 90vh; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: max-width 0.3s ease;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #333; background: #2a2a2a; border-radius: 8px 8px 0 0;">
-                            <div style="display: flex; gap: 15px; align-items: center;">
-                                <h3 style="margin: 0; color: #ffb74d;" id="modal-titulo-unidad">Detalles del Equipo</h3>
-                                <button id="btn-mostrar-soporte" style="display: none; background: rgba(25, 118, 210, 0.1); color: #64b5f6; border: 1px solid #1976d2; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s;">🛠️ Opciones de Soporte</button>
-                            </div>
-                            <button onclick="document.getElementById('mapon-modal-detalles').style.display='none'; window.equipoEnPantallaMapon = null;" style="background: transparent; color: #aaa; border: none; font-size: 20px; cursor: pointer;">✖</button>
-                        </div>
-                        
-                        <div style="display: flex; flex-direction: row; overflow-y: auto; max-height: calc(90vh - 70px);">
-                            <div id="modal-contenido-detalles" style="padding: 20px; color: #ddd; font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; align-content: start; min-height: min-content;"></div>
-                            <div id="modal-contenido-soporte" style="display: none; padding: 20px; padding-bottom: 40px; background: #141414; border-left: 1px solid #333; flex: 1; flex-direction: column; gap: 15px; min-height: min-content;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        <!-- ========================================== -->
+        <!-- VISTA 2: MONITORES GLOBALES (Nuevo)        -->
+        <!-- ========================================== -->
+        <div id="vista-monitores" class="vista-oculta">
+            <div class="header-vista" style="padding: 20px 20px 0 20px;">
+                <h2 style="color: #fff; margin-bottom: 5px;">Monitores de Telemetría</h2>
+                <p style="color: #888; margin-top: 0;">Radiografía global de equipos en plataforma</p>
+            </div>
+            <div class="dashboard-monitores" style="padding: 20px;">
+                <!-- Monitor Mapon -->
+                <div id="contenedor-mapon"></div>
+                
+                <!-- Monitor Zeek -->
+                <div id="contenedor-zeek"></div>
+            </div>
+        </div>
+        <!-- ========================================== -->
+        <!-- VISTA 3: DIAGNÓSTICO EN VIVO               -->
+        <!-- ========================================== -->
+        <div id="vista-diagnostico" class="vista-oculta" style="flex-grow: 1; overflow-y: auto;">
+            <!-- El contenido se generará automáticamente por diagnostico.js -->
+        </div>
+    </div> <!-- CIERRE DEL CONTENEDOR DE VISTAS -->
 
-        document.getElementById('mapon-filter-info').addEventListener('click', () => {
-            this.filtrarPorEstado(null);
-        });
-    }
+    <!-- ========================================== -->
+    <!-- ASISTENTE GLOBAL PU-K                      -->
+    <!-- ========================================== -->
+    <div id="puk-boton-flotante" onclick="appSoporte.toggleChatPUK()">🐶</div>
+    <div id="puk-panel-chat" class="puk-oculto">
+        <div class="puk-header">
+            <span>🐶 Asistente PU-K</span>
+            <button onclick="appSoporte.toggleChatPUK()">✖</button>
+        </div>
+        <div id="puk-mensajes">
+            <div class="puk-mensaje puk-ia">¡Guau! Hola, soy PU-K. ¿En qué te ayudo con los equipos de telemetría hoy?</div>
+        </div>
+        <div class="puk-input-area">
+            <input type="text" id="puk-input-chat" placeholder="Pregunta algo al manual..." onkeypress="appSoporte.manejarEnterChat(event)">
+            <button onclick="appSoporte.enviarMensajeChat()">Enviar</button>
+        </div>
+    </div>
 
-    Tabla(datos) {
-        const tbody = document.getElementById('mapon-tbody');
-        tbody.innerHTML = ''; 
+    <!-- Carga del Cerebro OOP y Scripts -->
+    <script src="soporte.js"></script>
+    <script src="monitormapon.js"></script>
+    <script src="js/diagnostico.js"></script> 
+    
+    <script>
+        // ==========================================
+        // FUNCIONES GLOBALES Y CONEXIÓN
+        // ==========================================
+        window.descargarExcelMapon = function() {
+            try {
+                let tabla = document.getElementById("tabla-mapon-exportar"); 
+                let nombreFiltro = "Todos_Los_Equipos";
+                let divFiltro = document.getElementById("mapon-filter-info");
+                
+                if (divFiltro && divFiltro.innerText.includes("Filtrando")) {
+                    let textoRaw = divFiltro.innerText;
+                    let fragmento = textoRaw.split("por:")[1]; 
+                    if (fragmento) {
+                        let estadoBruto = fragmento.split("(Clic")[0].trim();
+                        nombreFiltro = estadoBruto.replace(/[^a-zA-Z0-9]/g, '_');
+                    }
+                }
 
-        if (!datos || datos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 20px; color: #ff4c4c;">No hay datos disponibles en el monitor.</td></tr>';
-            return;
-        }
+                let libro = XLSX.utils.table_to_book(tabla, { sheet: "Monitor Mapon" });
+                XLSX.writeFile(libro, `Reporte_Mapon_${nombreFiltro}.xlsx`);
+            } catch (error) {
+                alert("⚠️ Ocurrió un error al intentar descargar el Excel: " + error.message);
+                console.error(error);
+            }
+            document.addEventListener('DOMContentLoaded', () => {
+            // ... (el código que ya tienes ahí) ...
+            
+            // INICIALIZAR EL SISTEMA DE DIAGNÓSTICO
+            if (typeof DiagnosticoEnVivo !== 'undefined') {
+                window.appDiagnostico = new DiagnosticoEnVivo('vista-diagnostico');
+            }
+            
+            cargarDatosMaponDirecto(); 
+        });
+        };
 
-        let primeraUnidad = datos[0];
-        // Ahora buscamos también las Columnas 0 y 1 para dar el pase libre
-        let checkColumna = this.extraerDato(primeraUnidad, ["compania", "company", "cliente", "economico", "vin", "numdeserie", "serie", "columna0", "columna1"]);
-        
-        if (!checkColumna) {
-            let llavesRecibidas = Object.keys(primeraUnidad).join(" | ");
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="10" style="text-align:center; padding: 40px; background: rgba(255, 183, 77, 0.05);">
-                        <h3 style="margin-top:0; color:#ffb74d;">⚠️ Alerta de Formato en Google Sheets</h3>
-                        <p style="color:#ddd; font-size:14px; max-width: 600px; margin: 0 auto;">No se encontraron columnas válidas.</p>
-                        <div style="background: #111; padding: 15px; border-radius: 6px; border: 1px dashed #ffb74d; color: #00e676; margin: 20px auto; max-width: 700px; word-break: break-word; font-family: monospace; font-size: 11px;">
-                            ${llavesRecibidas}
-                        </div>
-                    </td>
-                </tr>
-            `;
-            return; 
-        }
+        async function cargarDatosMaponDirecto() {
+            const divMapon = document.getElementById('contenedor-mapon');
+            if (!divMapon) return;
+            
+            divMapon.innerHTML = '<h3 style="color: #ffb74d; text-align: center; padding: 50px;">⏳ Descargando datos directo de Sheets...</h3>';
+            
+            try {
+                const sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM';
+                const query = encodeURIComponent('select *');
+                const sheetName = encodeURIComponent('MONITOR MAPON');
+                
+                const urlMapon = 'https://docs.google.com/spreadsheets/d/' + sheetId + '/gviz/tq?tqx=out:json&tq=' + query + '&sheet=' + sheetName;
+                
+                const respuesta = await fetch(urlMapon);
+                const texto = await respuesta.text();
+                const jsonString = texto.substring(47).slice(0, -2);
+                const jsonGviz = JSON.parse(jsonString);
+                
+                const headers = jsonGviz.table.cols.map(function(col, index) {
+                    return col.label ? col.label : 'Columna_' + index;
+                });
+                
+                const datosFormateados = jsonGviz.table.rows.map(function(row) {
+                    let obj = {};
+                    row.c.forEach(function(celda, i) {
+                        if (celda && celda.f) obj[headers[i]] = String(celda.f);
+                        else if (celda && celda.v !== null && celda.v !== undefined) obj[headers[i]] = String(celda.v);
+                        else obj[headers[i]] = '';
+                    });
+                    return obj;
+                });
+                
+                divMapon.innerHTML = ''; 
+                new MonitorMapon('contenedor-mapon', datosFormateados);
+                
+            } catch (error) {
+                divMapon.innerHTML = '<h3 style="color: #f44336; text-align: center; padding: 50px;">❌ Error de conexión directa: ' + error.message + '</h3>';
+                console.error("Error al procesar GVIZ:", error);
+            }
+        }
 
-        let datosOrdenados = [...datos].sort((a, b) => {
-            let compA = (this.extraerDato(a, ["compania", "company", "cliente", "columna0"]) || 'Sin asignar').toString().toUpperCase();
-            let compB = (this.extraerDato(b, ["compania", "company", "cliente", "columna0"]) || 'Sin asignar').toString().toUpperCase();
-            if (compA < compB) return -1;
-            if (compA > compB) return 1;
+        function verificarPestanaMonitores() {
+            const vistaMonitores = document.getElementById('vista-monitores');
+            if (vistaMonitores && vistaMonitores.classList.contains('vista-activa') && document.getElementById('contenedor-mapon').innerHTML.trim() === '') {
+                cargarDatosMaponDirecto();
+            }
+        }
 
-            let estA = (this.extraerDato(a, ["onlinestatus", "estado", "columna14"]) || 'Desconocido').toString().toUpperCase();
-            let estB = (this.extraerDato(b, ["onlinestatus", "estado", "columna14"]) || 'Desconocido').toString().toUpperCase();
-            if (estA < estB) return -1;
-            if (estA > estB) return 1;
-
-            return 0;
-        });
-
-        datosOrdenados.forEach((unidad, index) => {
-            // APLICAMOS EL MAPA EXACTO BASADO EN TU INFORMACIÓN DE COLUMNAS
-            let compania = this.extraerDato(unidad, ["compania", "company", "cliente", "columna0"]) || 'Sin asignar';
-            let economico = this.extraerDato(unidad, ["economico", "name", "unidad", "columna1"]) || 'S/N';
-            let marcaUnidad = this.extraerDato(unidad, ["marca", "vehiclebrand", "columna2"]) || '-';
-            let modeloUnidad = this.extraerDato(unidad, ["modelo", "vehiclemodel", "columna3"]) || '-';
-            let vin = this.extraerDato(unidad, ["vin", "chassisnumber", "chasis", "columna4"]) || '-';
-            let anio = this.extraerDato(unidad, ["anofabricacion", "ano", "year", "columna5"]) || '-';
-            
-            // Combinamos las posibilidades de Serie, IMEI o ID Disp que están en las columnas 10, 8 y 6
-            let idSerie = this.extraerDato(unidad, ["numdeserie", "serie", "imei", "iddisp", "columna10", "columna8", "columna6"]) || 'S/N';
-            let modelo = this.extraerDato(unidad, ["devicemodel", "modeloequipo", "gps", "columna7"]) || 'Desconocido';
-            let estado = this.extraerDato(unidad, ["onlinestatus", "estado", "columna14"]) || 'Desconocido';
-            let ultimoReporte = this.extraerDato(unidad, ["lastdatareceived", "ultimoreporte", "reporte", "columna15"]) || 'Sin fecha';
-
-            let colorTexto = '#fff';
-            let colorFondo = 'rgba(158, 158, 158, 0.1)';
-            let colorBorde = 'rgba(158, 158, 158, 0.3)';
-            let estadoUp = estado.toString().toUpperCase();
-            
-            if (estadoUp.includes('NODATA')) { colorTexto = '#f44336'; colorFondo = 'rgba(244, 67, 54, 0.1)'; colorBorde = 'rgba(244, 67, 54, 0.3)'; } 
-            else if (estadoUp === 'OK') { colorTexto = '#00e676'; colorFondo = 'rgba(0, 230, 118, 0.1)'; colorBorde = 'rgba(0, 230, 118, 0.3)'; } 
-            else if (estadoUp.includes('NOGPS')) { colorTexto = '#ffeb3b'; colorFondo = 'rgba(255, 235, 59, 0.1)'; colorBorde = 'rgba(255, 235, 59, 0.3)'; } 
-            else if (estadoUp.includes('NOPOWER')) { colorTexto = '#ff9800'; colorFondo = 'rgba(255, 152, 0, 0.1)'; colorBorde = 'rgba(255, 152, 0, 0.3)'; } 
-            else { colorTexto = '#9e9e9e'; }
-
-            let badgeEstado = `<span style="background: ${colorFondo}; color: ${colorTexto}; border: 1px solid ${colorBorde}; padding: 4px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;">${estado}</span>`;
-
-            const tr = document.createElement('tr');
-            tr.style.cssText = "cursor: pointer; transition: background 0.2s;";
-            tr.onmouseover = () => tr.style.background = "#222";
-            tr.onmouseout = () => tr.style.background = "transparent";
-            
-            tr.onclick = () => this.abrirModalDetalles(unidad, economico, colorTexto);
-
-            let dataOculta = Object.values(unidad).join(' ');
-
-            tr.innerHTML = `
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; color: #ddd;">${compania}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; font-weight: bold; color: #fff;">${economico}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; color: #ccc;">${marcaUnidad}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; color: #ccc;">${modeloUnidad}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; font-size: 10px; color: #888;">${vin}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; color: #ccc;">${anio}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; color: #888;">${idSerie}<span style="display:none;">${dataOculta}</span></td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; color: #ccc;">${modelo}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; text-align: center;">${badgeEstado}</td>
-                <td style="padding: 12px 10px; border-bottom: 1px solid #2a2a2a; font-size: 10px; color: #aaa;">${ultimoReporte}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    Grafica() {
-        const conteoEstados = {};
-        this.datosUnidades.forEach(unidad => {
-            let estado = (this.extraerDato(unidad, ["onlinestatus", "estado", "columna14"]) || 'Desconocido').toString().trim();
-            conteoEstados[estado] = (conteoEstados[estado] || 0) + 1;
-        });
-
-        const labels = Object.keys(conteoEstados);
-        const dataValues = Object.values(conteoEstados);
-
-        const backgroundColors = labels.map(label => {
-            let lbl = label.toUpperCase();
-            if (lbl.includes('NODATA')) return '#f44336'; 
-            if (lbl === 'OK') return '#00e676'; 
-            if (lbl.includes('NOGPS')) return '#ffeb3b'; 
-            if (lbl.includes('NOPOWER')) return '#ff9800';
-            return '#9e9e9e'; 
-        });
-
-        const ctx = document.getElementById('mapon-chart').getContext('2d');
-        if (this.grafica) this.grafica.destroy();
-
-        this.grafica = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: dataValues,
-                    backgroundColor: backgroundColors,
-                    borderWidth: 3,
-                    borderColor: '#1a1a1a' 
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%', 
-                plugins: {
-                    legend: { position: 'top', labels: { color: '#ccc', padding: 15, font: {size: 11, family: 'sans-serif'} } }
-                },
-                onClick: (event, elements) => {
-                    if (elements && elements.length > 0) {
-                        const indexClick = elements[0].index;
-                        const estadoSeleccionado = this.grafica.data.labels[indexClick];
-                        this.filtrarPorEstado(estadoSeleccionado);
-                    }
-                }
-            }
-        });
-    }
-
-    filtrarPorEstado(estado) {
-        const infoDiv = document.getElementById('mapon-filter-info');
-        if (!estado) {
-            infoDiv.innerHTML = `<span>✅</span> Mostrando todos los equipos`;
-            infoDiv.style.background = "rgba(255, 183, 77, 0.1)";
-            infoDiv.style.border = "1px solid rgba(255, 183, 77, 0.3)";
-            infoDiv.style.color = "#ffb74d";
-            this.Tabla(this.datosUnidades);
-        } else {
-            infoDiv.innerHTML = `<span>🔍</span> Filtrando: <b style="color:#fff;">${estado}</b> <span style="font-size:10px; margin-left:4px;">(✖)</span>`;
-            infoDiv.style.background = "rgba(0, 230, 118, 0.1)";
-            infoDiv.style.border = "1px solid rgba(0, 230, 118, 0.3)";
-            infoDiv.style.color = "#00e676"; 
-            
-            const datosFiltrados = this.datosUnidades.filter(u => {
-                let e = this.extraerDato(u, ["onlinestatus", "estado", "columna14"]) || 'Desconocido';
-                return e === estado;
-            });
-            this.Tabla(datosFiltrados);
-        }
-    }
-
-    abrirModalDetalles(unidad, nombreUnidad, colorBorde) {
-        document.getElementById('modal-titulo-unidad').innerText = nombreUnidad;
-        document.getElementById('mapon-modal-detalles').style.display = 'flex';
-        
-        const modalBox = document.getElementById('mapon-modal-box');
-        modalBox.style.maxWidth = '550px'; 
-        
-        const panelSoporte = document.getElementById('modal-contenido-soporte');
-        panelSoporte.style.display = 'none';
-        
-        const btnSoporte = document.getElementById('btn-mostrar-soporte');
-        btnSoporte.style.display = 'none';
-        btnSoporte.innerText = '🛠️ Opciones de Soporte';
-        btnSoporte.style.background = 'rgba(25, 118, 210, 0.1)';
-        btnSoporte.style.color = '#64b5f6';
-        btnSoporte.style.border = '1px solid #1976d2';
-
-        const contenedor = document.getElementById('modal-contenido-detalles');
-        contenedor.innerHTML = ''; 
-
-        if (typeof appSoporte !== 'undefined') {
-            window.equipoEnPantallaMapon = unidad;
-        }
-
-        Object.keys(unidad).forEach(key => {
-            const valor = unidad[key] || '-';
-            if(key.trim() !== '' && valor !== '-') {
-                let badgeStyle = "";
-                let displayValor = valor;
-                
-                let kLimpia = key.toLowerCase().replace(/[^a-z0-9]/g, "");
-                // También marcamos como estado la "columna14"
-                if (kLimpia.includes('onlinestatus') || kLimpia.includes('estado') || kLimpia === 'columna14') {
-                    badgeStyle = `background: ${colorBorde}15; color: ${colorBorde}; border: 1px solid ${colorBorde}; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; letter-spacing: 0.5px;`;
-                    displayValor = `<span style="${badgeStyle}">${valor}</span>`;
-                }
-
-                // Intentar ponerle el nombre real a la columna en el modal si viene como "columnaX"
-                let nombreKeyMostrado = key;
-                if(kLimpia === 'columna0') nombreKeyMostrado = "Compañía";
-                if(kLimpia === 'columna1') nombreKeyMostrado = "Económico";
-                if(kLimpia === 'columna2') nombreKeyMostrado = "Marca";
-                if(kLimpia === 'columna3') nombreKeyMostrado = "Modelo";
-                if(kLimpia === 'columna4') nombreKeyMostrado = "VIN";
-                if(kLimpia === 'columna5') nombreKeyMostrado = "Año Fabricación";
-                if(kLimpia === 'columna10') nombreKeyMostrado = "Núm. de Serie";
-                if(kLimpia === 'columna8') nombreKeyMostrado = "IMEI";
-                if(kLimpia === 'columna7') nombreKeyMostrado = "Device Model";
-                if(kLimpia === 'columna14') nombreKeyMostrado = "Online Status";
-                if(kLimpia === 'columna15') nombreKeyMostrado = "Último Reporte";
-
-                const divItem = document.createElement('div');
-                divItem.style.cssText = `background: #1a1a1a; padding: 12px; border-radius: 6px; border: 1px solid #2a2a2a; border-left: 3px solid ${colorBorde}; position: relative; transition: all 0.2s ease;`;
-                divItem.onmouseover = () => divItem.style.borderColor = '#444';
-                divItem.onmouseout = () => divItem.style.borderColor = '#2a2a2a';
-                
-                divItem.innerHTML = `
-                    <div style="font-size: 9px; color: #777; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">${nombreKeyMostrado}</div>
-                    <div style="font-size: 13px; font-weight: bold; color: #eee; word-break: break-all;">${displayValor}</div>
-                `;
-                contenedor.appendChild(divItem);
-            }
-        });
-
-        // CRUCE CON SOPORTE
-        let rawNumSerieMapon = this.extraerDato(unidad, ["numdeserie", "serie", "imei", "iddisp", "columna10", "columna8", "columna6"]) || '';
-        const numSerieMapon = String(rawNumSerieMapon).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
-        
-        let eqSoporteEncontrado = null;
-        
-        if (window.appSoporte && window.appSoporte.equipos && numSerieMapon && numSerieMapon !== 's/n' && numSerieMapon !== 'sindato') {
-            eqSoporteEncontrado = window.appSoporte.equipos.find(e => {
-                const idSalida = String(e.id).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
-                return idSalida === numSerieMapon || 
-                       (e.imei && String(e.imei).replace(/\s+/g, '').toLowerCase() === numSerieMapon);
-            });
-        }
-
-        if (eqSoporteEncontrado) {
-            btnSoporte.style.display = 'block';
-            
-            const id = eqSoporteEncontrado.id;
-            const linea = eqSoporteEncontrado.linea || 'N/A';
-            const iccid = eqSoporteEncontrado.iccid || 'N/A';
-            const compania = eqSoporteEncontrado.compania || '';
-            
-            const m1 = this.extraerDato(unidad, ["devicemodel", "modeloequipo", "columna7"]);
-            const m2 = this.extraerDato(unidad, ["modelo", "vehiclemodel", "columna3"]);
-            const modeloSeguro = m1 || m2 || eqSoporteEncontrado.modelo || '';
-            const modeloUpper = String(modeloSeguro).toUpperCase();
-            
-            let btnPlataformaNombre = '';
-            let btnPlataformaURL = '';
-            let btnPlataformaColor = ''; 
-            
-            if (modeloUpper.includes('SUNTECH') || modeloUpper.includes('ST4') || modeloUpper.includes('ST3') || modeloUpper.includes('ST8')) {
-                btnPlataformaNombre = 'SCUTI WEB';
-                btnPlataformaURL = 'https://www.suntechscuti.com/scuti/Login';
-                btnPlataformaColor = '#ff9800'; 
-            } else if (modeloUpper.includes('TELTONIKA') || modeloUpper.includes('FMC') || modeloUpper.includes('FMB')) {
-                btnPlataformaNombre = 'FOTA WEB';
-                btnPlataformaURL = 'https://fota.teltonika.lt/devices?root=27623';
-                btnPlataformaColor = '#03a9f4'; 
-            } else if (modeloUpper.includes('RUPTELA') || modeloUpper.includes('HCV') || modeloUpper.includes('PRO') || modeloUpper.includes('TRACE')) {
-                btnPlataformaNombre = 'DMP WEB';
-                btnPlataformaURL = 'https://dmp.ruptela.com/login';
-                btnPlataformaColor = '#e91e63'; 
-            }
-
-            let btnPlataformaHTML = '';
-            if (btnPlataformaNombre !== '') {
-                btnPlataformaHTML = `
-                    <button onclick="window.open('${btnPlataformaURL}', '_blank')" style="flex: 1; background: rgba(255, 255, 255, 0.05); color: ${btnPlataformaColor}; border: 1px solid ${btnPlataformaColor}; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.background='${btnPlataformaColor}'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.color='${btnPlataformaColor}';">
-                        <span style="font-size: 14px;">☁️</span> ${btnPlataformaNombre}
-                    </button>
-                `;
-            }
-            
-            let bloqueJasperModal = '';
-            if (compania.toUpperCase().includes('TELCEL')) {
-                bloqueJasperModal = `
-                    <div style="margin-top: 25px;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-                            <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">📡 Conectividad M2M</h4>
-                            <div style="flex: 1; height: 1px; background: #333;"></div>
-                        </div>
-                        <button onclick="appSoporte.consultarJasperLinea('${iccid}', 'jasper-modal-box')" 
-                                style="background: #1a1a1a; color: #00e676; border: 1px solid #00c853; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" 
-                                onmouseover="this.style.background='#00c853'; this.style.color='#fff';" 
-                                onmouseout="this.style.background='#1a1a1a'; this.style.color='#00e676';">
-                            <span style="font-size: 14px;">📶</span> Diagnóstico Telcel Jasper
-                        </button>
-                        <div id="jasper-modal-box" style="margin-top: 10px;"></div>
-                    </div>
-                `;
-            }
-
-            panelSoporte.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                    <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Acciones Rápidas</h4>
-                    <div style="flex: 1; height: 1px; background: #333;"></div>
-                </div>
-                <div style="margin-bottom: 15px; font-size: 11px; color: #888;">Línea vinculada: <b style="color: #ccc; letter-spacing: 0.5px;">${linea}</b></div>
-                
-                <div class="panel-botones" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 25px;">
-                    <button onclick="appSoporte.enviarSMS('apagar', '${id}')" style="background: rgba(244, 67, 54, 0.1); color: #ef5350; border: 1px solid #d32f2f; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#d32f2f'; this.style.color='#fff';" onmouseout="this.style.background='rgba(244, 67, 54, 0.1)'; this.style.color='#ef5350';">
-                        <span style="font-size: 14px;">⏻</span> APAGAR
-                    </button>
-                    <button onclick="appSoporte.enviarSMS('encender', '${id}')" style="background: rgba(76, 175, 80, 0.1); color: #66bb6a; border: 1px solid #388e3c; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#388e3c'; this.style.color='#fff';" onmouseout="this.style.background='rgba(76, 175, 80, 0.1)'; this.style.color='#66bb6a';">
-                        <span style="font-size: 14px;">⏻</span> ENCENDER
-                    </button>
-                    <button onclick="appSoporte.enviarSMS('configuracion', '${id}')" style="background: rgba(255, 152, 0, 0.1); color: #ffa726; border: 1px solid #f57c00; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#f57c00'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 152, 0, 0.1)'; this.style.color='#ffa726';">
-                        <span style="font-size: 14px;">⚙️</span> CONFIG
-                    </button>
-                    <button onclick="appSoporte.enviarSMS('reiniciar', '${id}')" style="background: rgba(255, 152, 0, 0.1); color: #ffa726; border: 1px solid #f57c00; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#f57c00'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 152, 0, 0.1)'; this.style.color='#ffa726';">
-                        <span style="font-size: 14px;">⟳</span> REINICIAR
-                    </button>
-                    <button onclick="appSoporte.enviarSMS('borrar', '${id}')" style="background: rgba(255, 87, 34, 0.1); color: #ff7043; border: 1px solid #e64a19; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#e64a19'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 87, 34, 0.1)'; this.style.color='#ff7043';">
-                        <span style="font-size: 14px;">🗑️</span> BORRAR
-                    </button>
-                    <button onclick="appSoporte.enviarSMS('formatear', '${id}')" style="background: rgba(211, 47, 47, 0.1); color: #ef5350; border: 1px solid #d32f2f; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#d32f2f'; this.style.color='#fff';" onmouseout="this.style.background='rgba(211, 47, 47, 0.1)'; this.style.color='#ef5350';">
-                        <span style="font-size: 14px;">⌫</span> FORMATO
-                    </button>
-                </div>
-                
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-                    <h4 style="margin: 0; color: #ffb74d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">🔗 Enlaces Externos</h4>
-                    <div style="flex: 1; height: 1px; background: #333;"></div>
-                </div>
-                
-                <div class="panel-botones" style="display: flex; gap: 8px;">
-                    <button onclick="window.open('https://soporte.zeekgps.com/ZeekSoporte/', '_blank')" style="flex: 1; background: rgba(33, 150, 243, 0.1); color: #42a5f5; border: 1px solid #1976d2; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.background='#1976d2'; this.style.color='#fff';" onmouseout="this.style.background='rgba(33, 150, 243, 0.1)'; this.style.color='#42a5f5';">
-                        <span style="font-size: 14px;">🛠️</span> ZEEK
-                    </button>
-                    <button onclick="window.open('https://mapon.com/partner/gbox_new/', '_blank')" style="flex: 1; background: rgba(0, 200, 83, 0.1); color: #69f0ae; border: 1px solid #00c853; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.background='#00c853'; this.style.color='#fff';" onmouseout="this.style.background='rgba(0, 200, 83, 0.1)'; this.style.color='#69f0ae';">
-                        <span style="font-size: 14px;">📍</span> MAPON
-                    </button>
-                    ${btnPlataformaHTML}
-                </div>
-                
-                ${bloqueJasperModal}
-            `;
-            
-            btnSoporte.onclick = () => {
-                if (panelSoporte.style.display === 'none') {
-                    panelSoporte.style.display = 'flex';
-                    modalBox.style.maxWidth = '850px'; 
-                    btnSoporte.innerHTML = '◀ Ocultar Soporte';
-                    btnSoporte.style.background = 'rgba(255, 255, 255, 0.05)';
-                    btnSoporte.style.color = '#ccc';
-                    btnSoporte.style.border = '1px solid #444';
-                } else {
-                    panelSoporte.style.display = 'none';
-                    modalBox.style.maxWidth = '550px'; 
-                    btnSoporte.innerHTML = '🛠️ Opciones de Soporte';
-                    btnSoporte.style.background = 'rgba(25, 118, 210, 0.1)';
-                    btnSoporte.style.color = '#64b5f6';
-                    btnSoporte.style.border = '1px solid #1976d2';
-                }
-            };
-        }
-    }
-}
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (typeof appSoporte !== 'undefined') {
+                    const cambiarVistaOriginal = appSoporte.cambiarVista.bind(appSoporte);
+                    appSoporte.cambiarVista = function(vista) {
+                        cambiarVistaOriginal(vista);
+                        if(vista === 'monitores') {
+                            setTimeout(verificarPestanaMonitores, 100);
+                        }
+                    }
+                }
+            }, 500);
+            
+            cargarDatosMaponDirecto(); 
+        });
+    </script>
+</body>
+</html>. INDEX
