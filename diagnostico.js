@@ -4,6 +4,7 @@ class DiagnosticoEnVivo {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
         this.equiposConFalla = [];
+        this.clientesUnicos = []; // Para llenar el selector
         this.analisisEnProgreso = false;
         
         this.triaje = {
@@ -24,24 +25,21 @@ class DiagnosticoEnVivo {
         const buscador = document.getElementById('buscador-global');
         const btnLimpiar = document.getElementById('btn-limpiar-busqueda');
 
-        // Escucha cada tecla que escribas en el buscador
         if (buscador) {
             buscador.addEventListener('input', () => {
-                // Solo renderiza si estamos en la pestaña de diagnóstico
                 if(document.getElementById('vista-diagnostico').classList.contains('vista-activa')){
                     this.renderizarTarjetas();
                 }
             });
         }
 
-        // Escucha cuando le picas a la tachita "✖" para limpiar
         if (btnLimpiar) {
             btnLimpiar.addEventListener('click', () => {
                 setTimeout(() => {
                     if(document.getElementById('vista-diagnostico').classList.contains('vista-activa')){
                         this.renderizarTarjetas();
                     }
-                }, 50); // Retraso de 50ms para dejar que el buscador se limpie primero
+                }, 50); 
             });
         }
     }
@@ -60,14 +58,15 @@ class DiagnosticoEnVivo {
             return null;
         };
 
-        this.equiposConFalla = datosMapon.filter(unidad => {
+        // Filtrar SOLO los que NO son "OK"
+        let equiposFiltrados = datosMapon.filter(unidad => {
             let estado = extraer(unidad, ["onlinestatus", "estado", "columna14"]);
             let eLimpio = (estado || "").toString().trim().toUpperCase();
             return eLimpio !== "OK" && eLimpio !== "OK (NOGPS)" && eLimpio !== "" && eLimpio !== "SIN ASIGNAR" && eLimpio !== "DESCONOCIDO";
         });
 
-        // Agregamos la data extraída directamente al objeto para facilitar la búsqueda y el envío a la IA
-        this.equiposConFalla = this.equiposConFalla.map(unidad => {
+        // Darles formato estructurado
+        this.equiposConFalla = equiposFiltrados.map(unidad => {
             return {
                 ...unidad,
                 _compania: extraer(unidad, ["compania", "company", "cliente", "columna0"]) || 'Sin asignar',
@@ -76,33 +75,65 @@ class DiagnosticoEnVivo {
                 _estado: extraer(unidad, ["onlinestatus", "estado", "columna14"]) || 'Desconocido',
                 _ultimoReporte: extraer(unidad, ["lastdatareceived", "ultimoreporte", "reporte", "columna15"]) || 'Sin fecha',
                 _marca: extraer(unidad, ["marca", "vehiclebrand", "columna2"]) || '-',
-                _modelo: extraer(unidad, ["modelo", "vehiclemodel", "columna3"]) || '-'
+                _modelo: extraer(unidad, ["modelo", "vehiclemodel", "columna3"]) || '-',
+                _diagnosticoIA: 'Pendiente de análisis' // Guardará la info para el Excel
             };
         });
 
+        // Extraer los clientes únicos para el selector
+        this.clientesUnicos = [...new Set(this.equiposConFalla.map(u => u._compania))].sort();
+        this.actualizarDropdownClientes();
+
         this.renderizarTarjetas();
+    }
+
+    actualizarDropdownClientes() {
+        const select = document.getElementById('diag-cliente-filter');
+        if (!select) return;
+        
+        const valorActual = select.value; // Recordar qué cliente estaba seleccionado
+        
+        select.innerHTML = '<option value="TODOS">🏢 Todos los clientes</option>';
+        this.clientesUnicos.forEach(cliente => {
+            const opt = document.createElement('option');
+            opt.value = cliente;
+            opt.innerText = cliente;
+            select.appendChild(opt);
+        });
+
+        // Si el cliente que estaba seleccionado sigue en la lista, lo dejamos seleccionado
+        if (this.clientesUnicos.includes(valorActual)) {
+            select.value = valorActual;
+        }
     }
 
     renderizarEstructura() {
         if (!this.container) return;
         this.container.innerHTML = `
             <div style="padding: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; flex-wrap: wrap; gap: 15px;">
                     <div>
                         <h2 style="color: #ffb74d; margin: 0; display: flex; align-items: center; gap: 10px;">
                             <span style="font-size: 1.5rem;">🩺</span> Centro de Diagnóstico PU-K
                         </h2>
                         <p style="color: #888; margin: 5px 0 0 0; font-size: 0.9rem;">Analizando equipos desconectados en tiempo real.</p>
                     </div>
-                    <button id="btn-iniciar-analisis" onclick="window.appDiagnostico.iniciarAnalisisEnCola()" style="background: #ffb74d; color: #111; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: transform 0.2s; box-shadow: 0 4px 10px rgba(255, 183, 77, 0.3);">
-                        ▶ Iniciar Análisis Inteligente
-                    </button>
+                    
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="diag-cliente-filter" onchange="window.appDiagnostico.renderizarTarjetas()" style="background: #222; color: #fff; border: 1px solid #444; padding: 10px 15px; border-radius: 8px; outline: none; cursor: pointer; font-family: inherit; font-size: 0.9rem;">
+                            <option value="TODOS">🏢 Todos los clientes</option>
+                        </select>
+
+                        <button id="btn-iniciar-analisis" onclick="window.appDiagnostico.iniciarAnalisisEnCola()" style="background: #ffb74d; color: #111; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: transform 0.2s; box-shadow: 0 4px 10px rgba(255, 183, 77, 0.3);">
+                            ▶ Iniciar Análisis Inteligente
+                        </button>
+                    </div>
                 </div>
                 
                 <div style="display: flex; gap: 15px; margin-bottom: 20px;">
                     <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; flex: 1; text-align: center;">
                         <div style="font-size: 2rem; font-weight: bold; color: #f44336;" id="diag-count-total">0</div>
-                        <div style="color: #888; font-size: 0.8rem; text-transform: uppercase;">Equipos Caídos</div>
+                        <div style="color: #888; font-size: 0.8rem; text-transform: uppercase;">Equipos Caídos (Filtro Actual)</div>
                     </div>
                     <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; flex: 1; text-align: center;">
                         <div style="font-size: 2rem; font-weight: bold; color: #4caf50;" id="diag-count-resueltos">0</div>
@@ -121,14 +152,22 @@ class DiagnosticoEnVivo {
         const contenedor = document.getElementById('contenedor-tarjetas-falla');
         if (!contenedor) return;
 
-        // LECTURA DEL BUSCADOR GLOBAL
+        // LECTURA DEL BUSCADOR Y EL SELECTOR DE CLIENTES
         const buscador = document.getElementById('buscador-global');
         const termino = buscador ? buscador.value.toLowerCase().trim() : '';
+        
+        const selectCliente = document.getElementById('diag-cliente-filter');
+        const clienteFiltro = selectCliente ? selectCliente.value : 'TODOS';
 
-        // FILTRADO DINÁMICO
+        // FILTRADO DINÁMICO (Por Cliente y luego por Buscador)
         let equiposAFiltrar = this.equiposConFalla;
+
+        if (clienteFiltro !== 'TODOS') {
+            equiposAFiltrar = equiposAFiltrar.filter(u => u._compania === clienteFiltro);
+        }
+
         if (termino !== '') {
-            equiposAFiltrar = this.equiposConFalla.filter(u => {
+            equiposAFiltrar = equiposAFiltrar.filter(u => {
                 let textoUnidad = Object.values(u).join(' ').toLowerCase();
                 return textoUnidad.includes(termino);
             });
@@ -137,8 +176,8 @@ class DiagnosticoEnVivo {
         document.getElementById('diag-count-total').innerText = equiposAFiltrar.length;
         
         if (equiposAFiltrar.length === 0) {
-            if (termino !== '' && this.equiposConFalla.length > 0) {
-                contenedor.innerHTML = `<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: #888; background: #1a1a1a; border-radius: 8px;">No hay equipos caídos que coincidan con la búsqueda: <b style="color:#ffb74d;">"${termino}"</b></div>`;
+            if (this.equiposConFalla.length > 0) {
+                contenedor.innerHTML = `<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: #888; background: #1a1a1a; border-radius: 8px;">No hay equipos caídos que coincidan con la búsqueda o cliente seleccionado.</div>`;
             } else {
                 contenedor.innerHTML = `
                 <div style="grid-column: 1 / -1; text-align: center; padding: 50px; background: rgba(0, 230, 118, 0.05); border: 1px dashed #00e676; border-radius: 8px;">
@@ -152,7 +191,10 @@ class DiagnosticoEnVivo {
 
         contenedor.innerHTML = '';
 
-        equiposAFiltrar.forEach((unidad, index) => {
+        equiposAFiltrar.forEach((unidad) => {
+            // Buscamos su index real en el array principal para los IDs de los divs
+            const indexOriginal = this.equiposConFalla.findIndex(u => u._idSerie === unidad._idSerie && u._economico === unidad._economico);
+            
             let estadoUp = unidad._estado.toString().toUpperCase().trim();
             let datosTriaje = this.triaje[estadoUp] || { color: '#f44336', mensaje: 'Falla no catalogada. Se requiere análisis manual.' };
             
@@ -166,10 +208,9 @@ class DiagnosticoEnVivo {
                 if(eqMatch) linea = eqMatch.linea || 'Sin número';
             }
             
-            // Guardamos la línea en el objeto para pasárselo a la IA después
             unidad._lineaAsignada = linea;
 
-            const idRespuestaIA = `ia-resp-${index}`;
+            const idRespuestaIA = `ia-resp-${indexOriginal}`;
 
             const tarjeta = document.createElement('div');
             tarjeta.style.cssText = `background: #1a1a1a; border-radius: 8px; border: 1px solid #333; overflow: hidden; display: flex; flex-direction: column;`;
@@ -198,7 +239,7 @@ class DiagnosticoEnVivo {
                 </div>
                 
                 <div style="padding: 10px 15px; border-top: 1px solid #333; background: rgba(0,0,0,0.2);">
-                    <button onclick="window.appDiagnostico.analizarEquipoIndividual(${index})" style="width: 100%; background: transparent; color: #ffb74d; border: 1px solid #ffb74d; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s;">
+                    <button onclick="window.appDiagnostico.analizarEquipoIndividual(${indexOriginal})" style="width: 100%; background: transparent; color: #ffb74d; border: 1px solid #ffb74d; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s;">
                         🧠 Solicitar Análisis IA
                     </button>
                 </div>
@@ -209,10 +250,10 @@ class DiagnosticoEnVivo {
     }
 
     // ==========================================
-    // 2. PREPARACIÓN DEL PROMPT PARA LA IA
+    // 2. CONEXIÓN REAL A LA IA Y GENERADOR DE BOTONES
     // ==========================================
     
-async analizarEquipoIndividual(index) {
+    async analizarEquipoIndividual(index) {
         const unidad = this.equiposConFalla[index];
         if(!unidad) return;
         
@@ -223,7 +264,6 @@ async analizarEquipoIndividual(index) {
         caja.style.display = 'block';
         caja.innerHTML = '<span style="color: #64b5f6;">🐕 PU-K analizando manuales y estado del equipo...</span>';
 
-        // 1. Preparamos el paquete exacto para Apps Script
         const payload = {
             accion: 'diagnostico_puk',
             compania: unidad._compania,
@@ -236,15 +276,17 @@ async analizarEquipoIndividual(index) {
         };
 
         try {
-            // ¡PON TU URL DE APPS SCRIPT AQUÍ!
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            // PON TU URL DE APPS SCRIPT AQUÍ
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxechSb9x2TtDrI_E8egBEkGjZOOFGMXNl5UiBjB9s8n_hJwH6qGHe5aEMMENaEO39H/exec"; 
             
             const respuesta = await fetch(URL_APPS_SCRIPT, {
                 method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
             });
 
-            // Recibimos la respuesta JSON
             const dataJSON = await respuesta.json();
             
             if (!dataJSON.success) {
@@ -253,7 +295,6 @@ async analizarEquipoIndividual(index) {
 
             let textoGemini = dataJSON.respuesta;
 
-            // 2. Extractor Mágico de Botones SMS
             const regexBotones = /\[BOTON:\s*([^\]]+)\]/gi;
             let botonesHTML = '';
             let match;
@@ -275,10 +316,11 @@ async analizarEquipoIndividual(index) {
                 `;
             }
 
-            // Ocultamos las etiquetas de texto puro y dejamos el diagnóstico limpio
             let textoLimpio = textoGemini.replace(regexBotones, '').trim();
+            
+            // GUARDAMOS EL RESULTADO PARA EXPORTARLO A EXCEL DESPUÉS
+            unidad._diagnosticoIA = textoLimpio;
 
-            // 3. Pintamos el resultado final con los botones funcionales
             caja.innerHTML = `
                 <div style="margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px;">
                     <b style="color: #ffb74d;">Diagnóstico de PU-K:</b>
@@ -292,20 +334,31 @@ async analizarEquipoIndividual(index) {
 
         } catch (error) {
             caja.innerHTML = `<span style="color: #f44336;">❌ Ocurrió un error al contactar a PU-K: ${error.message}</span>`;
+            unidad._diagnosticoIA = "Error al analizar: " + error.message;
         }
     }
 
+    // ==========================================
+    // 3. ANÁLISIS EN COLA Y EXPORTACIÓN A EXCEL
+    // ==========================================
+    
     async iniciarAnalisisEnCola() {
         if(this.analisisEnProgreso) return;
         
-        // Si hay una búsqueda activa, analizaremos SOLO los filtrados en pantalla
+        // Determinar qué equipos analizar (los que estén visibles en pantalla)
         const buscador = document.getElementById('buscador-global');
         const termino = buscador ? buscador.value.toLowerCase().trim() : '';
         
+        const selectCliente = document.getElementById('diag-cliente-filter');
+        const clienteFiltro = selectCliente ? selectCliente.value : 'TODOS';
+        
         let targetIndexList = [];
-        this.equiposConFalla.forEach((u, i) => {
-            if (termino === '' || Object.values(u).join(' ').toLowerCase().includes(termino)) {
-                targetIndexList.push(i);
+        this.equiposConFalla.forEach((u, indexReal) => {
+            let pasaFiltroCliente = (clienteFiltro === 'TODOS' || u._compania === clienteFiltro);
+            let pasaFiltroBusqueda = (termino === '' || Object.values(u).join(' ').toLowerCase().includes(termino));
+            
+            if (pasaFiltroCliente && pasaFiltroBusqueda) {
+                targetIndexList.push(indexReal);
             }
         });
 
@@ -324,22 +377,60 @@ async analizarEquipoIndividual(index) {
         let resueltos = 0;
         const contadorResueltos = document.getElementById('diag-count-resueltos');
 
-        // Iteramos respetando el filtro
+        // Procesar uno por uno
         for (let idx of targetIndexList) {
             await this.analizarEquipoIndividual(idx);
             resueltos++;
             if (contadorResueltos) contadorResueltos.innerText = resueltos;
-            await new Promise(resolve => setTimeout(resolve, 1000)); 
+            await new Promise(resolve => setTimeout(resolve, 1500)); // Pausa de 1.5s para no saturar Gemini
         }
 
         this.analisisEnProgreso = false;
         if (btn) {
-            btn.innerHTML = '✅ Análisis Completado';
+            btn.innerHTML = '✅ Análisis Completado (Descargando Excel...)';
             btn.style.background = '#4caf50';
+            
+            // DESCARGAMOS EL EXCEL MÁGICAMENTE
+            this.descargarReporteExcel(targetIndexList, clienteFiltro);
+
             setTimeout(() => {
                 btn.innerHTML = '▶ Iniciar Análisis Inteligente';
                 btn.style.background = '#ffb74d';
-            }, 3000);
+                if (contadorResueltos) contadorResueltos.innerText = '0';
+            }, 4000);
+        }
+    }
+
+    descargarReporteExcel(indicesAnalizados, clienteFiltro) {
+        try {
+            // Mapeamos solo los datos que queremos exportar
+            let datosExcel = indicesAnalizados.map(idx => {
+                let u = this.equiposConFalla[idx];
+                return {
+                    "Compañía": u._compania,
+                    "Económico": u._economico,
+                    "Marca/Modelo": u._marca + " " + u._modelo,
+                    "ID/Serie": u._idSerie,
+                    "Línea": u._lineaAsignada || 'S/N',
+                    "Estado Mapon": u._estado,
+                    "Último Reporte": u._ultimoReporte,
+                    "Diagnóstico de PU-K": u._diagnosticoIA
+                };
+            });
+
+            // Usamos XLSX (que ya está importado en index.html)
+            let hoja = XLSX.utils.json_to_sheet(datosExcel);
+            let libro = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(libro, hoja, "Diagnostico_IA");
+            
+            // Armamos el nombre del archivo
+            let nomCliente = clienteFiltro !== 'TODOS' ? clienteFiltro.replace(/[^a-z0-9]/gi, '_') : 'General';
+            let fecha = new Date().toISOString().slice(0,10);
+            
+            XLSX.writeFile(libro, `Diagnostico_PUK_${nomCliente}_${fecha}.xlsx`);
+        } catch(e) {
+            console.error("Error al exportar Excel:", e);
+            alert("El análisis terminó, pero hubo un error al generar el Excel.");
         }
     }
 }
