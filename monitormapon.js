@@ -3,7 +3,17 @@
 class MonitorMapon {
     constructor(containerId, datosFila) {
         this.container = document.getElementById(containerId);
-        this.datosUnidades = datosFila; 
+        
+        // =========================================================
+        // NUEVO FILTRO ANTI-BASURA: IGNORAR "SIN DATO" O VACÍOS
+        // =========================================================
+        this.datosUnidades = datosFila.filter(unidad => {
+            let economico = this.extraerDato(unidad, ["economico", "name", "unidad", "columna1"]);
+            let ecoLimpio = String(economico || "").toLowerCase().trim();
+            // Retorna TRUE (se queda) solo si NO es "sin dato" y NO está vacío
+            return ecoLimpio !== "sin dato" && ecoLimpio !== "" && ecoLimpio !== "-";
+        });
+
         this.grafica = null; 
         this.inicializar();
     }
