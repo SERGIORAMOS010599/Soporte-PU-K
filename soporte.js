@@ -25,10 +25,6 @@ class SoporteTecnico {
             contenedorResultado.innerHTML = '<span style="color: #ffb74d;">⏳ Consultando satélites de Telcel Jasper (Vía PU-K)... 📡</span>';
         }
 
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // ¡¡¡ ATENCIÓN SERGIO !!!
-        // PEGA AQUÍ LA URL DE TU "SUPER-SCRIPT" DE APPS SCRIPT (EL DE IA PU-K)
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         const urlMicroservicioJasper = 'TU_URL_DE_APPS_SCRIPT_IA_PUK_AQUI';
 
         try {
@@ -38,7 +34,7 @@ class SoporteTecnico {
                 body: JSON.stringify({ 
                     accion: "consultar_jasper", 
                     iccid: iccidUnidad,
-                    imei: imeiParaCortar // Mandamos el IMEI para que Apps Script lo corte a 14 y le ponga "00"
+                    imei: imeiParaCortar 
                 })
             });
             const data = await respuesta.json();
@@ -47,7 +43,6 @@ class SoporteTecnico {
                 throw new Error(data.error);
             }
 
-            // 1. Colores y estilos translúcidos tipo "Píldora"
             let colorEstadoSim = data.estado === 'ACTIVATED' ? '#00e676' : '#f44336';
             let bgEstadoSim = data.estado === 'ACTIVATED' ? 'rgba(0, 230, 118, 0.1)' : 'rgba(244, 67, 54, 0.1)';
 
@@ -63,19 +58,15 @@ class SoporteTecnico {
                 
             const bloqueoSIM = '<span style="color:#777; font-style: italic;">Portal web</span>';
 
-            // Actualizamos la UI principal (si la tabla está visible)
             const spanDetLinea = document.getElementById('det-linea');
             if (spanDetLinea && data.linea !== 'Sin dato') spanDetLinea.innerHTML = `<b style="color:#00e676;">${data.linea}</b>`;
             
             const spanDetIccid = document.getElementById('det-iccid');
             if (spanDetIccid && data.iccid !== 'Sin dato') spanDetIccid.innerHTML = `<b style="color:#00e676;">${data.iccid}</b>`;
 
-            // 2. Renderizado de la UI Profesional (Tus tarjetas originales)
             if (contenedorResultado) {
                 contenedorResultado.innerHTML = `
                     <div style="background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 8px; font-size: 11px; color: #bbb; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
-                        
-                        <!-- CABECERA DE LA TARJETA -->
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                             <div style="display: flex; gap: 8px; align-items: center;">
                                 <span style="color: #fff; font-weight: bold; font-size: 13px; letter-spacing: 0.5px;">LÍNEA TELCEL</span>
@@ -86,8 +77,6 @@ class SoporteTecnico {
                                 ${enSesionBadge}
                             </div>
                         </div>
-                        
-                        <!-- CUADRÍCULA DE DATOS INTERNA -->
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; background: #222; padding: 12px; border-radius: 6px; border: 1px solid #2a2a2a; margin-bottom: 15px;">
                             <div><span style="color: #777;">📞 MSISDN:</span> <b style="color: #fff;">${data.linea || 'N/A'}</b></div>
                             <div><span style="color: #777;">💳 PLAN:</span> <b style="color: #fff;">N/A</b></div>
@@ -96,8 +85,6 @@ class SoporteTecnico {
                             <div><span style="color: #777;">🚫 LÍMITE:</span> ${limiteUso}</div>
                             <div><span style="color: #777;">🔐 BLOQUEO:</span> ${bloqueoSIM}</div>
                         </div>
-
-                        <!-- BOTONES DE CONTROL DE ESTADO -->
                         <div style="display: flex; gap: 10px;">
                             <button onclick="appSoporte.cambiarEstadoSim('${data.iccid || iccidUnidad}', 'ACTIVATED', '${containerId}')" 
                                     style="flex: 1; background: rgba(0, 200, 83, 0.1); color: #00e676; border: 1px solid #00c853; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease;"
@@ -134,7 +121,6 @@ class SoporteTecnico {
             contenedorResultado.innerHTML = `<span style="color: #ffb74d;">⏳ Enviando orden de ${accionTexto} a Telcel Jasper... 📡</span>`;
         }
 
-        // Usamos también la misma URL del Super-Script
         const urlMicroservicioJasper = 'TU_URL_DE_APPS_SCRIPT_IA_PUK_AQUI';
 
         try {
@@ -162,15 +148,12 @@ class SoporteTecnico {
     constructor() {
         this.container = document.getElementById('grid-salidas');
         this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM'; 
-        
         this.equipos = [];
         this.equipoSeleccionado = null; 
-        
         this.Actual = localStorage.getItem('Global') || ''; 
         this.iniciar();
     }
 
-// --- FUNCION PARA CAMBIAR ENTRE PESTAÑAS ---
     cambiarVista(vistaDestino) {
         document.getElementById('vista-soporte').classList.add('vista-oculta');
         document.getElementById('vista-soporte').classList.remove('vista-activa');
@@ -263,7 +246,6 @@ class SoporteTecnico {
         }
     } 
 
-    // --- FUNCIONES DEL BUSCADOR GLOBAL ---
     buscarGlobal(texto) {
         this.Actual = texto;
         localStorage.setItem('Global', texto); 
@@ -273,10 +255,8 @@ class SoporteTecnico {
             btnLimpiar.style.display = texto.length > 0 ? 'block' : 'none';
         }
 
-        // 1. Filtrar Soporte
         this.renderizar(); 
 
-        // 2. Filtrar Mapon
         const query = texto.toLowerCase().trim();
         const filasMapon = document.querySelectorAll('#mapon-tbody tr'); 
         
@@ -296,13 +276,11 @@ class SoporteTecnico {
         this.buscarGlobal('');
     }
 
-    // --- RENDERIZADO Y PANTALLAS ---
     renderizar() {
         if (!this.container) return;
         this.container.innerHTML = '';
         const query = this.Actual.toLowerCase().trim();
 
-        // 1. BÚSQUEDA INTELIGENTE DE MAPON EN MEMORIA GLOBAL
         let maponData = [];
         for (let key in window) {
             if (window[key] && window[key].datosUnidades && Array.isArray(window[key].datosUnidades)) {
@@ -324,7 +302,6 @@ class SoporteTecnico {
             const tarjeta = document.createElement('div');
             tarjeta.className = 'tarjeta-gps';
 
-            // --- 2. LÓGICA DE CRUCE CON MAPON ---
             let estadoServicioFinal = eq.estadoServicio;
             let unidadFinal = eq.unidad;
             let marcaModeloUnidadFinal = eq.marcaModeloUnidad;
@@ -336,7 +313,6 @@ class SoporteTecnico {
                 let idSoporte = String(eq.id).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
                 let imeiSoporte = String(eq.imei).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
 
-                // Buscar coincidencias
                 let eqMapon = maponData.find(m => {
                     let rawMapon = m['Núm. de serie '] || m['Núm. de serie'] || m['ID disp.'] || m['IMEI'] || '';
                     let idM = String(rawMapon).replace(/\.0$/, '').replace(/\s+/g, '').trim().toLowerCase();
@@ -398,7 +374,6 @@ class SoporteTecnico {
         document.getElementById('det-anio').innerText = eq.anioVisible || eq.anio;
         document.getElementById('det-numSerie').innerText = eq.numSerieVisible || eq.numSerie;
 
-        // Limpiar datos de Jasper de consultas anteriores
         const spanEstJasper = document.getElementById('det-jasper-estado');
         const spanConsumoJasper = document.getElementById('det-jasper-consumo');
         const spanSesionJasper = document.getElementById('det-jasper-sesion');
@@ -406,7 +381,6 @@ class SoporteTecnico {
         if(spanConsumoJasper) spanConsumoJasper.innerText = "---";
         if(spanSesionJasper) spanSesionJasper.innerText = "---";
 
-        // --- DETECCIÓN DINÁMICA DE PLATAFORMA PARA BOTONES REDONDOS ---
         let modeloUpper = (eq.marca || '').toUpperCase() + ' ' + (eq.modelo || '').toUpperCase();
         let btnPlataformaNombre = '';
         let btnPlataformaURL = '';
@@ -457,4 +431,369 @@ class SoporteTecnico {
             `;
             
             cajaBotonesRedondos.appendChild(btnWeb);
-            cajaBotonesRedondos.
+            cajaBotonesRedondos.appendChild(btnComando);
+        }
+
+        const contenedorAsistenteBody = document.querySelector('.comandos-body');
+        let botonJasperExistente = document.getElementById('contenedor-jasper-panel');
+        const companiaUpper = (eq.compania || '').toUpperCase();
+        
+        if (companiaUpper.includes('TELCEL')) {
+            if (!botonJasperExistente && contenedorAsistenteBody) {
+                const wrapperJasper = document.createElement('div');
+                wrapperJasper.id = 'contenedor-jasper-panel';
+                wrapperJasper.style.cssText = "margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; text-align: center;";
+                wrapperJasper.innerHTML = `
+                    <button onclick="appSoporte.consultarJasperLinea('${eq.iccid}')" style="background: #00c853; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%;">
+                        📡 Consultar Estado en Telcel Jasper
+                    </button>
+                    <div id="jasper-resultado-box" style="margin-top: 10px;"></div>
+                `;
+                contenedorAsistenteBody.appendChild(wrapperJasper);
+            } else if (botonJasperExistente) {
+                botonJasperExistente.querySelector('button').setAttribute('onclick', `appSoporte.consultarJasperLinea('${eq.iccid}')`);
+                document.getElementById('jasper-resultado-box').innerHTML = ''; 
+            }
+        } else if (botonJasperExistente) {
+            botonJasperExistente.remove();
+        }
+
+        this.iniciarAsistente();
+    }
+
+    iniciarAsistente() {
+        const eq = this.equipoSeleccionado;
+        const badgeMarca = document.getElementById('asistente-badge-marca');
+        if (badgeMarca) badgeMarca.innerText = eq.marca;
+        
+        const contenedorInteractivo = document.getElementById('asistente-interactivo');
+        if (contenedorInteractivo) contenedorInteractivo.style.display = 'none';
+        const contenedorSugerencias = document.getElementById('asistente-sugerencias');
+        if (contenedorSugerencias) contenedorSugerencias.innerHTML = '';
+        
+        const inputBuscador = document.getElementById('buscador-asistente');
+        
+        if (inputBuscador) {
+            inputBuscador.value = '';
+            inputBuscador.placeholder = "🐶 Pídele un comando a PU-K y presiona Enter...";
+            inputBuscador.style.cssText = "width: 100%; padding: 12px 15px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff; font-size: 0.95rem; margin-bottom: 15px; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); transition: all 0.3s ease; box-sizing: border-box;";
+            inputBuscador.onfocus = () => inputBuscador.style.border = "1px solid #ffb74d";
+            inputBuscador.onblur = () => inputBuscador.style.border = "1px solid #444";
+
+            inputBuscador.oninput = null; 
+
+            inputBuscador.onkeypress = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const pregunta = inputBuscador.value.trim();
+                    if (pregunta !== '') {
+                        const promptOculto = `El técnico solicita: "${pregunta}". NOTA INTERNA: El equipo en pantalla es Marca: ${eq.marca}, Modelo: ${eq.modelo}, ID: ${eq.id}. Usa esta información para armar el comando correcto en base a tus manuales y reemplaza el {ID}.`;
+                        this.consultarCerebroPUK(promptOculto);
+                        inputBuscador.value = '';
+                    }
+                }
+            };
+        }
+        
+        this.hablarPUK(`¡Hola! Soy PU-K. Dime qué necesitas hacer con este <b>${eq.marca} ${eq.modelo}</b> y te armaré el comando.`, "normal");
+    }
+
+    hablarPUK(mensaje, estado = 'normal') {
+        let cajaPUK = document.getElementById('puk-dialogo-caja');
+        const inputBuscador = document.getElementById('buscador-asistente');
+        
+        if (!cajaPUK && inputBuscador) {
+            cajaPUK = document.createElement('div');
+            cajaPUK.id = 'puk-dialogo-caja';
+            cajaPUK.style.cssText = "background: #1e1e1e; border-left: 4px solid #ffb74d; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; font-size: 0.9em; color: #ccc; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.3s ease;";
+            inputBuscador.parentNode.insertBefore(cajaPUK, inputBuscador);
+        }
+
+        if (!cajaPUK) return;
+
+        let icono = '🐶'; 
+        let colorBorde = '#ffb74d'; 
+
+        if (estado === 'error') {
+            icono = '🐕‍🦺'; colorBorde = '#ff4c4c';
+        } else if (estado === 'exito') {
+            icono = '🐾'; colorBorde = '#4caf50';
+        } else if (estado === 'pensando') {
+            icono = '🐕'; colorBorde = '#64b5f6';
+        }
+
+        cajaPUK.style.borderLeft = `4px solid ${colorBorde}`;
+        cajaPUK.innerHTML = `
+            <span style="font-size: 2.2em; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">${icono}</span> 
+            <span style="line-height: 1.4; width: 100%;">
+                <b style="color: ${colorBorde}; font-size: 1.05em;">PU-K dice:</b><br>
+                ${mensaje}
+            </span>
+        `;
+    }
+
+    async consultarCerebroPUK(pregunta) {
+        this.hablarPUK("Revisando mis manuales técnicos... Dame unos segundos 🐕", "pensando");
+        
+        const urlAppsScript = 'TU_URL_DE_APPS_SCRIPT_IA_PUK_AQUI';
+
+        try {
+            const peticion = await fetch(urlAppsScript, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ mensaje: pregunta })
+            });
+            const respuesta = await peticion.json();
+
+            if (respuesta.success) {
+                let textoHTML = respuesta.respuesta
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<b style="color:#fff;">$1</b>');
+                
+                this.hablarPUK(textoHTML, "exito");
+            } else {
+                this.hablarPUK("¡Grrr! Hubo un error al pensar: " + respuesta.error, "error");
+            }
+        } catch (error) {
+            console.error(error);
+            this.hablarPUK("¡Grrr! No pude conectarme con mi cerebro en la nube. Revisa tu conexión a internet.", "error");
+        }
+    }
+
+    cerrarDetalles() { 
+        document.body.classList.remove('con-panel-abierto');
+        document.getElementById('panel-detalles').classList.remove('abierto'); 
+    }
+
+    activarEdicionGeneral() {
+        const eq = this.equipoSeleccionado;
+        document.getElementById('det-titulo-contenedor').innerHTML = `
+            <input type="text" id="input-edit-unidad" value="${eq.unidad}" class="input-edicion-general" style="font-size: 1.5rem; width: 50%;">
+            <button class="btn-guardar-edicion" onclick="appSoporte.guardarEdicionGeneral()">Guardar</button>
+            <button class="btn-cancelar" onclick="appSoporte.abrirDetalles(appSoporte.equipoSeleccionado)" style="padding: 5px;">✖</button>
+        `;
+        const crearInput = (idHTML, idInput, valor) => {
+            document.getElementById(idHTML).innerHTML = `<input type="text" id="${idInput}" value="${valor}" class="input-edicion-general">`;
+        };
+        crearInput('det-linea', 'input-edit-linea', eq.linea);
+        crearInput('det-iccid', 'input-edit-iccid', eq.iccid);
+        crearInput('det-imei', 'input-edit-imei', eq.imei);
+        crearInput('det-marca', 'input-edit-marca', eq.marca);
+        crearInput('det-modelo', 'input-edit-modelo', eq.modelo);
+        crearInput('det-cliente', 'input-edit-cliente', eq.cliente);
+        crearInput('det-tipo-servicio', 'input-edit-tipoServicio', eq.tipoServicio);
+        crearInput('det-servicio', 'input-edit-estadoServicio', eq.estadoServicio);
+        crearInput('det-marcaModeloUnidad', 'input-edit-marcaModeloUnidad', eq.marcaModeloUnidad);
+        crearInput('det-anio', 'input-edit-anio', eq.anio);
+        crearInput('det-numSerie', 'input-edit-numSerie', eq.numSerie);
+    }
+
+    async guardarEdicionGeneral() {
+        const btn = document.querySelector('.btn-guardar-edicion');
+        btn.innerText = "Guardando...";
+        btn.disabled = true;
+
+        const updates = {
+            unidad: document.getElementById('input-edit-unidad').value,
+            linea: document.getElementById('input-edit-linea').value,
+            iccid: document.getElementById('input-edit-iccid').value,
+            imei: document.getElementById('input-edit-imei').value,
+            marca: document.getElementById('input-edit-marca').value,
+            modelo: document.getElementById('input-edit-modelo').value,
+            cliente: document.getElementById('input-edit-cliente').value,
+            tipoServicio: document.getElementById('input-edit-tipoServicio').value,
+            estadoServicio: document.getElementById('input-edit-estadoServicio').value,
+            marcaModeloUnidad: document.getElementById('input-edit-marcaModeloUnidad').value,
+            anio: document.getElementById('input-edit-anio').value,
+            numSerie: document.getElementById('input-edit-numSerie').value,
+        };
+
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbzgwP6L_DDx5XXidThkm__ECIEX8uba7tbqTlh-JOWACArOkaoRPDIf80qaVsf7gwGz/exec'; 
+
+        try {
+            const respuesta = await fetch(scriptUrl, {
+                method: 'POST',
+                body: JSON.stringify({ id: this.equipoSeleccionado.id, updates: updates })
+            });
+            const resultado = await respuesta.json();
+
+            if (resultado.success) {
+                Object.assign(this.equipoSeleccionado, updates);
+                this.abrirDetalles(this.equipoSeleccionado);
+                this.renderizar();
+            } else {
+                throw new Error("No se encontró el ID en Sheets");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Error al guardar en la base de datos.");
+            btn.innerText = "Reintentar";
+            btn.disabled = false;
+        }
+    }
+
+    enviarSMS(accion, eqIdDesdeTarjeta = null) {
+        let eq = eqIdDesdeTarjeta 
+            ? this.equipos.find(e => String(e.id) === String(eqIdDesdeTarjeta)) 
+            : this.equipoSeleccionado;
+
+        if (!eq) return; 
+
+        const numero = eq.linea;
+        if (!numero || numero === 'SIN NÚMERO') {
+            alert("No hay un número vinculado para este equipo.");
+            return;
+        }
+
+        const marca = eq.marca.toUpperCase().trim();
+        const modelo = eq.modelo.toUpperCase().trim();
+        const id = String(eq.id).trim(); 
+        let comando = "";
+
+        if (accion === 'apagar') {
+            if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Enable1`;
+            else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Enable1`;
+            else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Enable1`;
+            else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;01`;
+            else if (marca === "TELTONIKA") comando = "  setdigout 1 0"; 
+        }
+        else if (accion === 'encender') {
+            if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Disable1`;
+            else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Disable1`;
+            else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Disable1`;
+            else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;02`;
+            else if (marca === "TELTONIKA") comando = "  setdigout 0 0";
+        } 
+        else if (accion === 'reiniciar') {
+            if (marca === "SUNTECH") comando = `CMD;${id};03;03`;
+            else if (marca === "TELTONIKA") comando = "  cpureset";
+            else if (marca === "RUPTELA") comando = " reset";
+            else if (marca === "CONCOX" || marca === "JIMIIOT") comando = "REBOOT#";
+        }
+        else if (accion === 'configuracion') {
+            if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;PresetA`;
+            else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;PresetA`;
+            else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;PresetA`;
+            else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};03;05`;
+            else if (marca.startsWith("TELTONIKA")) comando = "  getparam 2001:;2002:;2003:;2004:;2005:;2006:;1004:";
+            else if (marca.startsWith("RUPTELA")) comando = " getapn";
+            else if (marca.startsWith("CONCOX" ) || marca.startsWith("JIMIIOT")) comando = "GPRSSET#";
+        }
+        else if (accion === 'borrar') {
+            if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;EraseAll`;
+            else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;EraseAll`;
+            else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;EraseAll`;
+            else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};05;02`;
+            else if (marca.startsWith("RUPTELA")) comando = " delrecords";
+            else if (marca.startsWith("TELTONIKA")) comando = "  deleterecords";
+        }
+        else if (accion === 'comando_plataforma') {
+            if (marca === "SUNTECH") comando = `CMD;${id};01;01`;
+            else if (marca === "TELTONIKA") comando = "  web_connect";
+            else if (marca === "RUPTELA") comando = " dmpfconnect";
+        }
+
+        if (comando) {
+            window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
+        }
+    }
+    
+    toggleChatPUK() {
+        const panel = document.getElementById('puk-panel-chat');
+        panel.classList.toggle('puk-oculto');
+    }
+
+    manejarEnterChat(e) {
+        if (e.key === 'Enter') {
+            this.enviarMensajeChat();
+        }
+    }
+
+    async enviarMensajeChat() {
+        const input = document.getElementById('puk-input-chat');
+        const mensajeUsuario = input.value.trim();
+        if (!mensajeUsuario) return;
+
+        this.agregarBurbujaChat(mensajeUsuario, 'puk-usuario');
+        input.value = '';
+
+        const idPensando = this.agregarBurbujaChat('Olfateando el manual y revisando el equipo... 🐕', 'puk-ia');
+
+        let contextoOculto = "";
+        
+        if (window.equipoEnPantallaMapon) {
+            const eq = window.equipoEnPantallaMapon;
+            const marca = eq['Device model'] || 'Desconocido';
+            const estado = eq['Online status'] || 'Desconocido';
+            const ultimoReporte = eq['Last data received'] || 'Desconocido';
+            const imei = eq['IMEI'] || 'Desconocido';
+
+            contextoOculto = `
+                NOTA INTERNA PARA LA IA: El técnico está viendo actualmente un equipo en el dashboard de Mapon. 
+                Aquí están los datos técnicos de ese equipo:
+                - Marca/Modelo: ${marca}
+                - Estado actual en Mapon: ${estado}
+                - Último reporte: ${ultimoReporte}
+                - IMEI: ${imei}
+                
+                Guía rápida de estados de Mapon para tu análisis:
+                - NODATA (NOGPS): El equipo tiene energía pero no recibe señal de satélite (GPS). Sugiere revisar la ubicación del vehículo (si está bajo techo), la posición de la antena o problemas con el módulo GPS.
+                - NODATA (INSTALL): Es un equipo nuevo que aún no ha reportado por primera vez o la instalación quedó inconclusa.
+                - NODATA (NOPOWER): El equipo perdió la alimentación eléctrica principal (batería desconectada, fusible fundido o cables cortados).
+                - OK: Funcionando correctamente.
+                - OK (NOGPS): Reporta datos pero sin posición válida.
+                
+                Si la pregunta del técnico ("${mensajeUsuario}") es sobre fallas, usa estos datos y la guía de estados para darle un diagnóstico preciso, sugiriendo comandos o revisiones físicas necesarias para ese modelo específico (${marca}). No menciones que leíste esta "Nota Interna", actúa como si lo supieras por contexto.
+            `;
+        }
+
+        const mensajeFinalParaIA = contextoOculto ? contextoOculto + "\n\nPregunta del técnico: " + mensajeUsuario : mensajeUsuario;
+
+        const urlAppsScript = 'TU_URL_DE_APPS_SCRIPT_IA_PUK_AQUI'; 
+        
+        try {
+            const peticion = await fetch(urlAppsScript, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ mensaje: mensajeFinalParaIA })
+            });
+            const respuesta = await peticion.json();
+
+            document.getElementById(idPensando).remove();
+
+            if (respuesta.success) {
+                let textoHTML = respuesta.respuesta
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<b style="color:#ffb74d;">$1</b>');
+                
+                this.agregarBurbujaChat(textoHTML, 'puk-ia');
+            } else {
+                this.agregarBurbujaChat("¡Grrr! Hubo un error al pensar: " + respuesta.error, 'puk-ia');
+            }
+        } catch (error) {
+            document.getElementById(idPensando).remove();
+            this.agregarBurbujaChat("¡Grrr! No pude conectarme con mi cerebro en la nube.", 'puk-ia');
+            console.error(error);
+        }
+    }
+
+    agregarBurbujaChat(texto, clase) {
+        const contenedor = document.getElementById('puk-mensajes');
+        const div = document.createElement('div');
+        div.className = `puk-mensaje ${clase}`;
+        div.innerHTML = texto;
+        
+        const idUnico = 'msg-' + Date.now();
+        div.id = idUnico;
+        
+        contenedor.appendChild(div);
+        contenedor.scrollTop = contenedor.scrollHeight; 
+        
+        return idUnico;
+    }
+}
+
+// INICIALIZACIÓN CORRECTA
+document.addEventListener('DOMContentLoaded', () => { 
+    window.appSoporte = new SoporteTecnico(); 
+});
