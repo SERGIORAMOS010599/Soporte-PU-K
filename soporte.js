@@ -1,33 +1,22 @@
 // js/soporte.js
 
 class SoporteTecnico {
-    async sincronizarJasperUnidad() {
-        const spanIccid = document.getElementById('det-iccid');
-        if (spanIccid && spanIccid.innerText !== '---' && spanIccid.innerText !== '') {
-            // Llama a la función principal que ya hace toda la magia
-            this.consultarJasperLinea(spanIccid.innerText.trim());
-        } else {
-            alert("No hay un ICCID válido en pantalla para sincronizar con Jasper.");
-        }
-    }
     // --- CONSULTA Y CONTROL EN VIVO DE JASPER / TELCEL ---
     async consultarJasperLinea(iccidUnidad, containerId = 'jasper-resultado-box') {
         const contenedorResultado = document.getElementById(containerId);
         
-        if (!iccidUnidad || iccidUnidad === 'N/A' || iccidUnidad === 'S/N') {
+        let spanImei = document.getElementById('det-imei');
+        let spanIccid = document.getElementById('det-iccid');
+        
+        let imeiUI = spanImei && spanImei.innerText !== '---' ? spanImei.innerText.trim() : "N/A";
+        let iccidFinal = (spanIccid && spanIccid.innerText !== '---' && spanIccid.innerText !== '') ? spanIccid.innerText.trim() : iccidUnidad;
+
+        if ((!iccidFinal || iccidFinal === 'N/A' || iccidFinal === 'S/N') && 
+            (!imeiUI || imeiUI === 'N/A' || imeiUI === 'S/N')) {
             if (contenedorResultado) {
-                contenedorResultado.innerHTML = '<span style="color: #ff4c4c;">❌ Este equipo no tiene un ICCID válido registrado.</span>';
+                contenedorResultado.innerHTML = '<span style="color: #ff4c4c;">❌ Este equipo no tiene un ICCID o IMEI válido para buscar.</span>';
             }
             return;
-        }
-
-        // --- MAGIA: Rescatar el IMEI de la UI para mandarlo a cortar ---
-        let imeiParaCortar = "N/A";
-        const spanImei = document.getElementById('det-imei');
-        if (spanImei && spanImei.innerText !== '---' && spanImei.innerText !== '') {
-            imeiParaCortar = spanImei.innerText.trim();
-        } else if (window.equipoEnPantallaMapon) {
-            imeiParaCortar = window.equipoEnPantallaMapon['IMEI'] || "N/A";
         }
 
         if (contenedorResultado) {
@@ -42,8 +31,8 @@ class SoporteTecnico {
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({ 
                     accion: "consultar_jasper", 
-                    iccid: iccidUnidad,
-                    imei: imeiParaCortar 
+                    iccid: iccidFinal,
+                    imei: imeiUI 
                 })
             });
             const data = await respuesta.json();
@@ -52,6 +41,12 @@ class SoporteTecnico {
                 throw new Error(data.error);
             }
 
+            // AUTO-COMPLETAR LA TABLA SI ESTABA VACÍA
+            const spanDetLinea = document.getElementById('det-linea');
+            if (spanDetLinea && data.linea && data.linea !== 'Sin dato') spanDetLinea.innerHTML = `<b style="color:#00e676;">${data.linea}</b>`;
+            if (spanIccid && data.iccid && data.iccid !== 'Sin dato') spanIccid.innerHTML = `<b style="color:#00e676;">${data.iccid}</b>`;
+
+            // COLORES Y ESTILOS ORIGINALES DE LA TARJETA
             let colorEstadoSim = data.estado === 'ACTIVATED' ? '#00e676' : '#f44336';
             let bgEstadoSim = data.estado === 'ACTIVATED' ? 'rgba(0, 230, 118, 0.1)' : 'rgba(244, 67, 54, 0.1)';
 
@@ -67,15 +62,10 @@ class SoporteTecnico {
                 
             const bloqueoSIM = '<span style="color:#777; font-style: italic;">Portal web</span>';
 
-            const spanDetLinea = document.getElementById('det-linea');
-            if (spanDetLinea && data.linea !== 'Sin dato') spanDetLinea.innerHTML = `<b style="color:#00e676;">${data.linea}</b>`;
-            
-            const spanDetIccid = document.getElementById('det-iccid');
-            if (spanDetIccid && data.iccid !== 'Sin dato') spanDetIccid.innerHTML = `<b style="color:#00e676;">${data.iccid}</b>`;
-
             if (contenedorResultado) {
                 contenedorResultado.innerHTML = `
-                    <div style="background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 8px; font-size: 11px; color: #bbb; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
+                    <div style="background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 8px; font-size: 11px; color: #bbb; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); text-align: left; margin-top: 15px;">
+                        
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                             <div style="display: flex; gap: 8px; align-items: center;">
                                 <span style="color: #fff; font-weight: bold; font-size: 13px; letter-spacing: 0.5px;">LÍNEA TELCEL</span>
@@ -86,26 +76,28 @@ class SoporteTecnico {
                                 ${enSesionBadge}
                             </div>
                         </div>
+                        
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; background: #222; padding: 12px; border-radius: 6px; border: 1px solid #2a2a2a; margin-bottom: 15px;">
                             <div><span style="color: #777;">📞 MSISDN:</span> <b style="color: #fff;">${data.linea || 'N/A'}</b></div>
-                            <div><span style="color: #777;">💳 PLAN:</span> <b style="color: #fff;">N/A</b></div>
-                            <div style="grid-column: span 2;"><span style="color: #777;">🏷️ ICCID:</span> <b style="color: #fff; letter-spacing: 0.5px;">${data.iccid || iccidUnidad}</b></div>
-                            <div style="grid-column: span 2;"><span style="color: #777;">📱 IMEI RED:</span> <b style="color: #fff; letter-spacing: 0.5px;">${imeiParaCortar} (Cortado)</b></div>
+                            <div><span style="color: #777;">💳 PLAN:</span> <b style="color: #fff;">M2MZ1</b></div>
+                            <div style="grid-column: span 2;"><span style="color: #777;">🏷️ ICCID:</span> <b style="color: #fff; letter-spacing: 0.5px;">${data.iccid || iccidFinal}</b></div>
+                            <div style="grid-column: span 2;"><span style="color: #777;">📱 IMEI RED:</span> <b style="color: #fff; letter-spacing: 0.5px;">${imeiUI} (Cortado)</b></div>
                             <div><span style="color: #777;">🚫 LÍMITE:</span> ${limiteUso}</div>
                             <div><span style="color: #777;">🔐 BLOQUEO:</span> ${bloqueoSIM}</div>
                         </div>
+
                         <div style="display: flex; gap: 10px;">
-                            <button onclick="appSoporte.cambiarEstadoSim('${data.iccid || iccidUnidad}', 'ACTIVATED', '${containerId}')" 
+                            <button onclick="appSoporte.cambiarEstadoSim('${data.iccid || iccidFinal}', 'ACTIVATED', '${containerId}')" 
                                     style="flex: 1; background: rgba(0, 200, 83, 0.1); color: #00e676; border: 1px solid #00c853; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease;"
                                     onmouseover="this.style.background='#00c853'; this.style.color='#fff';"
                                     onmouseout="this.style.background='rgba(0, 200, 83, 0.1)'; this.style.color='#00e676';">
-                                ▶ Activar SIM
+                                ▶ ACTIVAR SIM
                             </button>
-                            <button onclick="appSoporte.cambiarEstadoSim('${data.iccid || iccidUnidad}', 'DEACTIVATED', '${containerId}')" 
+                            <button onclick="appSoporte.cambiarEstadoSim('${data.iccid || iccidFinal}', 'DEACTIVATED', '${containerId}')" 
                                     style="flex: 1; background: rgba(244, 67, 54, 0.1); color: #f44336; border: 1px solid #d32f2f; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease;"
                                     onmouseover="this.style.background='#d32f2f'; this.style.color='#fff';"
                                     onmouseout="this.style.background='rgba(244, 67, 54, 0.1)'; this.style.color='#f44336';">
-                                ⏹ Desactivar SIM
+                                ⏹ DESACTIVAR SIM
                             </button>
                         </div>
                     </div>
@@ -114,7 +106,7 @@ class SoporteTecnico {
         } catch (error) {
             console.error("Error Jasper:", error);
             if (contenedorResultado) {
-                contenedorResultado.innerHTML = `<span style="color: #ff4c4c;">❌ Error al consultar Jasper: SIM no encontrado o error de red.</span>`;
+                contenedorResultado.innerHTML = `<span style="color: #ff4c4c; display: block; margin-top: 15px;">❌ Error al consultar Jasper: SIM/IMEI no encontrado o error de red.</span>`;
             }
         }
     }
@@ -383,13 +375,6 @@ class SoporteTecnico {
         document.getElementById('det-anio').innerText = eq.anioVisible || eq.anio;
         document.getElementById('det-numSerie').innerText = eq.numSerieVisible || eq.numSerie;
 
-        const spanEstJasper = document.getElementById('det-jasper-estado');
-        const spanConsumoJasper = document.getElementById('det-jasper-consumo');
-        const spanSesionJasper = document.getElementById('det-jasper-sesion');
-        if(spanEstJasper) spanEstJasper.innerText = "---";
-        if(spanConsumoJasper) spanConsumoJasper.innerText = "---";
-        if(spanSesionJasper) spanSesionJasper.innerText = "---";
-
         let modeloUpper = (eq.marca || '').toUpperCase() + ' ' + (eq.modelo || '').toUpperCase();
         let btnPlataformaNombre = '';
         let btnPlataformaURL = '';
@@ -443,28 +428,24 @@ class SoporteTecnico {
             cajaBotonesRedondos.appendChild(btnComando);
         }
 
+        // INYECCIÓN SIEMPRE VISIBLE DEL BOTÓN DE JASPER 
         const contenedorAsistenteBody = document.querySelector('.comandos-body');
         let botonJasperExistente = document.getElementById('contenedor-jasper-panel');
-        const companiaUpper = (eq.compania || '').toUpperCase();
         
-        if (companiaUpper.includes('TELCEL')) {
-            if (!botonJasperExistente && contenedorAsistenteBody) {
-                const wrapperJasper = document.createElement('div');
-                wrapperJasper.id = 'contenedor-jasper-panel';
-                wrapperJasper.style.cssText = "margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; text-align: center;";
-                wrapperJasper.innerHTML = `
-                    <button onclick="appSoporte.consultarJasperLinea('${eq.iccid}')" style="background: #00c853; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%;">
-                        📡 Consultar Estado en Telcel Jasper
-                    </button>
-                    <div id="jasper-resultado-box" style="margin-top: 10px;"></div>
-                `;
-                contenedorAsistenteBody.appendChild(wrapperJasper);
-            } else if (botonJasperExistente) {
-                botonJasperExistente.querySelector('button').setAttribute('onclick', `appSoporte.consultarJasperLinea('${eq.iccid}')`);
-                document.getElementById('jasper-resultado-box').innerHTML = ''; 
-            }
+        if (!botonJasperExistente && contenedorAsistenteBody) {
+            const wrapperJasper = document.createElement('div');
+            wrapperJasper.id = 'contenedor-jasper-panel';
+            wrapperJasper.style.cssText = "margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; text-align: center;";
+            wrapperJasper.innerHTML = `
+                <button onclick="appSoporte.consultarJasperLinea('${eq.iccid}')" style="background: #00c853; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%;">
+                    📡 Consultar Estado en Telcel Jasper
+                </button>
+                <div id="jasper-resultado-box" style="margin-top: 10px;"></div>
+            `;
+            contenedorAsistenteBody.appendChild(wrapperJasper);
         } else if (botonJasperExistente) {
-            botonJasperExistente.remove();
+            botonJasperExistente.querySelector('button').setAttribute('onclick', `appSoporte.consultarJasperLinea('${eq.iccid}')`);
+            document.getElementById('jasper-resultado-box').innerHTML = ''; 
         }
 
         this.iniciarAsistente();
@@ -802,7 +783,6 @@ class SoporteTecnico {
     }
 }
 
-// INICIALIZACIÓN CORRECTA
 document.addEventListener('DOMContentLoaded', () => { 
     window.appSoporte = new SoporteTecnico(); 
 });
