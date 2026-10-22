@@ -2,27 +2,27 @@
 
 class SoporteTecnico {
     // --- CONSULTA Y CONTROL EN VIVO DE JASPER / TELCEL ---
+    // --- CONSULTA Y CONTROL EN VIVO DE JASPER / TELCEL ---
     async consultarJasperLinea(iccidUnidad, containerId = 'jasper-resultado-box') {
         const contenedorResultado = document.getElementById(containerId);
         
-        let spanImei = document.getElementById('det-imei');
         let spanIccid = document.getElementById('det-iccid');
-        
-        let imeiUI = spanImei && spanImei.innerText !== '---' ? spanImei.innerText.trim() : "N/A";
         let iccidFinal = (spanIccid && spanIccid.innerText !== '---' && spanIccid.innerText !== '') ? spanIccid.innerText.trim() : iccidUnidad;
 
-        if ((!iccidFinal || iccidFinal === 'N/A' || iccidFinal === 'S/N') && 
-            (!imeiUI || imeiUI === 'N/A' || imeiUI === 'S/N')) {
+        if (!iccidFinal || iccidFinal === 'N/A' || iccidFinal === 'S/N') {
             if (contenedorResultado) {
-                contenedorResultado.innerHTML = '<span style="color: #ff4c4c;">❌ Este equipo no tiene un ICCID o IMEI válido para buscar.</span>';
+                contenedorResultado.innerHTML = '<span style="color: #ff4c4c; display:block; margin-top:15px;">❌ Este equipo no tiene un ICCID válido registrado.</span>';
             }
             return;
         }
 
         if (contenedorResultado) {
-            contenedorResultado.innerHTML = '<span style="color: #ffb74d;">⏳ Consultando satélites de Telcel Jasper (Vía PU-K)... 📡</span>';
+            contenedorResultado.innerHTML = '<span style="color: #ffb74d; display:block; margin-top:15px;">⏳ Consultando satélites de Telcel Jasper... 📡</span>';
         }
 
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // VERIFICA QUE ESTA SEA LA URL CORRECTA DE TU APPS SCRIPT
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         const urlMicroservicioJasper = 'TU_URL_DE_APPS_SCRIPT_IA_PUK_AQUI';
 
         try {
@@ -31,8 +31,7 @@ class SoporteTecnico {
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({ 
                     accion: "consultar_jasper", 
-                    iccid: iccidFinal,
-                    imei: imeiUI 
+                    iccid: iccidFinal
                 })
             });
             const data = await respuesta.json();
@@ -41,19 +40,23 @@ class SoporteTecnico {
                 throw new Error(data.error);
             }
 
-            // AUTO-COMPLETAR LA TABLA SI ESTABA VACÍA
+            // AUTO-COMPLETAR LA TABLA PRINCIPAL SI ESTABA VACÍA
             const spanDetLinea = document.getElementById('det-linea');
             if (spanDetLinea && data.linea && data.linea !== 'Sin dato') spanDetLinea.innerHTML = `<b style="color:#00e676;">${data.linea}</b>`;
-            if (spanIccid && data.iccid && data.iccid !== 'Sin dato') spanIccid.innerHTML = `<b style="color:#00e676;">${data.iccid}</b>`;
 
-            // COLORES Y ESTILOS ORIGINALES DE LA TARJETA
+            // COLORES Y ESTILOS
             let colorEstadoSim = data.estado === 'ACTIVATED' ? '#00e676' : '#f44336';
             let bgEstadoSim = data.estado === 'ACTIVATED' ? 'rgba(0, 230, 118, 0.1)' : 'rgba(244, 67, 54, 0.1)';
 
             const enSesionBadge = data.enSesion 
-                ? '<span style="background: rgba(0, 230, 118, 0.15); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; letter-spacing: 0.5px;">🟢 EN SESIÓN</span>' 
-                : '<span style="background: rgba(244, 67, 54, 0.15); color: #f44336; border: 1px solid rgba(244, 67, 54, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; letter-spacing: 0.5px;">🔴 SIN SESIÓN</span>';
+                ? '<span style="background: rgba(244, 67, 54, 0.15); color: #f44336; border: 1px solid rgba(244, 67, 54, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; letter-spacing: 0.5px;">🔴 SIN SESIÓN</span>' // Ajustado según tu imagen
+                : '<span style="background: rgba(0, 230, 118, 0.15); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; letter-spacing: 0.5px;">🟢 EN SESIÓN</span>';
             
+            // Corrección de estado de sesión visual según tu captura
+            let sesionHTML = data.enSesion
+                ? '<span style="background: rgba(0, 230, 118, 0.15); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; letter-spacing: 0.5px;">🟢 EN SESIÓN</span>'
+                : '<span style="background: rgba(244, 67, 54, 0.15); color: #f44336; border: 1px solid rgba(244, 67, 54, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; letter-spacing: 0.5px;">🔴 SIN SESIÓN</span>';
+
             const consumoMB = data.consumoMB !== "No disponible" ? `${data.consumoMB} MB` : "N/A";
             
             const limiteUso = data.limiteAlcanzado 
@@ -73,15 +76,15 @@ class SoporteTecnico {
                             </div>
                             <div style="display: flex; gap: 8px; align-items: center;">
                                 <span style="color: #90caf9; font-weight: bold; font-size: 12px; background: rgba(144, 202, 249, 0.1); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(144, 202, 249, 0.2);">📊 ${consumoMB}</span>
-                                ${enSesionBadge}
+                                ${sesionHTML}
                             </div>
                         </div>
                         
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; background: #222; padding: 12px; border-radius: 6px; border: 1px solid #2a2a2a; margin-bottom: 15px;">
                             <div><span style="color: #777;">📞 MSISDN:</span> <b style="color: #fff;">${data.linea || 'N/A'}</b></div>
-                            <div><span style="color: #777;">💳 PLAN:</span> <b style="color: #fff;">M2MZ1</b></div>
+                            <div><span style="color: #777;">💳 PLAN:</span> <b style="color: #fff;">${data.plan || 'M2MZ1'}</b></div>
                             <div style="grid-column: span 2;"><span style="color: #777;">🏷️ ICCID:</span> <b style="color: #fff; letter-spacing: 0.5px;">${data.iccid || iccidFinal}</b></div>
-                            <div style="grid-column: span 2;"><span style="color: #777;">📱 IMEI RED:</span> <b style="color: #fff; letter-spacing: 0.5px;">${imeiUI} (Cortado)</b></div>
+                            <div style="grid-column: span 2;"><span style="color: #777;">📱 IMEI RED:</span> <b style="color: #fff; letter-spacing: 0.5px;">${data.imeiRed}</b></div>
                             <div><span style="color: #777;">🚫 LÍMITE:</span> ${limiteUso}</div>
                             <div><span style="color: #777;">🔐 BLOQUEO:</span> ${bloqueoSIM}</div>
                         </div>
