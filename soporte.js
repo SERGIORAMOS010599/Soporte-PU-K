@@ -1,6 +1,15 @@
 // js/soporte.js
 
 class SoporteTecnico {
+    async sincronizarJasperUnidad() {
+        const spanIccid = document.getElementById('det-iccid');
+        if (spanIccid && spanIccid.innerText !== '---' && spanIccid.innerText !== '') {
+            // Llama a la función principal que ya hace toda la magia
+            this.consultarJasperLinea(spanIccid.innerText.trim());
+        } else {
+            alert("No hay un ICCID válido en pantalla para sincronizar con Jasper.");
+        }
+    }
     // --- CONSULTA Y CONTROL EN VIVO DE JASPER / TELCEL ---
     async consultarJasperLinea(iccidUnidad, containerId = 'jasper-resultado-box') {
         const contenedorResultado = document.getElementById(containerId);
