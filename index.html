@@ -109,9 +109,26 @@
                     
                     <table class="tabla-info">
                         <tr><td>ID</td><td id="det-id">---</td></tr>
-                        <tr><td>Línea</td><td id="det-linea">---</td></tr>
+                        
+                        <!-- FILA DE LÍNEA MODIFICADA CON EL BOTÓN DE JASPER -->
+                        <tr>
+                            <td>Línea</td>
+                            <td style="display:flex; justify-content:space-between; align-items:center;">
+                                <span id="det-linea">---</span>
+                                <button onclick="appSoporte.sincronizarJasperUnidad()" style="background:rgba(25, 118, 210, 0.2); color:#64b5f6; border:1px solid #1976d2; padding:4px 8px; border-radius:4px; font-size:10px; cursor:pointer; font-weight:bold; transition:0.2s;" onmouseover="this.style.background='#1976d2'; this.style.color='#fff';" onmouseout="this.style.background='rgba(25, 118, 210, 0.2)'; this.style.color='#64b5f6';">
+                                    📡 Consultar Jasper
+                                </button>
+                            </td>
+                        </tr>
+                        
                         <tr><td>ICCID</td><td id="det-iccid">---</td></tr>
                         <tr><td>IMEI</td><td id="det-imei">---</td></tr>
+                        
+                        <!-- NUEVAS FILAS DE JASPER -->
+                        <tr><td>Estado Jasper</td><td id="det-jasper-estado">---</td></tr>
+                        <tr><td>Datos Usados</td><td id="det-jasper-consumo">---</td></tr>
+                        <tr><td>Sesión Activa</td><td id="det-jasper-sesion">---</td></tr>
+                        
                         <tr><td>Marca</td><td id="det-marca">---</td></tr>
                         <tr><td>Modelo</td><td id="det-modelo">---</td></tr>
                         <tr><td>Cliente</td><td id="det-cliente">---</td></tr>
