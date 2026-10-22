@@ -27,7 +27,7 @@ class SoporteTecnico {
             contenedorResultado.innerHTML = '<span style="color: #ffb74d; display:block; margin-top:15px;">⏳ Consultando satélites de Telcel Jasper... 📡</span>';
         }
 
-        const urlMicroservicioJasper = 'TU_URL_DE_APPS_SCRIPT_IA_PUK_AQUI';
+        const urlMicroservicioJasper = 'https://script.google.com/macros/s/AKfycbxechSb9x2TtDrI_E8egBEkGjZOOFGMXNl5UiBjB9s8n_hJwH6qGHe5aEMMENaEO39H/exec';
 
         try {
             const respuesta = await fetch(urlMicroservicioJasper, {
