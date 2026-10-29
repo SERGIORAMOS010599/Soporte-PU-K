@@ -2,7 +2,6 @@
 
 class SoporteTecnico {
     // --- CONSULTA Y CONTROL EN VIVO DE JASPER / TELCEL ---
-    // --- CONSULTA Y CONTROL EN VIVO DE JASPER / TELCEL ---
     async consultarJasperLinea(iccidUnidad, containerId = 'jasper-resultado-box') {
         const contenedorResultado = document.getElementById(containerId);
         
@@ -119,7 +118,7 @@ class SoporteTecnico {
             contenedorResultado.innerHTML = `<span style="color: #ffb74d;">⏳ Enviando orden de ${accionTexto} a Telcel Jasper... 📡</span>`;
         }
 
-        const urlMicroservicioJasper = 'TU_URL_DE_APPS_SCRIPT_IA_PUK_AQUI';
+        const urlMicroservicioJasper = 'https://script.google.com/macros/s/AKfycbxua3f3WK8cOQVV8NGFHaRJ4D7omCK7CptzXtDprnTpooGY-fZxw7m5XoHQgQOAMa2V/exec';
 
         try {
             const respuesta = await fetch(urlMicroservicioJasper, {
