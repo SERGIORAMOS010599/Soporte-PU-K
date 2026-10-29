@@ -115,30 +115,43 @@ class SoporteTecnico {
 
         const contenedorResultado = document.getElementById(containerId);
         if (contenedorResultado) {
-            contenedorResultado.innerHTML = `<span style="color: #ffb74d;">⏳ Enviando orden de ${accionTexto} a Telcel Jasper... 📡</span>`;
+            contenedorResultado.innerHTML = `<span style="color: #ffb74d; display:block; margin-top:15px;">⏳ Enviando orden de ${accionTexto} a Telcel Jasper... 📡</span>`;
         }
 
+        // TU URL REAL YA ESTÁ AQUÍ
         const urlMicroservicioJasper = 'https://script.google.com/macros/s/AKfycbxua3f3WK8cOQVV8NGFHaRJ4D7omCK7CptzXtDprnTpooGY-fZxw7m5XoHQgQOAMa2V/exec';
 
         try {
             const respuesta = await fetch(urlMicroservicioJasper, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ accion: "cambiar_estado", iccid: iccidUnidad, nuevoEstado: nuevoEstado })
+                body: JSON.stringify({ 
+                    accion: "cambiar_estado_jasper", // <- AHORA COINCIDE CON APPS SCRIPT
+                    iccid: iccidUnidad,
+                    estado: nuevoEstado              // <- AHORA COINCIDE CON APPS SCRIPT
+                })
             });
+            
             const data = await respuesta.json();
 
             if (data.error) {
                 throw new Error(data.error);
             }
 
-            alert(`✅ ¡Éxito! La línea ha sido actualizada a estado: ${data.status}`);
+            alert(`✅ ¡Éxito! La línea ha sido cambiada a ${nuevoEstado}.`);
+            
+            // Volvemos a consultar para actualizar la UI
             this.consultarJasperLinea(iccidUnidad, containerId);
 
         } catch (error) {
-            console.error("Error al cambiar estado:", error);
-            alert("❌ Ocurrió un error al intentar cambiar el estado en Jasper.");
-            this.consultarJasperLinea(iccidUnidad, containerId);
+            console.error("Error cambiando estado:", error);
+            
+            // LA ALERTA YA NOS DIRÁ LA VERDAD
+            alert(`❌ Error real al cambiar estado:\n\n${error.message}`);
+            
+            if (contenedorResultado) {
+                contenedorResultado.innerHTML = `<span style="color: #ff4c4c; display: block; margin-top: 15px;">❌ Detalle del Error: <b>${error.message}</b></span>`;
+            }
         }
     }
     
