@@ -534,7 +534,7 @@ class SoporteTecnico {
     async consultarCerebroPUK(pregunta) {
         this.hablarPUK("Revisando mis manuales técnicos... Dame unos segundos 🐕", "pensando");
         
-        const urlAppsScript = 'TU_URL_DE_APPS_SCRIPT_IA_PUK_AQUI';
+        const urlAppsScript = 'https://script.google.com/macros/s/AKfycbxua3f3WK8cOQVV8NGFHaRJ4D7omCK7CptzXtDprnTpooGY-fZxw7m5XoHQgQOAMa2V/exec';
 
         try {
             const peticion = await fetch(urlAppsScript, {
@@ -748,7 +748,7 @@ class SoporteTecnico {
 
         const mensajeFinalParaIA = contextoOculto ? contextoOculto + "\n\nPregunta del técnico: " + mensajeUsuario : mensajeUsuario;
 
-        const urlAppsScript = 'TU_URL_DE_APPS_SCRIPT_IA_PUK_AQUI'; 
+        const urlAppsScript = 'https://script.google.com/macros/s/AKfycbxua3f3WK8cOQVV8NGFHaRJ4D7omCK7CptzXtDprnTpooGY-fZxw7m5XoHQgQOAMa2V/exec'; 
         
         try {
             const peticion = await fetch(urlAppsScript, {
