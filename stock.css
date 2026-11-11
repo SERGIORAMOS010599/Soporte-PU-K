@@ -2,15 +2,9 @@
    MÓDULO DE STOCK / INVENTARIO - DISEÑO PRO
 ========================================== */
 
-/* REGLAS ESTRICTAS DE VISIBILIDAD PARA EL JS */
-#vista-stock.vista-activa {
-    display: flex !important;
-    flex-direction: column;
-    height: 100%;
-}
-#vista-stock.vista-oculta {
-    display: none !important;
-}
+/* REGLAS CRÍTICAS PARA LA VISIBILIDAD DE LA PESTAÑA */
+#vista-stock.vista-activa { display: flex !important; flex-direction: column; height: 100%; }
+#vista-stock.vista-oculta { display: none !important; }
 
 #vista-stock {
     padding: 15px 25px;
@@ -29,6 +23,7 @@
     border-radius: 8px;
     border: 1px solid #333;
     box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    flex-shrink: 0;
 }
 
 .stock-titulo {
@@ -67,16 +62,15 @@
 .btn-stock-exito { background: #00e676; color: #000; box-shadow: 0 2px 8px rgba(0, 230, 118, 0.4); }
 .btn-stock-exito:hover { background: #00c853; transform: translateY(-1px); }
 
-/* CLASE MAESTRA PARA OCULTAR ELEMENTOS */
+/* CLASE MAESTRA QUE OCULTA LOS CHECKBOXES Y BOTONES */
 .oculto { display: none !important; }
 
-/* --- CONTENEDOR CON SCROLL --- */
+/* --- CONTENEDOR CON SCROLL PARA LA TABLA --- */
 .stock-table-wrapper {
     background: #181818;
     border-radius: 8px;
     border: 1px solid #2a2a2a;
     box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-    /* Forzar scroll */
     max-height: calc(100vh - 200px); 
     overflow-y: auto;
     overflow-x: auto;
