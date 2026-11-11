@@ -7,7 +7,7 @@ class ControlInventario {
         this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM';
         this.urlAppsScript = 'https://script.google.com/macros/s/AKfycbxua3f3WK8cOQVV8NGFHaRJ4D7omCK7CptzXtDprnTpooGY-fZxw7m5XoHQgQOAMa2V/exec';
         
-        // Estado del modo de selección
+        // Controla si los checkboxes están visibles o no
         this.modoSeleccion = false;
 
         this.cargarDatos();
@@ -36,7 +36,7 @@ class ControlInventario {
             if (thCheck) thCheck.classList.add('oculto');
             tdChecks.forEach(td => td.classList.add('oculto'));
             
-            // Desmarcar todos al cancelar
+            // Desmarcar todo al cancelar
             const checkAll = document.getElementById('check-all-stock');
             if (checkAll) checkAll.checked = false;
             this.toggleTodos({checked: false});
@@ -48,7 +48,7 @@ class ControlInventario {
         checkboxes.forEach(cb => cb.checked = checkboxMaster.checked);
     }
 
-    // --- CARGA Y RENDERIZADO DE DATOS ---
+    // --- CARGA Y RENDERIZADO ---
     async cargarDatos() {
         if (!this.tbody) return;
         this.tbody.innerHTML = '<tr><td colspan="14" style="text-align:center; padding: 40px; color:#ffb74d; font-size:1.2rem;">⏳ Conectando con Google Sheets y descargando inventario... 📡</td></tr>';
@@ -98,11 +98,11 @@ class ControlInventario {
         if(checkAll) checkAll.checked = false;
 
         if (datos.length === 0) {
-            this.tbody.innerHTML = `<tr><td colspan="14" style="text-align:center; padding: 30px; color:#777; font-size:1.1rem;">No se encontraron equipos.</td></tr>`;
+            this.tbody.innerHTML = `<tr><td colspan="14" style="text-align:center; padding: 30px; color:#777; font-size:1.1rem;">No se encontraron equipos con esa búsqueda.</td></tr>`;
             return;
         }
 
-        // Definir si la columna de checkbox debe estar visible o no al repintar
+        // Si el modo selección NO está activo, le ponemos "oculto" a la celda del checkbox
         const displayCheck = this.modoSeleccion ? '' : 'oculto';
 
         datos.forEach(equipo => {
@@ -143,7 +143,6 @@ class ControlInventario {
         });
     }
 
-    // Función que será llamada por el buscador global
     filtrarTabla(texto) {
         const query = texto.toLowerCase().trim();
         const filtrados = this.inventarioGlobal.filter(eq => {
@@ -152,16 +151,12 @@ class ControlInventario {
         this.renderizarTabla(filtrados);
     }
 
-    // --- ACCIONES A LA BASE DE DATOS ---
     async enviarSeleccionadosASalidas() {
         const checkboxes = document.querySelectorAll('.check-item:checked');
-        if (checkboxes.length === 0) return alert("⚠️ Selecciona al menos un equipo marcando su casilla.");
+        if (checkboxes.length === 0) return alert("⚠️ Selecciona al menos un equipo.");
         
         const imeisSeleccionados = Array.from(checkboxes).map(cb => cb.value);
-        
-        if (!confirm(`📦 ¿Estás seguro de mover ${imeisSeleccionados.length} equipo(s) de Stock a Salidas? Esto los borrará de esta tabla y los pasará a Soporte Técnico.`)) {
-            return;
-        }
+        if (!confirm(`📦 ¿Estás seguro de mover ${imeisSeleccionados.length} equipo(s) a Salidas?`)) return;
 
         const btn = document.getElementById('btn-enviar-salidas');
         btn.innerText = "⏳ Moviendo..."; btn.disabled = true;
@@ -176,23 +171,22 @@ class ControlInventario {
 
             if (respuesta.success) {
                 alert(`✅ ¡Éxito! ${respuesta.mensaje}`);
-                this.toggleModoSeleccion(); // Ocultar checkboxes y resetear botones
+                this.toggleModoSeleccion(); 
                 this.cargarDatos(); 
                 if (window.appSoporte) window.appSoporte.iniciar(); 
             } else {
                 alert("❌ Error: " + respuesta.error);
             }
         } catch (error) {
-            console.error(error);
-            alert("❌ Falla de red al intentar conectar con el servidor.");
+            alert("❌ Falla de red al intentar conectar.");
         }
         btn.innerHTML = "📦 Enviar equipos a salidas"; btn.disabled = false;
     }
 
+    // Modal de edición (Se mantiene igual que antes)
     abrirEdicion(imei) {
         const equipo = this.inventarioGlobal.find(e => e.imei === imei);
         if (!equipo) return;
-
         const modalAnterior = document.getElementById('modal-stock-edit');
         if (modalAnterior) modalAnterior.remove();
 
@@ -201,36 +195,16 @@ class ControlInventario {
                 <div style="background: #1e1e1e; border: 1px solid #ffb74d; border-radius: 12px; padding: 30px; width: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.7);">
                     <h2 style="color: #ffb74d; margin-top: 0; margin-bottom: 5px;">Editar Equipo</h2>
                     <p style="color: #888; font-size: 0.85rem; margin-top: 0; margin-bottom: 25px;">IMEI: <b style="color:#fff;">${equipo.imei}</b> (${equipo.marca} ${equipo.modelo})</p>
-                    
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                        <div>
-                            <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Estado:</label>
-                            <input type="text" id="edit-stock-estado" value="${equipo.estado}" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
-                        </div>
-                        <div>
-                            <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Línea (MSISDN):</label>
-                            <input type="text" id="edit-stock-linea" value="${equipo.linea}" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
-                        </div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Estado:</label><input type="text" id="edit-stock-estado" value="${equipo.estado}" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Línea (MSISDN):</label><input type="text" id="edit-stock-linea" value="${equipo.linea}" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
                     </div>
-
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Ubicación / Unidad:</label>
-                        <input type="text" id="edit-stock-ubicacion" value="${equipo.ubicacion}" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
-                    </div>
-
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">ICCID Vinculado:</label>
-                        <input type="text" id="edit-stock-iccid" value="${equipo.iccid}" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
-                    </div>
-
-                    <div style="margin-bottom: 30px;">
-                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Comentario:</label>
-                        <textarea id="edit-stock-comentario" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px; resize: vertical; min-height: 60px;">${equipo.comentario}</textarea>
-                    </div>
-
+                    <div style="margin-bottom: 15px;"><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Ubicación / Unidad:</label><input type="text" id="edit-stock-ubicacion" value="${equipo.ubicacion}" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                    <div style="margin-bottom: 15px;"><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">ICCID Vinculado:</label><input type="text" id="edit-stock-iccid" value="${equipo.iccid}" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                    <div style="margin-bottom: 30px;"><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Comentario:</label><textarea id="edit-stock-comentario" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px; resize: vertical; min-height: 60px;">${equipo.comentario}</textarea></div>
                     <div style="display: flex; justify-content: space-between; gap: 15px;">
                         <button onclick="document.getElementById('modal-stock-edit').remove()" style="flex: 1; padding: 12px; background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; cursor: pointer; font-weight:bold;">Cancelar</button>
-                        <button id="btn-guardar-stock" onclick="appStock.guardarEdicion('${equipo.imei}')" style="flex: 1; padding: 12px; background: #ffb74d; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight:bold; box-shadow: 0 4px 10px rgba(255, 183, 77, 0.3);">💾 Guardar</button>
+                        <button id="btn-guardar-stock" onclick="appStock.guardarEdicion('${equipo.imei}')" style="flex: 1; padding: 12px; background: #ffb74d; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight:bold;">💾 Guardar</button>
                     </div>
                 </div>
             </div>
@@ -241,7 +215,6 @@ class ControlInventario {
     async guardarEdicion(imei) {
         const btn = document.getElementById('btn-guardar-stock');
         btn.innerText = "Guardando... ⏳"; btn.disabled = true;
-
         try {
             const peticion = await fetch(this.urlAppsScript, {
                 method: 'POST',
@@ -257,7 +230,6 @@ class ControlInventario {
                 })
             });
             const respuesta = await peticion.json();
-
             if (respuesta.success) {
                 document.getElementById('modal-stock-edit').remove();
                 this.cargarDatos(); 
