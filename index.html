@@ -136,15 +136,18 @@
             <div class="stock-header">
                 <h1 class="stock-titulo">Inventario General</h1>
                 <div class="stock-controles">
-                    <button id="btn-activar-seleccion" class="btn-stock-primario" onclick="appStock.toggleModoSeleccion()">
-                        ☑️ Selección de Equipos
-                    </button>
-                    <button id="btn-cancelar-seleccion" class="btn-stock-secundario oculto" onclick="appStock.toggleModoSeleccion()">
-                        ✖ Cancelar
-                    </button>
-                    <button id="btn-enviar-salidas" class="btn-stock-exito oculto" onclick="appStock.enviarSeleccionadosASalidas()">
-                        📦 Enviar equipos a salidas
-                    </button>
+                <button id="btn-agregar-equipo" class="btn-stock-primario" onclick="appStock.abrirAgregar()">
+                    ➕ Agregar Equipo
+                </button>
+                <button id="btn-activar-seleccion" class="btn-stock-primario" onclick="appStock.toggleModoSeleccion()">
+                    ☑️ Selección de Equipos
+                </button>
+                <button id="btn-cancelar-seleccion" class="btn-stock-secundario oculto" onclick="appStock.toggleModoSeleccion()">
+                    ✖ Cancelar
+                </button>
+                <button id="btn-enviar-salidas" class="btn-stock-exito oculto" onclick="appStock.enviarSeleccionadosASalidas()">
+                    📦 Enviar equipos a salidas
+                </button>
                 </div>
             </div>
             
