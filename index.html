@@ -126,24 +126,38 @@
 <div id="vista-stock" class="vista-oculta">
     <div class="stock-header">
         <h1 class="stock-titulo">Control de Inventario</h1>
-        <input type="text" id="buscador-stock" class="stock-buscador" placeholder="🔍 Buscar por IMEI, modelo o marca...">
+        <div class="stock-controles">
+            <input type="text" id="buscador-stock" class="stock-buscador" placeholder="🔍 Buscar por IMEI, modelo o marca...">
+            <button id="btn-enviar-salidas" class="btn-enviar-salidas" onclick="appStock.enviarSeleccionadosASalidas()">
+                📦 Enviar a Salidas
+            </button>
+        </div>
     </div>
     
     <div class="stock-table-container">
         <table class="stock-table">
             <thead>
                 <tr>
+                    <th style="width: 40px; text-align: center;">
+                        <input type="checkbox" id="check-all-stock" class="stock-checkbox" onclick="appStock.toggleTodos(this)">
+                    </th>
+                    <th>FECHA ENT.</th>
                     <th>MARCA</th>
                     <th>MODELO</th>
+                    <th>ID</th>
                     <th>IMEI / SERIE</th>
                     <th>ICCID (Línea)</th>
+                    <th>COMPAÑÍA</th>
                     <th>ESTADO</th>
                     <th>UBICACIÓN</th>
+                    <th>TIPO SERV.</th>
+                    <th>COMENTARIO</th>
+                    <th>FOTO</th>
                     <th>ACCIONES</th>
                 </tr>
             </thead>
             <tbody id="tbody-stock">
-                <!-- Las filas se inyectarán aquí con JavaScript -->
+                <!-- Inyección por JS -->
             </tbody>
         </table>
     </div>
