@@ -290,7 +290,7 @@ class ControlInventario {
                     <p style="color: #888; font-size: 0.85rem; margin-top: 0; margin-bottom: 20px;">Llene los datos para el inventario. La fecha de entrada se asignará automáticamente.</p>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">ID Sistema (Opcional):</label><input type="text" id="add-id" placeholder="Ej. 12345" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">ID Equipo:</label><input type="text" id="add-id" placeholder="Ej. 12345" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
                         <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">IMEI / SERIE:</label><input type="text" id="add-imei" placeholder="Requerido" style="width: 100%; padding: 8px; background: #111; border: 1px solid #00e676; color: #00e676; font-weight: bold; border-radius: 6px;"></div>
                         
                         <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Marca:</label><input type="text" id="add-marca" placeholder="Ej. TELTONIKA" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
