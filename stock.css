@@ -145,3 +145,23 @@
     font-weight: bold;
 }
 .btn-stock-accion:hover { background: #333; color: #ffb74d; border-color: #ffb74d; }
+
+/* ==========================================
+   DISEÑO MÓVIL PARA STOCK
+========================================== */
+@media screen and (max-width: 768px) {
+    .stock-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+        text-align: center;
+    }
+    .stock-controles {
+        flex-direction: column;
+        width: 100%;
+    }
+    .btn-stock-primario, .btn-stock-secundario, .btn-stock-exito {
+        width: 100%;
+        justify-content: center; /* Centra el texto y el ícono del botón */
+    }
+}
