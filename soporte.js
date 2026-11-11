@@ -165,6 +165,7 @@ class SoporteTecnico {
     }
 
     cambiarVista(vistaDestino) {
+        // Ocultar todas las vistas primero
         document.getElementById('vista-soporte').classList.add('vista-oculta');
         document.getElementById('vista-soporte').classList.remove('vista-activa');
         
@@ -177,9 +178,17 @@ class SoporteTecnico {
             vistaDiag.classList.remove('vista-activa');
         }
 
+        // AGREGAR ESTO PARA EL STOCK
+        const vistaStock = document.getElementById('vista-stock');
+        if(vistaStock) {
+            vistaStock.classList.add('vista-oculta');
+            vistaStock.classList.remove('vista-activa');
+        }
+
         const botones = document.querySelectorAll('.tab-btn');
         botones.forEach(btn => btn.classList.remove('activo'));
 
+        // Mostrar la vista destino
         if (vistaDestino === 'soporte') {
             document.getElementById('vista-soporte').classList.remove('vista-oculta');
             document.getElementById('vista-soporte').classList.add('vista-activa');
@@ -197,6 +206,15 @@ class SoporteTecnico {
                 vistaDiag.classList.add('vista-activa');
             }
             if(botones[2]) botones[2].classList.add('activo'); 
+        }
+        // AGREGAR ESTO PARA EL STOCK
+        else if (vistaDestino === 'stock') {
+            if(vistaStock) {
+                vistaStock.classList.remove('vista-oculta');
+                vistaStock.classList.add('vista-activa');
+            }
+            // Asumiendo que es el 4to botón en tu HTML (índice 3)
+            if(botones[3]) botones[3].classList.add('activo'); 
         }
     }
 
