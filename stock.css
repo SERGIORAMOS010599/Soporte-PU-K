@@ -1,0 +1,110 @@
+/* ==========================================
+   MÓDULO DE STOCK / INVENTARIO
+========================================== */
+
+#vista-stock {
+    padding: 20px;
+    color: #e0e0e0;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.stock-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background: #1a1a1a;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.stock-titulo {
+    font-size: 1.5rem;
+    color: #ffb74d; /* Naranja de PU-K */
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+.stock-buscador {
+    width: 350px;
+    padding: 10px 15px;
+    border-radius: 20px;
+    border: 1px solid #444;
+    background: #222;
+    color: #fff;
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.stock-buscador:focus {
+    border-color: #ffb74d;
+    box-shadow: 0 0 5px rgba(255, 183, 77, 0.3);
+}
+
+.stock-table-container {
+    background: #1e1e1e;
+    border-radius: 8px;
+    border: 1px solid #333;
+    overflow-x: auto;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.stock-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.stock-table th {
+    background: #141414;
+    color: #90caf9;
+    padding: 15px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #333;
+    position: sticky;
+    top: 0;
+}
+
+.stock-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #2a2a2a;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.stock-table tr:hover {
+    background-color: #252525;
+}
+
+/* Badges de Estado */
+.stock-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.badge-disponible { background: rgba(0, 230, 118, 0.15); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.3); }
+.badge-asignado { background: rgba(244, 67, 54, 0.15); color: #f44336; border: 1px solid rgba(244, 67, 54, 0.3); }
+.badge-revision { background: rgba(255, 183, 77, 0.15); color: #ffb74d; border: 1px solid rgba(255, 183, 77, 0.3); }
+
+/* Botones de acción en tabla */
+.btn-stock-accion {
+    background: transparent;
+    border: 1px solid #555;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: 0.2s;
+}
+
+.btn-stock-accion:hover {
+    background: #333;
+    border-color: #777;
+}
