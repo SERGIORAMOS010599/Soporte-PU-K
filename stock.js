@@ -5,9 +5,11 @@ class ControlInventario {
         this.tbody = document.getElementById('tbody-stock');
         this.inputBuscador = document.getElementById('buscador-stock');
         this.inventarioGlobal = []; 
-        
+        this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM';
+        this.urlAppsScript = 'https://script.google.com/macros/s/AKfycbxua3f3WK8cOQVV8NGFHaRJ4D7omCK7CptzXtDprnTpooGY-fZxw7m5XoHQgQOAMa2V/exec';
+
         this.inicializarEventos();
-        this.cargarDatos(); // Aquí en el futuro conectaremos con Google Sheets
+        this.cargarDatos();
     }
 
     inicializarEventos() {
@@ -17,15 +19,47 @@ class ControlInventario {
     }
 
     async cargarDatos() {
-        // TODO: En la próxima iteración, haremos el fetch() a la hoja "Stock" de tu Google Sheets.
-        // Por ahora, usamos datos de prueba para maquetar la tabla.
-        this.inventarioGlobal = [
-            { id: '1', marca: 'TELTONIKA', modelo: 'FMC130', imei: '351158360010480', iccid: '8952020028397441552', estado: 'DISPONIBLE', ubicacion: 'Oficina Hermosillo' },
-            { id: '2', marca: 'TELTONIKA', modelo: 'FMC650', imei: '351158360010481', iccid: 'N/A', estado: 'REVISIÓN', ubicacion: 'Taller' },
-            { id: '3', marca: 'SUNTECH', modelo: 'ST300', imei: '863719063804844', iccid: '8952020524694483248', estado: 'ASIGNADO', ubicacion: 'FORD PIPA' }
-        ];
-
-        this.renderizarTabla(this.inventarioGlobal);
+        if (!this.tbody) return;
+        this.tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 30px; color:#ffb74d;">⏳ Conectando con Google Sheets y descargando inventario... 📡</td></tr>';
+        
+        const urlInventario = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Stock')}`;
+        
+        try {
+            const respuestaInv = await fetch(urlInventario);
+            const textInv = await respuestaInv.text();
+            const jsonInv = JSON.parse(textInv.substring(47).slice(0, -2));
+            
+            this.inventarioGlobal = [];
+            
+            // Asignación directa basada en tu orden exacto de columnas (0 = Fecha, 1 = Marca, etc.)
+            jsonInv.table.rows.forEach((row, rowIndex) => {
+                if (row && row.c) {
+                    let equipo = {
+                        filaOriginal: rowIndex + 2,
+                        marca: row.c[1] ? row.c[1].v : 'S/M',
+                        modelo: row.c[2] ? row.c[2].v : 'S/M',
+                        id: row.c[3] ? row.c[3].v : 'S/N',
+                        imei: row.c[4] ? String(row.c[4].v).replace(/\.0$/, '').trim() : 'S/N',
+                        linea: row.c[5] ? String(row.c[5].v).replace(/\.0$/, '').trim() : '',
+                        iccid: row.c[6] ? String(row.c[6].v).replace(/\.0$/, '').trim() : '',
+                        compania: row.c[7] ? row.c[7].v : '',
+                        estado: row.c[8] ? row.c[8].v : 'SIN ESTADO',
+                        ubicacion: row.c[9] ? row.c[9].v : 'NO ASIGNADA',
+                        tipoServicio: row.c[10] ? row.c[10].v : '',
+                        comentario: row.c[12] ? row.c[12].v : ''
+                    };
+                    
+                    if (equipo.imei && equipo.imei !== 'S/N') {
+                        this.inventarioGlobal.push(equipo);
+                    }
+                }
+            });
+            
+            this.renderizarTabla(this.inventarioGlobal);
+        } catch (error) {
+            console.error("Error al cargar Stock:", error);
+            this.tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#ff4c4c; padding: 20px;">❌ Error al descargar datos. Asegúrate de que la pestaña se llame "Stock".</td></tr>`;
+        }
     }
 
     renderizarTabla(datos) {
@@ -38,20 +72,27 @@ class ControlInventario {
         }
 
         datos.forEach(equipo => {
+            let estadoMayus = String(equipo.estado).toUpperCase();
             let claseBadge = 'badge-revision';
-            if (equipo.estado === 'DISPONIBLE') claseBadge = 'badge-disponible';
-            if (equipo.estado === 'ASIGNADO') claseBadge = 'badge-asignado';
+            if (estadoMayus.includes('DISPONIBLE') || estadoMayus.includes('ALMACEN')) claseBadge = 'badge-disponible';
+            if (estadoMayus.includes('ASIGNADO') || estadoMayus.includes('INSTALADO')) claseBadge = 'badge-asignado';
+
+            // Armamos la celda de la línea e ICCID
+            let htmlLinea = '';
+            if (equipo.linea) htmlLinea += `<div style="color: #90caf9; font-size: 0.8rem; margin-bottom: 3px;">📞 ${equipo.linea}</div>`;
+            if (equipo.iccid) htmlLinea += `<div style="color: #ccc;">💳 ${equipo.iccid}</div>`;
+            if (!equipo.linea && !equipo.iccid) htmlLinea = '<span style="color:#555;">N/A</span>';
 
             const fila = document.createElement('tr');
             fila.innerHTML = `
-                <td><b>${equipo.marca}</b></td>
+                <td><b style="color: #fff;">${equipo.marca}</b></td>
                 <td>${equipo.modelo}</td>
-                <td style="font-family: monospace; letter-spacing: 0.5px;">${equipo.imei}</td>
-                <td style="font-family: monospace; letter-spacing: 0.5px;">${equipo.iccid}</td>
+                <td style="font-family: monospace; color: #ffb74d; letter-spacing: 0.5px;">${equipo.imei}</td>
+                <td style="font-family: monospace; letter-spacing: 0.5px;">${htmlLinea}</td>
                 <td><span class="stock-badge ${claseBadge}">${equipo.estado}</span></td>
                 <td>${equipo.ubicacion}</td>
                 <td>
-                    <button class="btn-stock-accion" onclick="appStock.verDetalles('${equipo.imei}')">✏️ Editar</button>
+                    <button class="btn-stock-accion" onclick="appStock.abrirEdicion('${equipo.imei}')">✏️ Editar</button>
                 </td>
             `;
             this.tbody.appendChild(fila);
@@ -68,14 +109,111 @@ class ControlInventario {
         this.renderizarTabla(filtrados);
     }
 
-    verDetalles(imei) {
-        // En iteraciones futuras, aquí abriremos un modal o panel lateral para editar ubicación, estado, etc.
-        console.log(`Abriendo detalles de edición para el IMEI: ${imei}`);
-        alert(`Módulo de edición en construcción. IMEI seleccionado: ${imei}`);
+    abrirEdicion(imei) {
+        const equipo = this.inventarioGlobal.find(e => e.imei === imei);
+        if (!equipo) return;
+
+        const modalAnterior = document.getElementById('modal-stock-edit');
+        if (modalAnterior) modalAnterior.remove();
+
+        const modalHTML = `
+            <div id="modal-stock-edit" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center;">
+                <div style="background: #1e1e1e; border: 1px solid #ffb74d; border-radius: 8px; padding: 25px; width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                    <h2 style="color: #ffb74d; margin-top: 0; margin-bottom: 5px;">Editar Equipo</h2>
+                    <p style="color: #888; font-size: 0.85rem; margin-top: 0; margin-bottom: 20px;">IMEI: <b style="color:#fff;">${equipo.imei}</b> (${equipo.marca} ${equipo.modelo})</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Estado:</label>
+                            <select id="edit-stock-estado" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px;">
+                                <option value="DISPONIBLE" ${equipo.estado.toUpperCase().includes('DISPONIBLE') ? 'selected' : ''}>DISPONIBLE</option>
+                                <option value="ASIGNADO" ${equipo.estado.toUpperCase().includes('ASIGNADO') ? 'selected' : ''}>ASIGNADO</option>
+                                <option value="REVISIÓN" ${equipo.estado.toUpperCase().includes('REVIS') ? 'selected' : ''}>REVISIÓN</option>
+                                <option value="DAÑADO" ${equipo.estado.toUpperCase().includes('DAÑ') ? 'selected' : ''}>DAÑADO</option>
+                                <option value="${equipo.estado}" style="display:none;" selected>${equipo.estado}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Línea (MSISDN):</label>
+                            <input type="text" id="edit-stock-linea" value="${equipo.linea}" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Ubicación / Unidad:</label>
+                        <input type="text" id="edit-stock-ubicacion" value="${equipo.ubicacion}" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box;">
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">ICCID Vinculado:</label>
+                        <input type="text" id="edit-stock-iccid" value="${equipo.iccid}" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box;">
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Comentario:</label>
+                        <textarea id="edit-stock-comentario" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; resize: vertical; min-height: 60px;">${equipo.comentario}</textarea>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; gap: 10px;">
+                        <button onclick="document.getElementById('modal-stock-edit').remove()" style="flex: 1; padding: 10px; background: #333; color: #fff; border: none; border-radius: 4px; cursor: pointer;">Cancelar</button>
+                        <button id="btn-guardar-stock" onclick="appStock.guardarEdicion('${equipo.imei}')" style="flex: 1; padding: 10px; background: #ffb74d; color: #000; font-weight: bold; border: none; border-radius: 4px; cursor: pointer;">💾 Guardar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    async guardarEdicion(imei) {
+        const btn = document.getElementById('btn-guardar-stock');
+        btn.innerText = "Guardando... ⏳";
+        btn.disabled = true;
+        btn.style.background = "#555";
+        btn.style.color = "#ccc";
+
+        const nuevoEstado = document.getElementById('edit-stock-estado').value;
+        const nuevaUbicacion = document.getElementById('edit-stock-ubicacion').value;
+        const nuevoIccid = document.getElementById('edit-stock-iccid').value;
+        const nuevaLinea = document.getElementById('edit-stock-linea').value;
+        const nuevoComentario = document.getElementById('edit-stock-comentario').value;
+
+        try {
+            const peticion = await fetch(this.urlAppsScript, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ 
+                    accion: "editar_stock", 
+                    imei: imei,
+                    nuevoEstado: nuevoEstado,
+                    nuevaUbicacion: nuevaUbicacion,
+                    nuevoIccid: nuevoIccid,
+                    nuevaLinea: nuevaLinea,
+                    nuevoComentario: nuevoComentario
+                })
+            });
+            const respuesta = await peticion.json();
+
+            if (respuesta.success) {
+                document.getElementById('modal-stock-edit').remove();
+                this.cargarDatos(); 
+            } else {
+                alert("❌ Error al guardar en Sheets: " + respuesta.error);
+                btn.innerText = "💾 Guardar";
+                btn.disabled = false;
+                btn.style.background = "#ffb74d";
+                btn.style.color = "#000";
+            }
+        } catch (error) {
+            console.error(error);
+            alert("❌ Falla de red al intentar conectar con el servidor.");
+            btn.innerText = "💾 Guardar";
+            btn.disabled = false;
+            btn.style.background = "#ffb74d";
+            btn.style.color = "#000";
+        }
     }
 }
 
-// Inicializar la clase cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => { 
     window.appStock = new ControlInventario(); 
 });
