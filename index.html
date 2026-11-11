@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Soporte PU-K - IDT Tecnologías</title>
+    <link rel="stylesheet" href="css/stock.css">
     <link rel="stylesheet" href="soporte.css">
     <link rel="stylesheet" href="css/monitormapon.css">
     <link rel="stylesheet" href="css/monitorzeek.css">
@@ -26,6 +27,7 @@
         <div style="display: flex; align-items: center; gap: 30px;">
             <div class="logo-app" style="color: #ffb74d; font-weight: bold; font-size: 1.2rem;">IDT TECNOLOGÍAS - PU-K</div>
             <div class="menu-tabs" style="display: flex; gap: 10px;">
+                <button class="tab-btn" onclick="appSoporte.cambiarVista('stock')">Inventario Stock</button>
                 <button class="tab-btn activo" onclick="appSoporte.cambiarVista('soporte')">Soporte Técnico</button>
                 <button class="tab-btn" onclick="appSoporte.cambiarVista('monitores')">Monitores Globales</button>
                 <button class="tab-btn" onclick="appSoporte.cambiarVista('diagnostico')">Diagnóstico en Vivo</button>
@@ -121,7 +123,31 @@
                 <div id="contenedor-zeek"></div>
             </div>
         </div>
-
+<div id="vista-stock" class="vista-oculta">
+    <div class="stock-header">
+        <h1 class="stock-titulo">Control de Inventario</h1>
+        <input type="text" id="buscador-stock" class="stock-buscador" placeholder="🔍 Buscar por IMEI, modelo o marca...">
+    </div>
+    
+    <div class="stock-table-container">
+        <table class="stock-table">
+            <thead>
+                <tr>
+                    <th>MARCA</th>
+                    <th>MODELO</th>
+                    <th>IMEI / SERIE</th>
+                    <th>ICCID (Línea)</th>
+                    <th>ESTADO</th>
+                    <th>UBICACIÓN</th>
+                    <th>ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-stock">
+                <!-- Las filas se inyectarán aquí con JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
         <div id="vista-diagnostico" class="vista-oculta" style="flex-grow: 1; overflow-y: auto;">
         </div>
 
@@ -142,6 +168,7 @@
         </div>
     </div>
 
+    <script src="stock.js"></script>
     <script src="soporte.js"></script>
     <script src="monitormapon.js"></script>
     <script src="diagnostico.js"></script> 
@@ -246,5 +273,6 @@
             cargarDatosMaponDirecto(); 
         });
     </script>
+    
 </body>
 </html>
