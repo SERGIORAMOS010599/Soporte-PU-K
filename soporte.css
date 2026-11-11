@@ -441,3 +441,74 @@ body.con-panel-abierto .vista-cuadricula {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+/* ==========================================
+   DISEÑO RESPONSIVO (MÓVILES Y TABLETS)
+========================================== */
+@media screen and (max-width: 768px) {
+    /* Menú superior: de fila a columna */
+    .navbar-principal {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 15px;
+        padding: 15px !important;
+    }
+    
+    .navbar-principal > div:first-child {
+        flex-direction: column !important;
+        gap: 15px !important;
+    }
+
+    /* Botones del menú en celular */
+    .menu-tabs {
+        flex-wrap: wrap !important;
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .tab-btn {
+        flex: 1 1 45%; /* Dos botones por fila */
+        font-size: 0.8rem;
+        padding: 8px 5px;
+        text-align: center;
+    }
+
+    /* Buscador global al 100% de ancho */
+    .buscador-container {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+    
+    /* Vistas y contenedores */
+    .vistas-container {
+        height: calc(100vh - 180px) !important; /* Más espacio para el menú alto */
+    }
+
+    /* Panel lateral de soporte ocupará toda la pantalla */
+    #panel-detalles.abierto {
+        width: 100% !important;
+        right: 0 !important;
+    }
+
+    /* Tarjetas de soporte a una sola columna */
+    .grid-tarjetas {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Modales de Stock (Editar/Agregar) ajustados a la pantalla */
+    #modal-stock > div {
+        width: 95% !important;
+        padding: 15px !important;
+    }
+    
+    /* Forzar que los grids internos de los modales sean de 1 columna */
+    #modal-stock > div > div {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* Botones de acción (Apagar motor, etc.) más compactos */
+    .panel-botones .btn-accion {
+        flex: 1 1 30% !important;
+        font-size: 0.6rem !important;
+        padding: 8px 5px !important;
+    }
+}
