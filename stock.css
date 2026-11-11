@@ -1,112 +1,114 @@
 /* ==========================================
-   MÓDULO DE STOCK / INVENTARIO
+   MÓDULO DE STOCK / INVENTARIO - DISEÑO PRO
 ========================================== */
 
 #vista-stock {
-    padding: 20px;
+    padding: 15px 25px;
     color: #e0e0e0;
     animation: fadeIn 0.3s ease-in-out;
 }
 
+/* --- HEADER Y BOTONES --- */
 .stock-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    background: #1a1a1a;
-    padding: 15px 20px;
-    border-radius: 8px;
+    background: linear-gradient(145deg, #1e1e1e, #141414);
+    padding: 15px 25px;
+    border-radius: 12px;
     border: 1px solid #333;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    flex-shrink: 0;
 }
 
 .stock-titulo {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     color: #ffb74d; 
     margin: 0;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
+    font-weight: 700;
 }
 
 .stock-controles {
     display: flex;
-    gap: 15px;
+    gap: 12px;
     align-items: center;
 }
 
-.stock-buscador {
-    width: 300px;
-    padding: 10px 15px;
-    border-radius: 20px;
-    border: 1px solid #444;
-    background: #222;
-    color: #fff;
-    font-size: 0.9rem;
-    outline: none;
-    transition: all 0.3s ease;
-}
-
-.stock-buscador:focus {
-    border-color: #ffb74d;
-    box-shadow: 0 0 5px rgba(255, 183, 77, 0.3);
-}
-
-.btn-enviar-salidas {
-    background: #00e676;
-    color: #000;
-    border: none;
+/* Estilos de botones modernos */
+.btn-stock-primario, .btn-stock-secundario, .btn-stock-exito {
     padding: 10px 20px;
-    border-radius: 20px;
+    border-radius: 6px;
     font-weight: bold;
+    font-size: 0.9rem;
     cursor: pointer;
-    transition: 0.3s;
+    transition: all 0.2s ease;
+    border: none;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.btn-enviar-salidas:hover { background: #00c853; }
-.btn-enviar-salidas:disabled { background: #555; color: #888; cursor: not-allowed; }
+.btn-stock-primario { background: #333; color: #fff; border: 1px solid #555; }
+.btn-stock-primario:hover { background: #444; border-color: #ffb74d; color: #ffb74d; }
 
-/* --- CONTENEDOR CON SCROLL --- */
-.stock-table-container {
-    background: #1e1e1e;
-    border-radius: 8px;
-    border: 1px solid #333;
-    max-height: calc(100vh - 220px); /* Esto activa el scroll vertical */
+.btn-stock-secundario { background: transparent; color: #aaa; border: 1px solid #444; }
+.btn-stock-secundario:hover { background: rgba(255, 60, 60, 0.1); color: #ff4c4c; border-color: #ff4c4c; }
+
+.btn-stock-exito { background: #00e676; color: #000; box-shadow: 0 2px 8px rgba(0, 230, 118, 0.4); }
+.btn-stock-exito:hover { background: #00c853; transform: translateY(-1px); }
+.btn-stock-exito:disabled { background: #555; color: #888; box-shadow: none; cursor: not-allowed; }
+
+.oculto { display: none !important; }
+
+/* --- CONTENEDOR CON SCROLL (LA SOLUCIÓN AL DESBORDAMIENTO) --- */
+.stock-table-wrapper {
+    background: #181818;
+    border-radius: 12px;
+    border: 1px solid #2a2a2a;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    /* Forzar scroll */
+    max-height: calc(100vh - 190px); 
     overflow-y: auto;
-    overflow-x: auto; /* Scroll horizontal si hay muchas columnas */
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    overflow-x: auto;
 }
 
+/* --- DISEÑO DE TABLA ELEGANTE --- */
 .stock-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate; 
+    border-spacing: 0;
     text-align: left;
-    white-space: nowrap; /* Evita que el texto se amontone hacia abajo */
+    white-space: nowrap;
 }
 
-/* Encabezado fijo (Sticky) */
+/* Encabezado fijo superior */
 .stock-table th {
-    background: #141414;
-    color: #90caf9;
-    padding: 15px;
+    background: #111;
+    color: #ffb74d;
+    padding: 16px 15px;
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    border-bottom: 2px solid #333;
     position: sticky;
     top: 0;
     z-index: 10;
+    border-bottom: 2px solid #ffb74d;
 }
 
+/* Ajustes de celdas */
 .stock-table td {
-    padding: 10px 15px;
-    border-bottom: 1px solid #2a2a2a;
+    padding: 12px 15px;
+    border-bottom: 1px solid #222;
     font-size: 0.85rem;
     color: #ccc;
     vertical-align: middle;
 }
 
-.stock-table tr:hover { background-color: #2a2a2a; }
+/* Zebra striping suave */
+.stock-table tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.02); }
+.stock-table tr:hover { background-color: rgba(255, 183, 77, 0.05); }
 
 /* Checkboxes */
 .stock-checkbox {
@@ -116,25 +118,27 @@
     accent-color: #ffb74d;
 }
 
-/* Badges de Estado */
+/* Badges */
 .stock-badge {
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 5px 10px;
+    border-radius: 6px;
     font-size: 0.75rem;
     font-weight: bold;
+    letter-spacing: 0.5px;
 }
-.badge-disponible { background: rgba(0, 230, 118, 0.15); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.3); }
-.badge-asignado { background: rgba(244, 67, 54, 0.15); color: #f44336; border: 1px solid rgba(244, 67, 54, 0.3); }
-.badge-revision { background: rgba(255, 183, 77, 0.15); color: #ffb74d; border: 1px solid rgba(255, 183, 77, 0.3); }
+.badge-disponible { background: rgba(0, 230, 118, 0.1); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.2); }
+.badge-asignado { background: rgba(244, 67, 54, 0.1); color: #f44336; border: 1px solid rgba(244, 67, 54, 0.2); }
+.badge-revision { background: rgba(255, 183, 77, 0.1); color: #ffb74d; border: 1px solid rgba(255, 183, 77, 0.2); }
 
 .btn-stock-accion {
-    background: #333;
-    border: 1px solid #555;
-    color: #fff;
-    padding: 5px 10px;
+    background: #252525;
+    border: 1px solid #444;
+    color: #ddd;
+    padding: 6px 12px;
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.75rem;
     transition: 0.2s;
+    font-weight: bold;
 }
-.btn-stock-accion:hover { background: #ffb74d; color: #000; border-color: #ffb74d; }
+.btn-stock-accion:hover { background: #333; color: #ffb74d; border-color: #ffb74d; }
