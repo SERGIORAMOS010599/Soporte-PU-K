@@ -2,6 +2,20 @@
    MÓDULO DE STOCK / INVENTARIO - DISEÑO PRO
 ========================================== */
 
+/* REGLAS ESTRICTAS DE VISIBILIDAD PARA EL JS */
+#vista-stock.vista-activa {
+    display: flex !important;
+    flex-direction: column;
+    height: 100%;
+}
+#vista-stock.vista-oculta {
+    display: none !important;
+}
+
+#vista-stock {
+    padding: 15px 25px;
+    /* ... el resto de tu código sigue normal hacia abajo ... */
+   
 #vista-stock {
     padding: 15px 25px;
     color: #e0e0e0;
