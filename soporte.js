@@ -283,6 +283,11 @@ class SoporteTecnico {
 
         this.renderizar(); 
 
+        // ---> AGREGA ESTAS TRES LÍNEAS PARA FILTRAR EL STOCK <---
+        if (window.appStock) {
+            window.appStock.filtrarTabla(texto);
+        }
+
         const query = texto.toLowerCase().trim();
         const filasMapon = document.querySelectorAll('#mapon-tbody tr'); 
         
