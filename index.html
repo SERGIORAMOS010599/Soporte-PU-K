@@ -123,22 +123,29 @@
                 <div id="contenedor-zeek"></div>
             </div>
         </div>
-<div id="vista-stock" class="vista-oculta">
+<div id="vista-stock" class="vista-oculta" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
     <div class="stock-header">
-        <h1 class="stock-titulo">Control de Inventario</h1>
+        <h1 class="stock-titulo">Inventario General</h1>
         <div class="stock-controles">
-            <input type="text" id="buscador-stock" class="stock-buscador" placeholder="🔍 Buscar por IMEI, modelo o marca...">
-            <button id="btn-enviar-salidas" class="btn-enviar-salidas" onclick="appStock.enviarSeleccionadosASalidas()">
-                📦 Enviar a Salidas
+            <!-- Botón Inicial -->
+            <button id="btn-activar-seleccion" class="btn-stock-primario" onclick="appStock.toggleModoSeleccion()">
+                ☑️ Selección de Equipos
+            </button>
+            <!-- Botones Ocultos (Aparecen al seleccionar) -->
+            <button id="btn-cancelar-seleccion" class="btn-stock-secundario oculto" onclick="appStock.toggleModoSeleccion()">
+                ✖ Cancelar
+            </button>
+            <button id="btn-enviar-salidas" class="btn-stock-exito oculto" onclick="appStock.enviarSeleccionadosASalidas()">
+                📦 Enviar equipos a salidas
             </button>
         </div>
     </div>
     
-    <div class="stock-table-container">
-        <table class="stock-table">
+    <div class="stock-table-wrapper">
+        <table class="stock-table" id="tabla-stock-id">
             <thead>
                 <tr>
-                    <th style="width: 40px; text-align: center;">
+                    <th class="col-check oculto" style="width: 40px; text-align: center;">
                         <input type="checkbox" id="check-all-stock" class="stock-checkbox" onclick="appStock.toggleTodos(this)">
                     </th>
                     <th>FECHA ENT.</th>
@@ -153,7 +160,7 @@
                     <th>TIPO SERV.</th>
                     <th>COMENTARIO</th>
                     <th>FOTO</th>
-                    <th>ACCIONES</th>
+                    <th style="text-align: center;">ACCIONES</th>
                 </tr>
             </thead>
             <tbody id="tbody-stock">
