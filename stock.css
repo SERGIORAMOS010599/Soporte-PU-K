@@ -21,13 +21,19 @@
 
 .stock-titulo {
     font-size: 1.5rem;
-    color: #ffb74d; /* Naranja de PU-K */
+    color: #ffb74d; 
     margin: 0;
     letter-spacing: 0.5px;
 }
 
+.stock-controles {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
 .stock-buscador {
-    width: 350px;
+    width: 300px;
     padding: 10px 15px;
     border-radius: 20px;
     border: 1px solid #444;
@@ -43,11 +49,31 @@
     box-shadow: 0 0 5px rgba(255, 183, 77, 0.3);
 }
 
+.btn-enviar-salidas {
+    background: #00e676;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-enviar-salidas:hover { background: #00c853; }
+.btn-enviar-salidas:disabled { background: #555; color: #888; cursor: not-allowed; }
+
+/* --- CONTENEDOR CON SCROLL --- */
 .stock-table-container {
     background: #1e1e1e;
     border-radius: 8px;
     border: 1px solid #333;
-    overflow-x: auto;
+    max-height: calc(100vh - 220px); /* Esto activa el scroll vertical */
+    overflow-y: auto;
+    overflow-x: auto; /* Scroll horizontal si hay muchas columnas */
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
@@ -55,56 +81,60 @@
     width: 100%;
     border-collapse: collapse;
     text-align: left;
+    white-space: nowrap; /* Evita que el texto se amontone hacia abajo */
 }
 
+/* Encabezado fijo (Sticky) */
 .stock-table th {
     background: #141414;
     color: #90caf9;
     padding: 15px;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     border-bottom: 2px solid #333;
     position: sticky;
     top: 0;
+    z-index: 10;
 }
 
 .stock-table td {
-    padding: 12px 15px;
+    padding: 10px 15px;
     border-bottom: 1px solid #2a2a2a;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #ccc;
+    vertical-align: middle;
 }
 
-.stock-table tr:hover {
-    background-color: #252525;
+.stock-table tr:hover { background-color: #2a2a2a; }
+
+/* Checkboxes */
+.stock-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #ffb74d;
 }
 
 /* Badges de Estado */
 .stock-badge {
     padding: 4px 8px;
     border-radius: 4px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: bold;
 }
-
 .badge-disponible { background: rgba(0, 230, 118, 0.15); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.3); }
 .badge-asignado { background: rgba(244, 67, 54, 0.15); color: #f44336; border: 1px solid rgba(244, 67, 54, 0.3); }
 .badge-revision { background: rgba(255, 183, 77, 0.15); color: #ffb74d; border: 1px solid rgba(255, 183, 77, 0.3); }
 
-/* Botones de acción en tabla */
 .btn-stock-accion {
-    background: transparent;
+    background: #333;
     border: 1px solid #555;
     color: #fff;
     padding: 5px 10px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     transition: 0.2s;
 }
-
-.btn-stock-accion:hover {
-    background: #333;
-    border-color: #777;
-}
+.btn-stock-accion:hover { background: #ffb74d; color: #000; border-color: #ffb74d; }
