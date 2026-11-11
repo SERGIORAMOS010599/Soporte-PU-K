@@ -40,79 +40,82 @@
     </div>
 
     <div class="vistas-container">
+        
+        <!-- PESTAÑA 1: SOPORTE -->
         <div id="vista-soporte" class="vista-activa">
-                <div class="vista-cuadricula" style="overflow-y: auto; max-height: calc(100vh - 120px); padding-bottom: 20px; padding-right: 10px;">
-                    <div id="grid-salidas" class="grid-tarjetas"></div>
+            <div class="vista-cuadricula" style="overflow-y: auto; max-height: calc(100vh - 120px); padding-bottom: 20px; padding-right: 10px;">
+                <div id="grid-salidas" class="grid-tarjetas"></div>
+            </div>
+
+            <div id="panel-detalles" class="panel-lateral">
+                <div class="encabezado-panel">
+                    <div id="det-titulo-contenedor" style="display: flex; align-items: center; gap: 10px;">
+                        <h1 class="titulo-detalles" id="det-titulo">CARGANDO...</h1>
+                        <span class="icono-editar" onclick="appSoporte.activarEdicionGeneral()">✏️</span>
+                    </div>
+                    <button class="btn-cerrar" onclick="appSoporte.cerrarDetalles()">✖</button>
                 </div>
+                
+                <div class="panel-botones" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                    <button class="btn-accion" onclick="appSoporte.enviarSMS('apagar')">
+                        <div class="icono" style="background-color: #d32f2f;">⏻</div>APAGAR<br>MOTOR
+                    </button>
+                    <button class="btn-accion" onclick="appSoporte.enviarSMS('encender')">
+                        <div class="icono" style="background-color: #388e3c;">⏻</div>ENCENDER<br>MOTOR
+                    </button>
+                    <button class="btn-accion" onclick="appSoporte.enviarSMS('configuracion')">
+                        <div class="icono" style="background-color: #ffb74d;">?</div>CONFIGURACION<br>DEL EQUIPO
+                    </button>
+                    <button class="btn-accion" onclick="appSoporte.enviarSMS('reiniciar')">
+                        <div class="icono" style="background-color: #f57c00;">⟳</div>REINICIAR<br>EQUIPO
+                    </button>
+                    <button class="btn-accion" onclick="appSoporte.enviarSMS('borrar')">
+                        <div class="icono" style="background-color: #f57c00;">🗑️</div>BORRADO DE<br>MEMORIA
+                    </button>
+                    <button class="btn-accion" onclick="appSoporte.enviarSMS('formatear')">
+                        <div class="icono" style="background-color: #d32f2f;">⌫</div>FORMATEAR<br>EQUIPO
+                    </button>
+                    <button class="btn-accion" onclick="window.open('https://soporte.zeekgps.com/ZeekSoporte/', '_blank')">
+                        <div class="icono" style="background-color: #1976d2;">🛠️</div>ZEEK<br>SOPORTE
+                    </button>
+                    <button class="btn-accion" onclick="window.open('https://mapon.com/partner/gbox_new/', '_blank')">
+                        <div class="icono" style="background-color: #00c853;">📍</div>MAPON<br>SOPORTE
+                    </button>
+                    <button class="btn-accion" onclick="appSoporte.abrirDiagnostico()">
+                        <div class="icono" style="background-color: #9c27b0;">🩺</div>DIAGNÓSTICO<br>EN VIVO
+                    </button>
+                </div>
+                
+                <table class="tabla-info">
+                    <tr><td>ID</td><td id="det-id">---</td></tr>
+                    <tr><td>Línea</td><td id="det-linea">---</td></tr>
+                    <tr><td>ICCID</td><td id="det-iccid">---</td></tr>
+                    <tr><td>IMEI</td><td id="det-imei">---</td></tr>
+                    <tr><td>Marca</td><td id="det-marca">---</td></tr>
+                    <tr><td>Modelo</td><td id="det-modelo">---</td></tr>
+                    <tr><td>Cliente</td><td id="det-cliente">---</td></tr>
+                    <tr><td>Tipo de servicio</td><td id="det-tipo-servicio" style="text-transform: uppercase; font-weight: bold;">---</td></tr>
+                    <tr><td>Estado del Servicio</td><td id="det-servicio">---</td></tr>
+                    <tr><td>Marca/Mod. Unidad</td><td id="det-marcaModeloUnidad">---</td></tr>
+                    <tr><td>Año Unidad</td><td id="det-anio">---</td></tr>
+                    <tr><td>Nº Serie Unidad</td><td id="det-numSerie">---</td></tr>
+                </table>
 
-                <div id="panel-detalles" class="panel-lateral">
-                    <div class="encabezado-panel">
-                        <div id="det-titulo-contenedor" style="display: flex; align-items: center; gap: 10px;">
-                            <h1 class="titulo-detalles" id="det-titulo">CARGANDO...</h1>
-                            <span class="icono-editar" onclick="appSoporte.activarEdicionGeneral()">✏️</span>
-                        </div>
-                        <button class="btn-cerrar" onclick="appSoporte.cerrarDetalles()">✖</button>
+                <div class="panel-comandos-box">
+                    <div class="comandos-header">
+                        <h3>Asistente de Configuración</h3>
+                        <span class="badge" id="asistente-badge-marca">Marca</span>
                     </div>
-                    
-                    <div class="panel-botones" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
-                        <button class="btn-accion" onclick="appSoporte.enviarSMS('apagar')">
-                            <div class="icono" style="background-color: #d32f2f;">⏻</div>APAGAR<br>MOTOR
-                        </button>
-                        <button class="btn-accion" onclick="appSoporte.enviarSMS('encender')">
-                            <div class="icono" style="background-color: #388e3c;">⏻</div>ENCENDER<br>MOTOR
-                        </button>
-                        <button class="btn-accion" onclick="appSoporte.enviarSMS('configuracion')">
-                            <div class="icono" style="background-color: #ffb74d;">?</div>CONFIGURACION<br>DEL EQUIPO
-                        </button>
-                        <button class="btn-accion" onclick="appSoporte.enviarSMS('reiniciar')">
-                            <div class="icono" style="background-color: #f57c00;">⟳</div>REINICIAR<br>EQUIPO
-                        </button>
-                        <button class="btn-accion" onclick="appSoporte.enviarSMS('borrar')">
-                            <div class="icono" style="background-color: #f57c00;">🗑️</div>BORRADO DE<br>MEMORIA
-                        </button>
-                        <button class="btn-accion" onclick="appSoporte.enviarSMS('formatear')">
-                            <div class="icono" style="background-color: #d32f2f;">⌫</div>FORMATEAR<br>EQUIPO
-                        </button>
-                        <button class="btn-accion" onclick="window.open('https://soporte.zeekgps.com/ZeekSoporte/', '_blank')">
-                            <div class="icono" style="background-color: #1976d2;">🛠️</div>ZEEK<br>SOPORTE
-                        </button>
-                        <button class="btn-accion" onclick="window.open('https://mapon.com/partner/gbox_new/', '_blank')">
-                            <div class="icono" style="background-color: #00c853;">📍</div>MAPON<br>SOPORTE
-                        </button>
-                        <button class="btn-accion" onclick="appSoporte.abrirDiagnostico()">
-                            <div class="icono" style="background-color: #9c27b0;">🩺</div>DIAGNÓSTICO<br>EN VIVO
-                        </button>
+                    <div class="comandos-body" style="padding: 15px; text-align: left;">
+                        <input type="text" id="buscador-asistente" placeholder="Escribe tu duda o comando...">
+                        <div id="asistente-sugerencias" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;"></div>
+                        <div id="asistente-interactivo" style="border-top: 1px dashed #444; padding-top: 15px; display: none;"></div>
                     </div>
-                    
-                    <table class="tabla-info">
-                        <tr><td>ID</td><td id="det-id">---</td></tr>
-                        <tr><td>Línea</td><td id="det-linea">---</td></tr>
-                        <tr><td>ICCID</td><td id="det-iccid">---</td></tr>
-                        <tr><td>IMEI</td><td id="det-imei">---</td></tr>
-                        <tr><td>Marca</td><td id="det-marca">---</td></tr>
-                        <tr><td>Modelo</td><td id="det-modelo">---</td></tr>
-                        <tr><td>Cliente</td><td id="det-cliente">---</td></tr>
-                        <tr><td>Tipo de servicio</td><td id="det-tipo-servicio" style="text-transform: uppercase; font-weight: bold;">---</td></tr>
-                        <tr><td>Estado del Servicio</td><td id="det-servicio">---</td></tr>
-                        <tr><td>Marca/Mod. Unidad</td><td id="det-marcaModeloUnidad">---</td></tr>
-                        <tr><td>Año Unidad</td><td id="det-anio">---</td></tr>
-                        <tr><td>Nº Serie Unidad</td><td id="det-numSerie">---</td></tr>
-                    </table>
-
-                    <div class="panel-comandos-box">
-                        <div class="comandos-header">
-                            <h3>Asistente de Configuración</h3>
-                            <span class="badge" id="asistente-badge-marca">Marca</span>
-                        </div>
-                        <div class="comandos-body" style="padding: 15px; text-align: left;">
-                            <input type="text" id="buscador-asistente" placeholder="Escribe tu duda o comando...">
-                            <div id="asistente-sugerencias" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;"></div>
-                            <div id="asistente-interactivo" style="border-top: 1px dashed #444; padding-top: 15px; display: none;"></div>
-                        </div>
-                    </div>
-                </div> 
+                </div>
             </div> 
+        </div> 
 
+        <!-- PESTAÑA 2: MONITORES GLOBALES -->
         <div id="vista-monitores" class="vista-oculta">
             <div class="header-vista" style="padding: 20px 20px 0 20px;">
                 <h2 style="color: #fff; margin-bottom: 5px;">Monitores de Telemetría</h2>
@@ -123,56 +126,58 @@
                 <div id="contenedor-zeek"></div>
             </div>
         </div>
-<div id="vista-stock" class="vista-oculta" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
-    <div class="stock-header">
-        <h1 class="stock-titulo">Inventario General</h1>
-        <div class="stock-controles">
-            <!-- Botón Inicial -->
-            <button id="btn-activar-seleccion" class="btn-stock-primario" onclick="appStock.toggleModoSeleccion()">
-                ☑️ Selección de Equipos
-            </button>
-            <!-- Botones Ocultos (Aparecen al seleccionar) -->
-            <button id="btn-cancelar-seleccion" class="btn-stock-secundario oculto" onclick="appStock.toggleModoSeleccion()">
-                ✖ Cancelar
-            </button>
-            <button id="btn-enviar-salidas" class="btn-stock-exito oculto" onclick="appStock.enviarSeleccionadosASalidas()">
-                📦 Enviar equipos a salidas
-            </button>
+
+        <!-- PESTAÑA 3: INVENTARIO STOCK (SIN ESTILOS EN LÍNEA) -->
+        <div id="vista-stock" class="vista-oculta">
+            <div class="stock-header">
+                <h1 class="stock-titulo">Inventario General</h1>
+                <div class="stock-controles">
+                    <button id="btn-activar-seleccion" class="btn-stock-primario" onclick="appStock.toggleModoSeleccion()">
+                        ☑️ Selección de Equipos
+                    </button>
+                    <button id="btn-cancelar-seleccion" class="btn-stock-secundario oculto" onclick="appStock.toggleModoSeleccion()">
+                        ✖ Cancelar
+                    </button>
+                    <button id="btn-enviar-salidas" class="btn-stock-exito oculto" onclick="appStock.enviarSeleccionadosASalidas()">
+                        📦 Enviar equipos a salidas
+                    </button>
+                </div>
+            </div>
+            
+            <div class="stock-table-wrapper">
+                <table class="stock-table" id="tabla-stock-id">
+                    <thead>
+                        <tr>
+                            <th class="col-check oculto" style="width: 40px; text-align: center;">
+                                <input type="checkbox" id="check-all-stock" class="stock-checkbox" onclick="appStock.toggleTodos(this)">
+                            </th>
+                            <th>FECHA ENT.</th>
+                            <th>MARCA</th>
+                            <th>MODELO</th>
+                            <th>ID</th>
+                            <th>IMEI / SERIE</th>
+                            <th>ICCID (Línea)</th>
+                            <th>COMPAÑÍA</th>
+                            <th>ESTADO</th>
+                            <th>UBICACIÓN</th>
+                            <th>TIPO SERV.</th>
+                            <th>COMENTARIO</th>
+                            <th>FOTO</th>
+                            <th style="text-align: center;">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-stock">
+                        <!-- Inyección por JS -->
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-    
-    <div class="stock-table-wrapper">
-        <table class="stock-table" id="tabla-stock-id">
-            <thead>
-                <tr>
-                    <th class="col-check oculto" style="width: 40px; text-align: center;">
-                        <input type="checkbox" id="check-all-stock" class="stock-checkbox" onclick="appStock.toggleTodos(this)">
-                    </th>
-                    <th>FECHA ENT.</th>
-                    <th>MARCA</th>
-                    <th>MODELO</th>
-                    <th>ID</th>
-                    <th>IMEI / SERIE</th>
-                    <th>ICCID (Línea)</th>
-                    <th>COMPAÑÍA</th>
-                    <th>ESTADO</th>
-                    <th>UBICACIÓN</th>
-                    <th>TIPO SERV.</th>
-                    <th>COMENTARIO</th>
-                    <th>FOTO</th>
-                    <th style="text-align: center;">ACCIONES</th>
-                </tr>
-            </thead>
-            <tbody id="tbody-stock">
-                <!-- Inyección por JS -->
-            </tbody>
-        </table>
-    </div>
-</div>
+
+        <!-- PESTAÑA 4: DIAGNÓSTICO EN VIVO -->
         <div id="vista-diagnostico" class="vista-oculta" style="flex-grow: 1; overflow-y: auto;">
         </div>
 
-    </div> 
+    </div>
 
     <div id="puk-boton-flotante" onclick="appSoporte.toggleChatPUK()">🐶</div>
     <div id="puk-panel-chat" class="puk-oculto">
