@@ -80,3 +80,17 @@
 .btn-cuadrado-excel:hover {
     background-color: #145230;
 }
+/* ==========================================
+   DISEÑO MÓVIL PARA MAPON
+========================================== */
+@media screen and (max-width: 768px) {
+    .header-vista {
+        text-align: center;
+    }
+    /* Asegura que la tabla se pueda deslizar con el dedo sin romper la pantalla */
+    #contenedor-mapon {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch; /* Deslizamiento suave en celulares */
+        width: 100%;
+    }
+}
