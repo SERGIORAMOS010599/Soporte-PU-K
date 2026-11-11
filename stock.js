@@ -183,7 +183,6 @@ class ControlInventario {
         btn.innerHTML = "📦 Enviar equipos a salidas"; btn.disabled = false;
     }
 
-    // Modal de edición (Se mantiene igual que antes)
     abrirEdicion(imei) {
         const equipo = this.inventarioGlobal.find(e => e.imei === imei);
         if (!equipo) return;
