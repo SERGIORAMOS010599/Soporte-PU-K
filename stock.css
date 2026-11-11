@@ -14,10 +14,6 @@
 
 #vista-stock {
     padding: 15px 25px;
-    /* ... el resto de tu código sigue normal hacia abajo ... */
-   
-#vista-stock {
-    padding: 15px 25px;
     color: #e0e0e0;
     animation: fadeIn 0.4s ease-in-out;
 }
