@@ -227,7 +227,6 @@ class InventarioSatelital {
         const esnInput = document.getElementById('add-sat-esn').value.trim();
         if (!esnInput) return alert("⚠️ El ESN (IMEI) es obligatorio.");
 
-        // Convertir formato de fecha (YYYY-MM-DD -> DD/MM/YYYY) para Google Sheets
         const fActVal = document.getElementById('add-sat-fAct').value;
         const fVenVal = document.getElementById('add-sat-fVen').value;
         const formatFecha = (fechaISO) => {
@@ -274,12 +273,10 @@ class InventarioSatelital {
         
         if (document.getElementById('modal-satelital')) document.getElementById('modal-satelital').remove();
 
-        // Convertir formato DD/MM/YYYY o similar al formato ISO (YYYY-MM-DD) para el input de calendario
         const toISODate = (fechaStr) => {
             if (!fechaStr || fechaStr.includes('-')) return fechaStr; 
             const partes = fechaStr.split('/');
             if (partes.length === 3) {
-                // Asume formato DD/MM/YYYY
                 return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
             }
             return '';
@@ -349,7 +346,6 @@ class InventarioSatelital {
         const btn = document.getElementById('btn-guardar-sat-edit');
         btn.innerText = "Guardando... ⏳"; btn.disabled = true;
 
-        // Convertir formato de fecha (YYYY-MM-DD -> DD/MM/YYYY) para Google Sheets
         const formatFecha = (fechaISO) => {
             if(!fechaISO) return '';
             const [year, month, day] = fechaISO.split('-');
@@ -396,49 +392,42 @@ class InventarioSatelital {
         if (!fechaActVal) return;
 
         const fechaAct = new Date(fechaActVal);
-        // Sumar un mes exactamente
         fechaAct.setMonth(fechaAct.getMonth() + 1);
         
-        // Formatear de regreso a YYYY-MM-DD para el input type="date"
         const year = fechaAct.getFullYear();
         const month = String(fechaAct.getMonth() + 1).padStart(2, '0');
         const day = String(fechaAct.getDate()).padStart(2, '0');
 
         document.getElementById(idVen).value = `${year}-${month}-${day}`;
     }
-}
-// ==========================================
+
+    // ==========================================
     // ORDENAMIENTO DE COLUMNAS (A-Z, Z-A)
     // ==========================================
     ordenarTabla(columna, thElement) {
         if (this.sortCol === columna) {
-            this.sortAsc = !this.sortAsc; // Alternar entre asc y desc
+            this.sortAsc = !this.sortAsc; 
         } else {
             this.sortCol = columna;
-            this.sortAsc = true; // Por defecto de A a Z
+            this.sortAsc = true; 
         }
 
-        // Limpiar flechas de todos los encabezados
         document.querySelectorAll('#tabla-satelitales-id th').forEach(th => {
             th.classList.remove('asc', 'desc');
         });
         
-        // Poner la flecha al encabezado cliqueado
         if (thElement) {
             thElement.classList.add(this.sortAsc ? 'asc' : 'desc');
         }
 
-        // Lógica de ordenamiento
         this.inventario.sort((a, b) => {
             let valA = String(a[columna] || '').toLowerCase();
             let valB = String(b[columna] || '').toLowerCase();
 
-            // Detectar si es fecha DD/MM/YYYY y voltearla a YYYYMMDD para comparar bien
             const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
             if (dateRegex.test(valA)) valA = valA.replace(dateRegex, '$3$2$1');
             if (dateRegex.test(valB)) valB = valB.replace(dateRegex, '$3$2$1');
 
-            // Detectar si son números puros
             if (!isNaN(valA) && !isNaN(valB) && valA !== '' && valB !== '') {
                 valA = parseFloat(valA);
                 valB = parseFloat(valB);
@@ -458,7 +447,6 @@ class InventarioSatelital {
     abrirFiltrosAvanzados() {
         if (document.getElementById('modal-filtros-sat')) document.getElementById('modal-filtros-sat').remove();
         
-        // Extraer lista única de clientes actuales para llenar el combo box automáticamente
         const clientes = [...new Set(this.inventario.map(e => e.cliente))].filter(c => c && c !== 'Sin Asignar').sort();
         const opcionesCliente = clientes.map(c => `<option value="${c}">${c}</option>`).join('');
 
@@ -520,14 +508,13 @@ class InventarioSatelital {
             let pasaFecha = true;
             
             if (fechaInicio || fechaFin) {
-                // Convertir la fecha DD/MM/YYYY a YYYY-MM-DD para poder comparar matemáticamente
                 const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
                 if (dateRegex.test(eq.fechaVen)) {
                     let isoVen = eq.fechaVen.replace(dateRegex, '$3-$2-$1');
                     if (fechaInicio && isoVen < fechaInicio) pasaFecha = false;
                     if (fechaFin && isoVen > fechaFin) pasaFecha = false;
                 } else {
-                    pasaFecha = false; // Si no tiene fecha válida y el usuario filtró por fechas, lo ocultamos
+                    pasaFecha = false; 
                 }
             }
             
@@ -542,4 +529,7 @@ class InventarioSatelital {
         this.renderizarTabla(this.inventario);
         document.getElementById('modal-filtros-sat').remove();
     }
+}
+
+// INICIALIZACIÓN
 document.addEventListener('DOMContentLoaded', () => { window.appSatelitales = new InventarioSatelital(); });
