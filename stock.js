@@ -8,6 +8,8 @@ class ControlInventario {
         this.urlAppsScript = 'https://script.google.com/macros/s/AKfycbxua3f3WK8cOQVV8NGFHaRJ4D7omCK7CptzXtDprnTpooGY-fZxw7m5XoHQgQOAMa2V/exec';
         
         this.modoSeleccion = false;
+        this.sortCol = '';
+        this.sortAsc = true;
         this.cargarDatos();
     }
 
@@ -16,25 +18,25 @@ class ControlInventario {
         const btnActivar = document.getElementById('btn-activar-seleccion');
         const btnCancelar = document.getElementById('btn-cancelar-seleccion');
         const btnEnviar = document.getElementById('btn-enviar-salidas');
-        const btnEnviarSat = document.getElementById('btn-enviar-satelitales'); // <-- NUEVO
+        const btnEnviarSat = document.getElementById('btn-enviar-satelitales');
         const btnAgregar = document.getElementById('btn-agregar-equipo');
         const thCheck = document.querySelector('th.col-check');
         const tdChecks = document.querySelectorAll('td.col-check');
 
         if (this.modoSeleccion) {
-            btnActivar.classList.add('oculto');
+            if(btnActivar) btnActivar.classList.add('oculto');
             if(btnAgregar) btnAgregar.classList.add('oculto');
-            btnCancelar.classList.remove('oculto');
-            btnEnviar.classList.remove('oculto');
-            if(btnEnviarSat) btnEnviarSat.classList.remove('oculto'); // <-- NUEVO
+            if(btnCancelar) btnCancelar.classList.remove('oculto');
+            if(btnEnviar) btnEnviar.classList.remove('oculto');
+            if(btnEnviarSat) btnEnviarSat.classList.remove('oculto'); 
             if (thCheck) thCheck.classList.remove('oculto');
             tdChecks.forEach(td => td.classList.remove('oculto'));
         } else {
-            btnActivar.classList.remove('oculto');
+            if(btnActivar) btnActivar.classList.remove('oculto');
             if(btnAgregar) btnAgregar.classList.remove('oculto');
-            btnCancelar.classList.add('oculto');
-            btnEnviar.classList.add('oculto');
-            if(btnEnviarSat) btnEnviarSat.classList.add('oculto'); // <-- NUEVO
+            if(btnCancelar) btnCancelar.classList.add('oculto');
+            if(btnEnviar) btnEnviar.classList.add('oculto');
+            if(btnEnviarSat) btnEnviarSat.classList.add('oculto'); 
             if (thCheck) thCheck.classList.add('oculto');
             tdChecks.forEach(td => td.classList.add('oculto'));
             
@@ -44,7 +46,11 @@ class ControlInventario {
         }
     }
 
-    // AGREGA ESTA FUNCIÓN NUEVA EN stock.js
+    toggleTodos(checkboxMaster) {
+        const checkboxes = document.querySelectorAll('.check-item');
+        checkboxes.forEach(cb => cb.checked = checkboxMaster.checked);
+    }
+
     async enviarSeleccionadosASatelitales() {
         const checkboxes = document.querySelectorAll('.check-item:checked');
         if (checkboxes.length === 0) return alert("⚠️ Selecciona al menos un equipo satelital.");
@@ -72,9 +78,31 @@ class ControlInventario {
         btn.innerHTML = "🛰️ Enviar a Satelitales"; btn.disabled = false;
     }
 
-    toggleTodos(checkboxMaster) {
-        const checkboxes = document.querySelectorAll('.check-item');
-        checkboxes.forEach(cb => cb.checked = checkboxMaster.checked);
+    async enviarSeleccionadosASalidas() {
+        const checkboxes = document.querySelectorAll('.check-item:checked');
+        if (checkboxes.length === 0) return alert("⚠️ Selecciona al menos un equipo.");
+        const imeisSeleccionados = Array.from(checkboxes).map(cb => cb.value);
+        if (!confirm(`📦 ¿Mover ${imeisSeleccionados.length} equipo(s) a Salidas?`)) return;
+
+        const btn = document.getElementById('btn-enviar-salidas');
+        btn.innerText = "⏳ Moviendo..."; btn.disabled = true;
+        try {
+            const peticion = await fetch(this.urlAppsScript, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ accion: "mover_a_salidas", imeis: imeisSeleccionados })
+            });
+            const respuesta = await peticion.json();
+            if (respuesta.success) {
+                alert(`✅ ¡Éxito! ${respuesta.mensaje}`);
+                this.toggleModoSeleccion(); 
+                this.cargarDatos(); 
+                if (window.appSoporte) window.appSoporte.iniciar(); 
+            } else alert("❌ Error: " + respuesta.error);
+        } catch (error) {
+            alert("❌ Falla de red al intentar conectar.");
+        }
+        btn.innerHTML = "📦 Enviar a Salidas"; btn.disabled = false;
     }
 
     async cargarDatos() {
@@ -89,7 +117,7 @@ class ControlInventario {
             const jsonInv = JSON.parse(textInv.substring(47).slice(0, -2));
             
             this.inventarioGlobal = [];
-            jsonInv.table.rows.forEach((row, rowIndex) => {
+            jsonInv.table.rows.forEach((row) => {
                 if (row && row.c) {
                     let equipo = {
                         fecha: row.c[0] ? (row.c[0].f || row.c[0].v) : '',
@@ -132,7 +160,7 @@ class ControlInventario {
             let estadoMayus = String(equipo.estado).toUpperCase();
             let claseBadge = 'badge-revision';
             if (estadoMayus.includes('NUEVO') || estadoMayus.includes('DISPONIBLE')) claseBadge = 'badge-disponible';
-            if (estadoMayus.includes('ASIGNADO') || estadoMayus.includes('INSTALADO')) claseBadge = 'badge-asignado';
+            if (estadoMayus.includes('ASIGNADO') || estadoMayus.includes('INSTALADO') || estadoMayus.includes('USADO')) claseBadge = 'badge-asignado';
 
             let htmlLinea = '';
             if (equipo.linea) htmlLinea += `<div style="color: #90caf9; font-size: 0.75rem;">📞 ${equipo.linea}</div>`;
@@ -172,34 +200,6 @@ class ControlInventario {
         this.renderizarTabla(filtrados);
     }
 
-    async enviarSeleccionadosASalidas() {
-        const checkboxes = document.querySelectorAll('.check-item:checked');
-        if (checkboxes.length === 0) return alert("⚠️ Selecciona al menos un equipo.");
-        const imeisSeleccionados = Array.from(checkboxes).map(cb => cb.value);
-        if (!confirm(`📦 ¿Mover ${imeisSeleccionados.length} equipo(s) a Salidas?`)) return;
-
-        const btn = document.getElementById('btn-enviar-salidas');
-        btn.innerText = "⏳ Moviendo..."; btn.disabled = true;
-        try {
-            const peticion = await fetch(this.urlAppsScript, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ accion: "mover_a_salidas", imeis: imeisSeleccionados })
-            });
-            const respuesta = await peticion.json();
-            if (respuesta.success) {
-                alert(`✅ ¡Éxito! ${respuesta.mensaje}`);
-                this.toggleModoSeleccion(); 
-                this.cargarDatos(); 
-                if (window.appSoporte) window.appSoporte.iniciar(); 
-            } else alert("❌ Error: " + respuesta.error);
-        } catch (error) {
-            alert("❌ Falla de red al intentar conectar.");
-        }
-        btn.innerHTML = "📦 Enviar equipos a salidas"; btn.disabled = false;
-    }
-
-    // --- INTEGRACIÓN JASPER ---
     async sincronizarConJasper(btnObj, inputIccidId, inputLineaId, inputCompaniaId) {
         const inputIccid = document.getElementById(inputIccidId).value.trim();
         if (!inputIccid || inputIccid === 'N/A') return alert("⚠️ Escribe un ICCID válido primero.");
@@ -229,7 +229,6 @@ class ControlInventario {
         btnObj.disabled = false;
     }
 
-    // --- MODALES (EDITAR Y AGREGAR) ---
     abrirEdicion(imei) {
         const equipo = this.inventarioGlobal.find(e => e.imei === imei);
         if (!equipo) return;
@@ -390,8 +389,8 @@ class ControlInventario {
             btn.innerText = "➕ Agregar a Inventario"; btn.disabled = false;
         }
     }
-}
-   // ==========================================
+
+    // ==========================================
     // ORDENAMIENTO DE COLUMNAS STOCK (A-Z, Z-A)
     // ==========================================
     ordenarTabla(columna, thElement) {
@@ -405,7 +404,7 @@ class ControlInventario {
         document.querySelectorAll('#tabla-stock-id th').forEach(th => th.classList.remove('asc', 'desc'));
         if (thElement) thElement.classList.add(this.sortAsc ? 'asc' : 'desc');
 
-        this.inventario.sort((a, b) => {
+        this.inventarioGlobal.sort((a, b) => {
             let valA = String(a[columna] || '').toLowerCase();
             let valB = String(b[columna] || '').toLowerCase();
 
@@ -421,7 +420,7 @@ class ControlInventario {
             if (valA > valB) return this.sortAsc ? 1 : -1;
             return 0;
         });
-        this.renderizarTabla(this.inventario);
+        this.renderizarTabla(this.inventarioGlobal);
     }
 
     // ==========================================
@@ -430,7 +429,7 @@ class ControlInventario {
     abrirFiltrosAvanzados() {
         if (document.getElementById('modal-filtros-stock')) document.getElementById('modal-filtros-stock').remove();
         
-        const marcas = [...new Set(this.inventario.map(e => e.marca))].filter(c => c).sort();
+        const marcas = [...new Set(this.inventarioGlobal.map(e => e.marca))].filter(c => c && c !== 'S/M').sort();
         const opcionesMarca = marcas.map(c => `<option value="${c}">${c}</option>`).join('');
 
         const modalHTML = `
@@ -471,7 +470,7 @@ class ControlInventario {
         const estadoFiltro = document.getElementById('filtro-stock-estado').value.toLowerCase();
         const ubiFiltro = document.getElementById('filtro-stock-ubi').value.toLowerCase();
         
-        let filtrados = this.inventario.filter(eq => {
+        let filtrados = this.inventarioGlobal.filter(eq => {
             let pasaMarca = marcaFiltro === "" || String(eq.marca).toLowerCase() === marcaFiltro;
             let pasaEstado = estadoFiltro === "" || String(eq.estado).toLowerCase() === estadoFiltro;
             let pasaUbi = ubiFiltro === "" || String(eq.ubicacion).toLowerCase().includes(ubiFiltro);
@@ -482,15 +481,12 @@ class ControlInventario {
     }
 
     limpiarFiltrosAvanzados() {
-        this.renderizarTabla(this.inventario);
+        this.renderizarTabla(this.inventarioGlobal);
         document.getElementById('modal-filtros-stock').remove();
     }
-
-} // <---- ¡ESTA LLAVE ES LA MAGIA QUE CIERRA LA CLASE COMPLETA!
+}
 
 // INICIALIZACIÓN
 document.addEventListener('DOMContentLoaded', () => { 
-    if (typeof InventarioGeneral !== 'undefined') {
-        window.appStock = new InventarioGeneral(); 
-    }
+    window.appStock = new ControlInventario(); 
 });
