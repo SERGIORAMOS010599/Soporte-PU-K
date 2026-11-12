@@ -8,6 +8,8 @@ class InventarioSatelital {
         this.urlAppsScript = 'https://script.google.com/macros/s/AKfycbxua3f3WK8cOQVV8NGFHaRJ4D7omCK7CptzXtDprnTpooGY-fZxw7m5XoHQgQOAMa2V/exec';
         
         this.modoSeleccion = false;
+        this.sortCol = '';
+        this.sortAsc = true;
         this.cargarDatos();
     }
 
@@ -199,7 +201,6 @@ class InventarioSatelital {
                              </select></div>
                         <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Estado:</label>
                              <select id="add-sat-estado" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
-                                <option value="NUEVO">NUEVO</option>
                                 <option value="ACTIVO">ACTIVO</option>
                                 <option value="BAJA">BAJA</option>
                                 <option value="SUSPENDIDO">SUSPENDIDO</option>
@@ -530,8 +531,7 @@ class InventarioSatelital {
         this.renderizarTabla(this.inventario);
         document.getElementById('modal-filtros-sat').remove();
     }
-
-} // <--- ESTA ES LA LLAVE MÁGICA QUE CIERRA LA CLASE COMPLETA. 
+}
 
 // INICIALIZACIÓN
 document.addEventListener('DOMContentLoaded', () => { window.appSatelitales = new InventarioSatelital(); });
