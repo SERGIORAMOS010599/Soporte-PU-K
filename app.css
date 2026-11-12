@@ -1,0 +1,100 @@
+/* ==========================================
+   REGLAS GLOBALES Y ANTI-PANTALLAS NEGRAS
+========================================== */
+.vista-oculta { display: none !important; }
+
+#vista-soporte.vista-activa, 
+#vista-monitores.vista-activa, 
+#vista-diagnostico.vista-activa { 
+    display: block !important; 
+    height: 100%;
+}
+
+#vista-stock.vista-activa { 
+    display: flex !important; 
+    flex-direction: column; 
+    height: 100%; 
+}
+
+.dashboard-monitores { display: flex; flex-direction: column; gap: 20px; margin-bottom: 30px; }
+
+/* ==========================================
+   MÓDULO DE STOCK / INVENTARIO
+========================================== */
+#vista-stock { padding: 15px 25px; color: #e0e0e0; animation: fadeIn 0.4s ease-in-out; }
+.stock-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: linear-gradient(145deg, #1e1e1e, #141414); padding: 15px 25px; border-radius: 8px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.5); flex-shrink: 0; }
+.stock-titulo { font-size: 1.6rem; color: #ffb74d; margin: 0; letter-spacing: 1px; font-weight: 700; }
+.stock-controles { display: flex; gap: 12px; align-items: center; }
+
+.btn-stock-primario, .btn-stock-secundario, .btn-stock-exito { padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; border: none; display: flex; align-items: center; gap: 8px; }
+.btn-stock-primario { background: #333; color: #fff; border: 1px solid #555; }
+.btn-stock-primario:hover { background: #444; border-color: #ffb74d; color: #ffb74d; }
+.btn-stock-secundario { background: transparent; color: #aaa; border: 1px solid #444; }
+.btn-stock-secundario:hover { background: rgba(255, 60, 60, 0.1); color: #ff4c4c; border-color: #ff4c4c; }
+.btn-stock-exito { background: #00e676; color: #000; box-shadow: 0 2px 8px rgba(0, 230, 118, 0.4); }
+.btn-stock-exito:hover { background: #00c853; transform: translateY(-1px); }
+
+.oculto { display: none !important; }
+
+.stock-table-wrapper { background: #181818; border-radius: 8px; border: 1px solid #2a2a2a; box-shadow: 0 8px 25px rgba(0,0,0,0.5); max-height: calc(100vh - 200px); overflow-y: auto; overflow-x: auto; }
+.stock-table-wrapper::-webkit-scrollbar { width: 10px; height: 10px; }
+.stock-table-wrapper::-webkit-scrollbar-track { background: #111; border-radius: 8px; }
+.stock-table-wrapper::-webkit-scrollbar-thumb { background: #444; border-radius: 8px; }
+.stock-table-wrapper::-webkit-scrollbar-thumb:hover { background: #ffb74d; }
+
+.stock-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; white-space: nowrap; }
+.stock-table th { background: #111; color: #ffb74d; padding: 18px 15px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; position: sticky; top: 0; z-index: 10; border-bottom: 2px solid #ffb74d; }
+.stock-table td { padding: 14px 15px; border-bottom: 1px solid #222; font-size: 0.85rem; color: #ccc; vertical-align: middle; }
+.stock-table tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.02); }
+.stock-table tr:hover { background-color: rgba(255, 183, 77, 0.05); }
+
+.stock-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: #ffb74d; }
+.stock-badge { padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; letter-spacing: 0.5px; }
+.badge-disponible { background: rgba(0, 230, 118, 0.1); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.3); }
+.badge-asignado { background: rgba(244, 67, 54, 0.1); color: #f44336; border: 1px solid rgba(244, 67, 54, 0.3); }
+.badge-revision { background: rgba(255, 183, 77, 0.1); color: #ffb74d; border: 1px solid rgba(255, 183, 77, 0.3); }
+
+.btn-stock-accion { background: #252525; border: 1px solid #444; color: #ddd; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; transition: 0.2s; font-weight: bold; }
+.btn-stock-accion:hover { background: #333; color: #ffb74d; border-color: #ffb74d; }
+
+/* ==========================================
+   DISEÑO MÓVIL (CORRECCIÓN DE EMPALMES)
+========================================== */
+@media screen and (max-width: 768px) {
+    .navbar-principal {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 15px;
+        padding: 15px !important;
+        height: auto !important;
+    }
+    .navbar-principal > div:first-child {
+        flex-direction: column !important;
+        gap: 15px !important;
+        width: 100%;
+    }
+    .menu-tabs {
+        flex-wrap: wrap !important;
+        justify-content: center;
+        width: 100%;
+        gap: 5px !important;
+    }
+    .tab-btn {
+        flex: 1 1 45%; 
+        font-size: 0.8rem;
+        padding: 8px 5px;
+        text-align: center;
+    }
+    .buscador-container {
+        width: 100% !important;
+        min-width: 100% !important;
+        margin-top: 10px;
+    }
+    .buscador-container input {
+        z-index: 50; 
+        position: relative;
+    }
+    .vistas-container {
+        height: calc(100vh - 200px) !important; 
+    }
+}
