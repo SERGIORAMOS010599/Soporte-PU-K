@@ -199,6 +199,7 @@ class InventarioSatelital {
                              </select></div>
                         <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Estado:</label>
                              <select id="add-sat-estado" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
+                                <option value="NUEVO">NUEVO</option>
                                 <option value="ACTIVO">ACTIVO</option>
                                 <option value="BAJA">BAJA</option>
                                 <option value="SUSPENDIDO">SUSPENDIDO</option>
@@ -402,7 +403,7 @@ class InventarioSatelital {
     }
 
     // ==========================================
-    // ORDENAMIENTO DE COLUMNAS STOCK (A-Z, Z-A)
+    // ORDENAMIENTO DE COLUMNAS (A-Z, Z-A)
     // ==========================================
     ordenarTabla(columna, thElement) {
         if (this.sortCol === columna) {
@@ -412,8 +413,13 @@ class InventarioSatelital {
             this.sortAsc = true; 
         }
 
-        document.querySelectorAll('#tabla-stock-id th').forEach(th => th.classList.remove('asc', 'desc'));
-        if (thElement) thElement.classList.add(this.sortAsc ? 'asc' : 'desc');
+        document.querySelectorAll('#tabla-satelitales-id th').forEach(th => {
+            th.classList.remove('asc', 'desc');
+        });
+        
+        if (thElement) {
+            thElement.classList.add(this.sortAsc ? 'asc' : 'desc');
+        }
 
         this.inventario.sort((a, b) => {
             let valA = String(a[columna] || '').toLowerCase();
@@ -424,83 +430,108 @@ class InventarioSatelital {
             if (dateRegex.test(valB)) valB = valB.replace(dateRegex, '$3$2$1');
 
             if (!isNaN(valA) && !isNaN(valB) && valA !== '' && valB !== '') {
-                valA = parseFloat(valA); valB = parseFloat(valB);
+                valA = parseFloat(valA);
+                valB = parseFloat(valB);
             }
 
             if (valA < valB) return this.sortAsc ? -1 : 1;
             if (valA > valB) return this.sortAsc ? 1 : -1;
             return 0;
         });
+
         this.renderizarTabla(this.inventario);
     }
 
     // ==========================================
-    // FILTROS AVANZADOS STOCK
+    // FILTROS AVANZADOS (CLIENTES, ESTADOS, FECHAS)
     // ==========================================
     abrirFiltrosAvanzados() {
-        if (document.getElementById('modal-filtros-stock')) document.getElementById('modal-filtros-stock').remove();
+        if (document.getElementById('modal-filtros-sat')) document.getElementById('modal-filtros-sat').remove();
         
-        const marcas = [...new Set(this.inventario.map(e => e.marca))].filter(c => c).sort();
-        const opcionesMarca = marcas.map(c => `<option value="${c}">${c}</option>`).join('');
+        const clientes = [...new Set(this.inventario.map(e => e.cliente))].filter(c => c && c !== 'Sin Asignar').sort();
+        const opcionesCliente = clientes.map(c => `<option value="${c}">${c}</option>`).join('');
 
         const modalHTML = `
-            <div id="modal-filtros-stock" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center;">
-                <div style="background: #1e1e1e; border: 1px solid #ffb74d; border-radius: 12px; padding: 25px; width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); animation: fadeIn 0.2s;">
-                    <h2 style="color: #ffb74d; margin-top: 0; margin-bottom: 5px;">🔎 Filtros Avanzados (Stock)</h2>
+            <div id="modal-filtros-sat" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center;">
+                <div style="background: #1e1e1e; border: 1px solid #64b5f6; border-radius: 12px; padding: 25px; width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); animation: fadeIn 0.2s;">
+                    <h2 style="color: #64b5f6; margin-top: 0; margin-bottom: 5px;">🔎 Filtros Avanzados</h2>
+                    <p style="color: #888; font-size: 0.85rem; margin-top: 0; margin-bottom: 20px;">Filtre los equipos satelitales.</p>
                     
                     <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px;">
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Marca:</label>
-                            <select id="filtro-stock-marca" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
-                                <option value="">-- Todas las Marcas --</option>
-                                ${opcionesMarca}
-                            </select></div>
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Estado:</label>
-                            <select id="filtro-stock-estado" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
+                        <div>
+                            <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Cliente Específico:</label>
+                            <select id="filtro-cliente" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
+                                <option value="">-- Todos los Clientes --</option>
+                                ${opcionesCliente}
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Estado del Equipo:</label>
+                            <select id="filtro-estado" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
                                 <option value="">-- Todos los Estados --</option>
                                 <option value="NUEVO">NUEVO</option>
-                                <option value="USADO">USADO</option>
-                                <option value="DAÑADO">DAÑADO</option>
-                                <option value="GARANTIA">GARANTIA</option>
-                            </select></div>
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Ubicación (Ej. Oficina, Bunker):</label>
-                            <input type="text" id="filtro-stock-ubi" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                                <option value="ACTIVO">ACTIVO</option>
+                                <option value="BAJA">BAJA</option>
+                                <option value="SUSPENDIDO">SUSPENDIDO</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 15px;">
+                            <div style="flex: 1;">
+                                <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Vencimiento Desde:</label>
+                                <input type="date" id="filtro-fecha-inicio" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px; color-scheme: dark;">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Vencimiento Hasta:</label>
+                                <input type="date" id="filtro-fecha-fin" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px; color-scheme: dark;">
+                            </div>
+                        </div>
                     </div>
                     
                     <div style="display: flex; justify-content: space-between; gap: 15px; margin-top: 25px;">
-                        <button onclick="appStock.limpiarFiltrosAvanzados()" style="flex: 1; padding: 12px; background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; cursor: pointer; font-weight:bold;">Limpiar y Cerrar</button>
-                        <button onclick="appStock.aplicarFiltrosAvanzados()" style="flex: 1; padding: 12px; background: #ffb74d; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight:bold;">Aplicar Filtros</button>
+                        <button onclick="appSatelitales.limpiarFiltrosAvanzados()" style="flex: 1; padding: 12px; background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; cursor: pointer; font-weight:bold;">Limpiar y Cerrar</button>
+                        <button onclick="appSatelitales.aplicarFiltrosAvanzados()" style="flex: 1; padding: 12px; background: #64b5f6; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight:bold;">Aplicar Filtros</button>
                     </div>
                 </div>
             </div>
         `;
         document.body.insertAdjacentHTML('beforeend', modalHTML);
     }
-
+    
     aplicarFiltrosAvanzados() {
-        const marcaFiltro = document.getElementById('filtro-stock-marca').value.toLowerCase();
-        const estadoFiltro = document.getElementById('filtro-stock-estado').value.toLowerCase();
-        const ubiFiltro = document.getElementById('filtro-stock-ubi').value.toLowerCase();
+        const clienteFiltro = document.getElementById('filtro-cliente').value.toLowerCase();
+        const estadoFiltro = document.getElementById('filtro-estado').value.toLowerCase();
+        const fechaInicio = document.getElementById('filtro-fecha-inicio').value;
+        const fechaFin = document.getElementById('filtro-fecha-fin').value;
         
         let filtrados = this.inventario.filter(eq => {
-            let pasaMarca = marcaFiltro === "" || String(eq.marca).toLowerCase() === marcaFiltro;
+            let pasaCliente = clienteFiltro === "" || String(eq.cliente).toLowerCase() === clienteFiltro;
             let pasaEstado = estadoFiltro === "" || String(eq.estado).toLowerCase() === estadoFiltro;
-            let pasaUbi = ubiFiltro === "" || String(eq.ubicacion).toLowerCase().includes(ubiFiltro);
-            return pasaMarca && pasaEstado && pasaUbi;
+            let pasaFecha = true;
+            
+            if (fechaInicio || fechaFin) {
+                const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+                if (dateRegex.test(eq.fechaVen)) {
+                    let isoVen = eq.fechaVen.replace(dateRegex, '$3-$2-$1');
+                    if (fechaInicio && isoVen < fechaInicio) pasaFecha = false;
+                    if (fechaFin && isoVen > fechaFin) pasaFecha = false;
+                } else {
+                    pasaFecha = false; 
+                }
+            }
+            
+            return pasaCliente && pasaEstado && pasaFecha;
         });
+        
         this.renderizarTabla(filtrados);
-        document.getElementById('modal-filtros-stock').remove();
+        document.getElementById('modal-filtros-sat').remove();
     }
-
+    
     limpiarFiltrosAvanzados() {
         this.renderizarTabla(this.inventario);
-        document.getElementById('modal-filtros-stock').remove();
+        document.getElementById('modal-filtros-sat').remove();
     }
 
-}
+} // <--- ESTA ES LA LLAVE MÁGICA QUE CIERRA LA CLASE COMPLETA. 
 
 // INICIALIZACIÓN
-document.addEventListener('DOMContentLoaded', () => { 
-    if (typeof InventarioGeneral !== 'undefined') {
-        window.appStock = new InventarioGeneral(); 
-    }
-});
+document.addEventListener('DOMContentLoaded', () => { window.appSatelitales = new InventarioSatelital(); });
