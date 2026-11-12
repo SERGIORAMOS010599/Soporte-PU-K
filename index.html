@@ -32,10 +32,12 @@
     </script>
 </head>
 <body>
-    <div class="navbar-principal" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #1a1a1a; border-bottom: 2px solid #ffb74d;">
-        <div style="display: flex; align-items: center; gap: 30px;">
-            <div class="logo-app" style="color: #ffb74d; font-weight: bold; font-size: 1.2rem;">IDT TECNOLOGÍAS - PU-K</div>
-            <div class="menu-tabs" style="display: flex; gap: 10px;">
+   <div class="navbar-principal" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #1a1a1a; border-bottom: 2px solid #ffb74d; gap: 15px;">
+        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+            <!-- AQUÍ BLINDAMOS EL LOGO PARA QUE NO SE ENCOJA NI HAGA SALTOS DE LÍNEA -->
+            <div class="logo-app" style="color: #ffb74d; font-weight: bold; font-size: 1.2rem; white-space: nowrap; flex-shrink: 0;">IDT TECNOLOGÍAS - PU-K</div>
+            
+            <div class="menu-tabs" style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <button class="tab-btn" onclick="appSoporte.cambiarVista('stock')">Inventario Stock</button>
                 <button class="tab-btn" onclick="appSoporte.cambiarVista('satelitales')">Equipos Satelitales</button>
                 <button class="tab-btn activo" onclick="appSoporte.cambiarVista('soporte')">Soporte Técnico</button>
@@ -43,8 +45,10 @@
                 <button class="tab-btn" onclick="appSoporte.cambiarVista('diagnostico')">Diagnóstico en Vivo</button>
             </div>
         </div>
-        <div class="buscador-container" style="position: relative; min-width: 300px;">
-            <input type="text" id="buscador-global" placeholder="Buscar por IMEI, ID, Cliente o Unidad..." oninput="appSoporte.buscarGlobal(this.value)" style="width: 100%; padding: 10px 35px 10px 15px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff;">
+        
+        <!-- BUSCADOR FLEXIBLE -->
+        <div class="buscador-container" style="position: relative; flex: 1; max-width: 350px; min-width: 200px;">
+            <input type="text" id="buscador-global" placeholder="Buscar IMEI, ID, Cliente..." oninput="appSoporte.buscarGlobal(this.value)" style="width: 100%; padding: 10px 35px 10px 15px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff; box-sizing: border-box;">
             <span id="btn-limpiar-busqueda" onclick="appSoporte.limpiarBusqueda()" style="display: none; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #ffb74d; font-weight: bold;">✖</span>
         </div>
     </div>
