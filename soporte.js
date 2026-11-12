@@ -214,6 +214,28 @@ class SoporteTecnico {
             }
             if(botones[3]) botones[3].classList.add('activo'); // Diagnóstico es el 4to botón
         }
+       const botones = document.querySelectorAll('.tab-btn');
+        botones.forEach(btn => btn.classList.remove('activo'));
+
+        // Ocultar las 5 vistas
+        ['vista-soporte', 'vista-monitores', 'vista-diagnostico', 'vista-stock', 'vista-satelitales'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) { el.classList.add('vista-oculta'); el.classList.remove('vista-activa'); }
+        });
+
+        // Mostrar la solicitada
+        const vistaMostrada = document.getElementById(`vista-${vistaDestino}`);
+        if(vistaMostrada) {
+            vistaMostrada.classList.remove('vista-oculta');
+            vistaMostrada.classList.add('vista-activa');
+        }
+
+        // Índices: 0:Stock, 1:Satelitales, 2:Soporte, 3:Monitores, 4:Diagnostico
+        if (vistaDestino === 'stock' && botones[0]) botones[0].classList.add('activo');
+        if (vistaDestino === 'satelitales' && botones[1]) botones[1].classList.add('activo');
+        if (vistaDestino === 'soporte' && botones[2]) { botones[2].classList.add('activo'); this.renderizar(); }
+        if (vistaDestino === 'monitores' && botones[3]) botones[3].classList.add('activo');
+        if (vistaDestino === 'diagnostico' && botones[4]) botones[4].classList.add('activo');
     }
 
     async iniciar() {
