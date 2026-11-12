@@ -17,7 +17,7 @@ class InventarioSatelital {
         
         const btnActivar = document.getElementById('btn-activar-sat-seleccion');
         const btnCancelar = document.getElementById('btn-cancelar-sat-seleccion');
-        const btnEnviar = document.getElementById('btn-enviar-sat-salidas');
+        const btnEnviar = document.getElementById('btn-enviar-sat-stock');
         const btnAgregar = document.getElementById('btn-agregar-satelital');
         
         const thCheck = document.querySelector('th.col-check-sat');
