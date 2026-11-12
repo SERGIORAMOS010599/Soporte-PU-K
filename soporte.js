@@ -1,5 +1,3 @@
-// js/soporte.js
-
 class SoporteTecnico {
     // --- CONSULTA Y CONTROL EN VIVO DE JASPER / TELCEL ---
     async consultarJasperLinea(iccidUnidad, containerId = 'jasper-resultado-box') {
@@ -214,8 +212,6 @@ class SoporteTecnico {
             }
             if(botones[3]) botones[3].classList.add('activo'); // Diagnóstico es el 4to botón
         }
-       const botones = document.querySelectorAll('.tab-btn');
-        botones.forEach(btn => btn.classList.remove('activo'));
 
         // Ocultar las 5 vistas
         ['vista-soporte', 'vista-monitores', 'vista-diagnostico', 'vista-stock', 'vista-satelitales'].forEach(id => {
