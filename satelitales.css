@@ -1,0 +1,24 @@
+/* ==========================================
+   MÓDULO DE EQUIPOS SATELITALES
+========================================== */
+
+.satelitales-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: linear-gradient(145deg, #151d2b, #0f141e); padding: 15px 25px; border-radius: 8px; border: 1px solid #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.5); flex-shrink: 0; }
+.satelitales-titulo { font-size: 1.6rem; color: #90caf9; margin: 0; letter-spacing: 1px; font-weight: 700; }
+.satelitales-controles { display: flex; gap: 12px; align-items: center; }
+
+.btn-satelitales-primario { padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; border: none; display: flex; align-items: center; gap: 8px; background: #1976d2; color: #fff; border: 1px solid #1565c0; }
+.btn-satelitales-primario:hover { background: #1565c0; box-shadow: 0 0 10px rgba(25, 118, 210, 0.4); }
+
+.satelitales-table-wrapper { background: #12161f; border-radius: 8px; border: 1px solid #1e293b; box-shadow: 0 8px 25px rgba(0,0,0,0.5); max-height: calc(100vh - 200px); overflow-y: auto; overflow-x: auto; }
+.satelitales-table-wrapper::-webkit-scrollbar { width: 10px; height: 10px; }
+.satelitales-table-wrapper::-webkit-scrollbar-track { background: #0f141e; border-radius: 8px; }
+.satelitales-table-wrapper::-webkit-scrollbar-thumb { background: #334155; border-radius: 8px; }
+.satelitales-table-wrapper::-webkit-scrollbar-thumb:hover { background: #90caf9; }
+
+.satelitales-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; white-space: nowrap; }
+.satelitales-table th { background: #0f141e; color: #90caf9; padding: 18px 15px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; position: sticky; top: 0; z-index: 10; border-bottom: 2px solid #1976d2; }
+.satelitales-table td { padding: 14px 15px; border-bottom: 1px solid #1e293b; font-size: 0.85rem; color: #cbd5e1; vertical-align: middle; }
+.satelitales-table tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.02); }
+.satelitales-table tr:hover { background-color: rgba(144, 202, 249, 0.05); }
+
+.satelitales-badge { padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; letter-spacing: 0.5px; }
