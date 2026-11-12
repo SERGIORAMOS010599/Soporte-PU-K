@@ -5,7 +5,8 @@
 
 #vista-soporte.vista-activa, 
 #vista-monitores.vista-activa, 
-#vista-diagnostico.vista-activa { 
+#vista-diagnostico.vista-activa,
+#vista-satelitales.vista-activa { 
     display: block !important; 
     height: 100%;
 }
