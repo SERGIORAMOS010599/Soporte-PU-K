@@ -391,7 +391,7 @@ class ControlInventario {
         }
     }
 }
-    // ==========================================
+   // ==========================================
     // ORDENAMIENTO DE COLUMNAS STOCK (A-Z, Z-A)
     // ==========================================
     ordenarTabla(columna, thElement) {
@@ -485,5 +485,12 @@ class ControlInventario {
         this.renderizarTabla(this.inventario);
         document.getElementById('modal-filtros-stock').remove();
     }
-}
-document.addEventListener('DOMContentLoaded', () => { window.appStock = new ControlInventario(); });
+
+} // <---- ¡ESTA LLAVE ES LA MAGIA QUE CIERRA LA CLASE COMPLETA!
+
+// INICIALIZACIÓN
+document.addEventListener('DOMContentLoaded', () => { 
+    if (typeof InventarioGeneral !== 'undefined') {
+        window.appStock = new InventarioGeneral(); 
+    }
+});
