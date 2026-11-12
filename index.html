@@ -149,6 +149,10 @@
             <div class="stock-header">
                 <h1 class="stock-titulo">Inventario General</h1>
                 <div class="stock-controles">
+                    <!-- NUEVO BOTÓN DE FILTROS PARA STOCK -->
+                    <button class="btn-stock-secundario" onclick="appStock.abrirFiltrosAvanzados()">
+                        🔎 Filtros Avanzados
+                    </button>
                     <button id="btn-agregar-equipo" class="btn-stock-primario" onclick="appStock.abrirAgregar()">
                         ➕ Agregar Equipo
                     </button>
@@ -174,16 +178,17 @@
                             <th class="col-check oculto" style="width: 40px; text-align: center;">
                                 <input type="checkbox" id="check-all-stock" class="stock-checkbox" onclick="appStock.toggleTodos(this)">
                             </th>
-                            <th>FECHA ENT.</th>
-                            <th>MARCA</th>
-                            <th>MODELO</th>
-                            <th>ID</th>
-                            <th>IMEI / SERIE</th>
-                            <th>ICCID (Línea)</th>
-                            <th>COMPAÑÍA</th>
-                            <th>ESTADO</th>
-                            <th>UBICACIÓN</th>
-                            <th>TIPO SERV.</th>
+                            <!-- CABECERAS DE STOCK ORDENABLES -->
+                            <th class="sortable" onclick="appStock.ordenarTabla('fecha', this)">FECHA ENT.</th>
+                            <th class="sortable" onclick="appStock.ordenarTabla('marca', this)">MARCA</th>
+                            <th class="sortable" onclick="appStock.ordenarTabla('modelo', this)">MODELO</th>
+                            <th class="sortable" onclick="appStock.ordenarTabla('id', this)">ID</th>
+                            <th class="sortable" onclick="appStock.ordenarTabla('imei', this)">IMEI / SERIE</th>
+                            <th class="sortable" onclick="appStock.ordenarTabla('iccid', this)">ICCID (Línea)</th>
+                            <th class="sortable" onclick="appStock.ordenarTabla('compania', this)">COMPAÑÍA</th>
+                            <th class="sortable" onclick="appStock.ordenarTabla('estado', this)">ESTADO</th>
+                            <th class="sortable" onclick="appStock.ordenarTabla('ubicacion', this)">UBICACIÓN</th>
+                            <th class="sortable" onclick="appStock.ordenarTabla('tipoServicio', this)">TIPO SERV.</th>
                             <th>COMENTARIO</th>
                             <th>FOTO</th>
                             <th style="text-align: center;">ACCIONES</th>
