@@ -192,11 +192,13 @@ class InventarioSatelital {
                                 <option value="SMARTONE C">SMARTONE C</option>
                                 <option value="SMARTONE SOLAR">SMARTONE SOLAR</option>
                                 <option value="SPOT TRACE">SPOT TRACE</option>
+                                <option value="SPOT X">SPOT X</option>
+                                <option value="SPOT GEN4">SPOT GEN4</option>
+                                <option value="EDGE">EDGE</option>
                                 <option value="OTRO">OTRO</option>
                              </select></div>
                         <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Estado:</label>
                              <select id="add-sat-estado" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
-                                <option value="NUEVO">NUEVO</option>
                                 <option value="ACTIVO">ACTIVO</option>
                                 <option value="BAJA">BAJA</option>
                                 <option value="SUSPENDIDO">SUSPENDIDO</option>
