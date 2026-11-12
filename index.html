@@ -146,23 +146,58 @@
             <div class="stock-header">
                 <h1 class="stock-titulo">Inventario General</h1>
                 <div class="stock-controles">
-                <button id="btn-agregar-equipo" class="btn-stock-primario" onclick="appStock.abrirAgregar()">
-                    ➕ Agregar Equipo
-                </button>
-                <button id="btn-activar-seleccion" class="btn-stock-primario" onclick="appStock.toggleModoSeleccion()">
-                    ☑️ Selección de Equipos
-                </button>
-                <button id="btn-cancelar-seleccion" class="btn-stock-secundario oculto" onclick="appStock.toggleModoSeleccion()">
-                    ✖ Cancelar
-                </button>
-                <button id="btn-enviar-salidas" class="btn-stock-exito oculto" onclick="appStock.enviarSeleccionadosASalidas()">
-                    📦 Enviar equipos a salidas
-                </button>
-                <button id="btn-enviar-satelitales" class="btn-stock-primario oculto" onclick="appStock.enviarSeleccionadosASatelitales()" style="background: #1976d2; border-color: #1565c0;">
-                    🛰️ Enviar a Satelitales
-                </button>    
+                    <button id="btn-agregar-equipo" class="btn-stock-primario" onclick="appStock.abrirAgregar()">
+                        ➕ Agregar Equipo
+                    </button>
+                    <button id="btn-activar-seleccion" class="btn-stock-primario" onclick="appStock.toggleModoSeleccion()">
+                        ☑️ Selección de Equipos
+                    </button>
+                    <button id="btn-cancelar-seleccion" class="btn-stock-secundario oculto" onclick="appStock.toggleModoSeleccion()">
+                        ✖ Cancelar
+                    </button>
+                    <button id="btn-enviar-salidas" class="btn-stock-exito oculto" onclick="appStock.enviarSeleccionadosASalidas()">
+                        📦 Enviar equipos a salidas
+                    </button>
+                    <button id="btn-enviar-satelitales" class="btn-stock-primario oculto" onclick="appStock.enviarSeleccionadosASatelitales()" style="background: #1976d2; border-color: #1565c0;">
+                        🛰️ Enviar a Satelitales
+                    </button>    
                 </div>
-                <!-- PESTAÑA 5: INVENTARIO SATELITAL -->
+            </div>
+            
+            <div class="stock-table-wrapper">
+                <table class="stock-table" id="tabla-stock-id">
+                    <thead>
+                        <tr>
+                            <th class="col-check oculto" style="width: 40px; text-align: center;">
+                                <input type="checkbox" id="check-all-stock" class="stock-checkbox" onclick="appStock.toggleTodos(this)">
+                            </th>
+                            <th>FECHA ENT.</th>
+                            <th>MARCA</th>
+                            <th>MODELO</th>
+                            <th>ID</th>
+                            <th>IMEI / SERIE</th>
+                            <th>ICCID (Línea)</th>
+                            <th>COMPAÑÍA</th>
+                            <th>ESTADO</th>
+                            <th>UBICACIÓN</th>
+                            <th>TIPO SERV.</th>
+                            <th>COMENTARIO</th>
+                            <th>FOTO</th>
+                            <th style="text-align: center;">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-stock">
+                        <!-- Inyección por JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 4: DIAGNÓSTICO EN VIVO -->
+        <div id="vista-diagnostico" class="vista-oculta" style="flex-grow: 1; overflow-y: auto;">
+        </div>
+
+        <!-- PESTAÑA 5: INVENTARIO SATELITAL (FUERA DEL STOCK) -->
         <div id="vista-satelitales" class="vista-oculta" style="display: flex; flex-direction: column; height: 100%; padding: 15px 25px;">
             <div class="satelitales-header">
                 <h1 class="satelitales-titulo">Inventario Satelital</h1>
@@ -197,6 +232,8 @@
                 </table>
             </div>
         </div>
+
+    </div>
             </div>
             
             <div class="stock-table-wrapper">
