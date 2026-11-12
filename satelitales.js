@@ -138,22 +138,22 @@ class InventarioSatelital {
         this.renderizarTabla(filtrados);
     }
 
-    // --- ACCIÓN DE ENVIAR A SALIDAS ---
-    async enviarSeleccionadosASalidas() {
+    // --- ACCIÓN DE ENVIAR A STOCK ---
+    async enviarSeleccionadosAStock() {
         const checkboxes = document.querySelectorAll('.check-item-sat:checked');
         if (checkboxes.length === 0) return alert("⚠️ Selecciona al menos un equipo satelital.");
         
         const esnsSeleccionados = Array.from(checkboxes).map(cb => cb.value);
-        if (!confirm(`📦 ¿Mover ${esnsSeleccionados.length} satelital(es) a la pestaña de Salidas?`)) return;
+        if (!confirm(`📦 ¿Mover ${esnsSeleccionados.length} satelital(es) de regreso al Stock General?`)) return;
 
-        const btn = document.getElementById('btn-enviar-sat-salidas');
+        const btn = document.getElementById('btn-enviar-sat-stock');
         btn.innerText = "⏳ Moviendo..."; btn.disabled = true;
 
         try {
             const peticion = await fetch(this.urlAppsScript, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ accion: "mover_satelital_a_salidas", esns: esnsSeleccionados })
+                body: JSON.stringify({ accion: "mover_satelital_a_stock", esns: esnsSeleccionados })
             });
             const respuesta = await peticion.json();
 
@@ -161,14 +161,14 @@ class InventarioSatelital {
                 alert(`✅ ¡Éxito! ${respuesta.mensaje}`);
                 this.toggleModoSeleccion(); 
                 this.cargarDatos(); 
-                if (window.appSoporte) window.appSoporte.iniciar(); 
+                if (window.appStock) window.appStock.cargarDatos(); 
             } else {
                 alert("❌ Error: " + respuesta.error);
             }
         } catch (error) {
             alert("❌ Falla de red al intentar conectar.");
         }
-        btn.innerHTML = "📦 Enviar a Salidas"; btn.disabled = false;
+        btn.innerHTML = "📦 Enviar a Stock"; btn.disabled = false;
     }
 
     // --- MODALES ---
