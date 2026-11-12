@@ -182,13 +182,33 @@ class InventarioSatelital {
                     <p style="color: #888; font-size: 0.85rem; margin-top: 0; margin-bottom: 20px;">Llene los datos básicos del equipo.</p>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">ESN (IMEI):</label><input type="text" id="add-sat-esn" placeholder="Requerido" style="width: 100%; padding: 8px; background: #111; border: 1px solid #00e676; color: #00e676; font-weight: bold; border-radius: 6px;"></div>
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Código Autenticación:</label><input type="text" id="add-sat-auth" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">ESN (IMEI):</label>
+                             <input type="text" id="add-sat-esn" placeholder="Requerido" style="width: 100%; padding: 8px; background: #111; border: 1px solid #00e676; color: #00e676; font-weight: bold; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Código Autenticación:</label>
+                             <input type="text" id="add-sat-auth" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
                         
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Modelo:</label><input type="text" id="add-sat-modelo" placeholder="Ej. SMARTONE C" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Estado:</label><input type="text" id="add-sat-estado" value="NUEVO" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Modelo:</label>
+                             <select id="add-sat-modelo" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
+                                <option value="SMARTONE C">SMARTONE C</option>
+                                <option value="SMARTONE SOLAR">SMARTONE SOLAR</option>
+                                <option value="SPOT TRACE">SPOT TRACE</option>
+                                <option value="OTRO">OTRO</option>
+                             </select></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Estado:</label>
+                             <select id="add-sat-estado" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
+                                <option value="NUEVO">NUEVO</option>
+                                <option value="ACTIVO">ACTIVO</option>
+                                <option value="BAJA">BAJA</option>
+                                <option value="SUSPENDIDO">SUSPENDIDO</option>
+                             </select></div>
                         
-                        <div style="grid-column: span 2;"><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Cliente:</label><input type="text" id="add-sat-cliente" placeholder="Nombre o Sin Asignar" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div style="grid-column: span 2;"><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Cliente:</label>
+                             <input type="text" id="add-sat-cliente" placeholder="Nombre o Sin Asignar" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Fecha Activación:</label>
+                             <input type="date" id="add-sat-fAct" onchange="appSatelitales.calcularVencimientoAlta('add-sat-fAct', 'add-sat-fVen')" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px; color-scheme: dark;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Vencimiento (Alta):</label>
+                             <input type="date" id="add-sat-fVen" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #00e676; border-radius: 6px; color-scheme: dark;"></div>
                     </div>
                     
                     <div style="display: flex; justify-content: space-between; gap: 15px; margin-top: 25px;">
@@ -205,6 +225,15 @@ class InventarioSatelital {
         const esnInput = document.getElementById('add-sat-esn').value.trim();
         if (!esnInput) return alert("⚠️ El ESN (IMEI) es obligatorio.");
 
+        // Convertir formato de fecha (YYYY-MM-DD -> DD/MM/YYYY) para Google Sheets
+        const fActVal = document.getElementById('add-sat-fAct').value;
+        const fVenVal = document.getElementById('add-sat-fVen').value;
+        const formatFecha = (fechaISO) => {
+            if(!fechaISO) return '';
+            const [year, month, day] = fechaISO.split('-');
+            return `${day}/${month}/${year}`;
+        };
+
         const btn = document.getElementById('btn-agregar-satelital-modal');
         btn.innerText = "Agregando... ⏳"; btn.disabled = true;
         try {
@@ -217,7 +246,9 @@ class InventarioSatelital {
                     auth: document.getElementById('add-sat-auth').value,
                     modelo: document.getElementById('add-sat-modelo').value,
                     cliente: document.getElementById('add-sat-cliente').value,
-                    estado: document.getElementById('add-sat-estado').value
+                    estado: document.getElementById('add-sat-estado').value,
+                    fechaAct: formatFecha(fActVal),
+                    fechaVen: formatFecha(fVenVal)
                 })
             });
             const respuesta = await peticion.json();
@@ -241,6 +272,21 @@ class InventarioSatelital {
         
         if (document.getElementById('modal-satelital')) document.getElementById('modal-satelital').remove();
 
+        // Convertir formato DD/MM/YYYY o similar al formato ISO (YYYY-MM-DD) para el input de calendario
+        const toISODate = (fechaStr) => {
+            if (!fechaStr || fechaStr.includes('-')) return fechaStr; 
+            const partes = fechaStr.split('/');
+            if (partes.length === 3) {
+                // Asume formato DD/MM/YYYY
+                return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
+            }
+            return '';
+        };
+
+        const fActISO = toISODate(equipo.fechaAct);
+        const fVenISO = toISODate(equipo.fechaVen);
+        const fBajaISO = toISODate(equipo.fechaBaja);
+
         const modalHTML = `
             <div id="modal-satelital" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center;">
                 <div style="background: #1e1e1e; border: 1px solid #ffb74d; border-radius: 12px; padding: 25px; width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); max-height: 90vh; overflow-y: auto;">
@@ -248,22 +294,43 @@ class InventarioSatelital {
                     <p style="color: #888; font-size: 0.9rem; margin-top: 0; margin-bottom: 20px;">ESN Original: <b style="color:#fff;">${equipo.esn}</b></p>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">ESN (IMEI):</label><input type="text" id="sat-esn" value="${equipo.esn}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #ffb74d; font-weight: bold; border-radius: 6px;"></div>
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Código Autenticación:</label><input type="text" id="sat-auth" value="${equipo.codigoAuth}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">ESN (IMEI):</label>
+                             <input type="text" id="sat-esn" value="${equipo.esn}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #ffb74d; font-weight: bold; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Código Autenticación:</label>
+                             <input type="text" id="sat-auth" value="${equipo.codigoAuth}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
                         
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Modelo:</label><input type="text" id="sat-modelo" value="${equipo.modelo}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Estado:</label><input type="text" id="sat-estado" value="${equipo.estado}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Modelo:</label>
+                             <select id="sat-modelo" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
+                                <option value="SMARTONE C" ${equipo.modelo === 'SMARTONE C' ? 'selected' : ''}>SMARTONE C</option>
+                                <option value="SMARTONE SOLAR" ${equipo.modelo === 'SMARTONE SOLAR' ? 'selected' : ''}>SMARTONE SOLAR</option>
+                                <option value="SPOT TRACE" ${equipo.modelo === 'SPOT TRACE' ? 'selected' : ''}>SPOT TRACE</option>
+                                <option value="OTRO" ${!['SMARTONE C', 'SMARTONE SOLAR', 'SPOT TRACE'].includes(equipo.modelo) ? 'selected' : ''}>OTRO</option>
+                             </select></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Estado:</label>
+                             <select id="sat-estado" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
+                                <option value="NUEVO" ${equipo.estado.toUpperCase() === 'NUEVO' ? 'selected' : ''}>NUEVO</option>
+                                <option value="ACTIVO" ${equipo.estado.toUpperCase() === 'ACTIVO' ? 'selected' : ''}>ACTIVO</option>
+                                <option value="BAJA" ${equipo.estado.toUpperCase() === 'BAJA' ? 'selected' : ''}>BAJA</option>
+                                <option value="SUSPENDIDO" ${equipo.estado.toUpperCase() === 'SUSPENDIDO' ? 'selected' : ''}>SUSPENDIDO</option>
+                             </select></div>
                         
-                        <div style="grid-column: span 2;"><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Cliente:</label><input type="text" id="sat-cliente" value="${equipo.cliente}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div style="grid-column: span 2;"><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Cliente:</label>
+                             <input type="text" id="sat-cliente" value="${equipo.cliente}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
                         
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Fecha Activación:</label><input type="text" id="sat-fAct" value="${equipo.fechaAct}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Fecha Vencimiento:</label><input type="text" id="sat-fVen" value="${equipo.fechaVen}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #ffb74d; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Fecha Activación:</label>
+                             <input type="date" id="sat-fAct" value="${fActISO}" onchange="appSatelitales.calcularVencimientoAlta('sat-fAct', 'sat-fVen')" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px; color-scheme: dark;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Fecha Vencimiento:</label>
+                             <input type="date" id="sat-fVen" value="${fVenISO}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #ffb74d; border-radius: 6px; color-scheme: dark;"></div>
                         
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Fecha Baja:</label><input type="text" id="sat-fBaja" value="${equipo.fechaBaja}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Meses Activo:</label><input type="text" id="sat-meses" value="${equipo.meses}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Fecha Baja:</label>
+                             <input type="date" id="sat-fBaja" value="${fBajaISO}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px; color-scheme: dark;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Meses Activo:</label>
+                             <input type="text" id="sat-meses" value="${equipo.meses}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
                         
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Renovaciones (Plan):</label><input type="text" id="sat-renovaciones" value="${equipo.renovaciones}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
-                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Prog. / Firmware:</label><input type="text" id="sat-firmware" value="${equipo.firmware}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Renovaciones (Plan):</label>
+                             <input type="text" id="sat-renovaciones" value="${equipo.renovaciones}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Prog. / Firmware:</label>
+                             <input type="text" id="sat-firmware" value="${equipo.firmware}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
                     </div>
                     
                     <div style="display: flex; justify-content: space-between; gap: 15px; margin-top: 25px;">
@@ -279,6 +346,14 @@ class InventarioSatelital {
     async guardarEdicion(esnOriginal) {
         const btn = document.getElementById('btn-guardar-sat-edit');
         btn.innerText = "Guardando... ⏳"; btn.disabled = true;
+
+        // Convertir formato de fecha (YYYY-MM-DD -> DD/MM/YYYY) para Google Sheets
+        const formatFecha = (fechaISO) => {
+            if(!fechaISO) return '';
+            const [year, month, day] = fechaISO.split('-');
+            return `${day}/${month}/${year}`;
+        };
+
         try {
             const peticion = await fetch(this.urlAppsScript, {
                 method: 'POST',
@@ -290,9 +365,9 @@ class InventarioSatelital {
                     nuevoAuth: document.getElementById('sat-auth').value,
                     nuevoModelo: document.getElementById('sat-modelo').value,
                     nuevoCliente: document.getElementById('sat-cliente').value,
-                    nuevaFechaAct: document.getElementById('sat-fAct').value,
-                    nuevaFechaVen: document.getElementById('sat-fVen').value,
-                    nuevaFechaBaja: document.getElementById('sat-fBaja').value,
+                    nuevaFechaAct: formatFecha(document.getElementById('sat-fAct').value),
+                    nuevaFechaVen: formatFecha(document.getElementById('sat-fVen').value),
+                    nuevaFechaBaja: formatFecha(document.getElementById('sat-fBaja').value),
                     nuevosMeses: document.getElementById('sat-meses').value,
                     nuevasRenovaciones: document.getElementById('sat-renovaciones').value,
                     nuevoEstado: document.getElementById('sat-estado').value,
@@ -311,6 +386,23 @@ class InventarioSatelital {
             alert("❌ Falla de red al intentar conectar.");
             btn.innerText = "💾 Guardar Cambios"; btn.disabled = false;
         }
+    }
+
+    // --- LÓGICA AUTOMÁTICA DE FECHAS ---
+    calcularVencimientoAlta(idAct, idVen) {
+        const fechaActVal = document.getElementById(idAct).value;
+        if (!fechaActVal) return;
+
+        const fechaAct = new Date(fechaActVal);
+        // Sumar un mes exactamente
+        fechaAct.setMonth(fechaAct.getMonth() + 1);
+        
+        // Formatear de regreso a YYYY-MM-DD para el input type="date"
+        const year = fechaAct.getFullYear();
+        const month = String(fechaAct.getMonth() + 1).padStart(2, '0');
+        const day = String(fechaAct.getDate()).padStart(2, '0');
+
+        document.getElementById(idVen).value = `${year}-${month}-${day}`;
     }
 }
 
