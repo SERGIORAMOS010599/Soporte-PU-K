@@ -5,7 +5,6 @@ class InventarioSatelital {
         this.tbody = document.getElementById('tbody-satelitales');
         this.inventario = []; 
         this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM';
-        // NOTA: Para editar en el futuro, usaremos la misma URL de Apps Script
         this.urlAppsScript = 'https://script.google.com/macros/s/AKfycbxua3f3WK8cOQVV8NGFHaRJ4D7omCK7CptzXtDprnTpooGY-fZxw7m5XoHQgQOAMa2V/exec';
         
         this.cargarDatos();
@@ -13,7 +12,7 @@ class InventarioSatelital {
 
     async cargarDatos() {
         if (!this.tbody) return;
-        this.tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px; color:#90caf9; font-size:1.2rem;">⏳ Conectando satélites y descargando inventario... 📡</td></tr>';
+        this.tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px; color:#ffb74d; font-size:1.2rem;">⏳ Conectando satélites y descargando inventario... 📡</td></tr>';
         
         const urlSatelitales = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Satelitales')}`;
         
@@ -24,7 +23,6 @@ class InventarioSatelital {
             
             this.inventario = [];
             
-            // Mapeo: ESN(0), Autenticacion(1), Modelo(2), Cliente(3), FechaAct(4), Vencimiento(5), FechaBaja(6), Meses(7), Renovaciones(8), Estado(9), Prog/Firmware(10)
             json.table.rows.forEach(row => {
                 if (row && row.c) {
                     const val = (col) => row.c[col] ? (row.c[col].f || row.c[col].v) : '';
@@ -67,13 +65,13 @@ class InventarioSatelital {
 
         datos.forEach(eq => {
             let estadoMayus = String(eq.estado).toUpperCase();
-            let claseBadge = 'badge-revision'; // Gris/Naranja por defecto
+            let claseBadge = 'badge-revision';
             if (estadoMayus.includes('ACTIVO') || estadoMayus.includes('NUEVO')) claseBadge = 'badge-disponible';
             if (estadoMayus.includes('SUSPENDIDO') || estadoMayus.includes('BAJA')) claseBadge = 'badge-asignado';
 
             const fila = document.createElement('tr');
             fila.innerHTML = `
-                <td style="font-family: monospace; color: #90caf9; font-weight: bold; font-size: 1rem;">${eq.esn}</td>
+                <td style="font-family: monospace; color: #ffb74d; font-weight: bold; font-size: 1rem;">${eq.esn}</td>
                 <td style="font-family: monospace; color: #fff;">${eq.codigoAuth}</td>
                 <td>${eq.modelo}</td>
                 <td style="font-weight: bold;">${eq.cliente}</td>
@@ -85,7 +83,7 @@ class InventarioSatelital {
                 <td><span class="satelitales-badge ${claseBadge}">${eq.estado}</span></td>
                 <td>${eq.firmware}</td>
                 <td style="text-align: center;">
-                    <button class="btn-stock-accion" onclick="alert('Módulo de edición satelital en construcción')">✏️ Editar</button>
+                    <button class="btn-stock-accion" onclick="appSatelitales.abrirEdicion('${eq.esn}')">✏️ Editar</button>
                 </td>
             `;
             this.tbody.appendChild(fila);
@@ -96,6 +94,155 @@ class InventarioSatelital {
         const query = texto.toLowerCase().trim();
         const filtrados = this.inventario.filter(eq => Object.values(eq).some(valor => String(valor).toLowerCase().includes(query)));
         this.renderizarTabla(filtrados);
+    }
+
+    // ==========================================
+    // MODAL DE EDICIÓN SATELITAL
+    // ==========================================
+    abrirEdicion(esn) {
+        const equipo = this.inventario.find(e => e.esn === esn);
+        if (!equipo) return;
+        
+        if (document.getElementById('modal-satelital')) document.getElementById('modal-satelital').remove();
+
+        const modalHTML = `
+            <div id="modal-satelital" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center;">
+                <div style="background: #1e1e1e; border: 1px solid #ffb74d; border-radius: 12px; padding: 25px; width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); max-height: 90vh; overflow-y: auto;">
+                    <h2 style="color: #ffb74d; margin-top: 0; margin-bottom: 5px;">Editar Satelital</h2>
+                    <p style="color: #888; font-size: 0.9rem; margin-top: 0; margin-bottom: 20px;">ESN Original: <b style="color:#fff;">${equipo.esn}</b></p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">ESN (IMEI):</label><input type="text" id="sat-esn" value="${equipo.esn}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #ffb74d; font-weight: bold; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Código Autenticación:</label><input type="text" id="sat-auth" value="${equipo.codigoAuth}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Modelo:</label><input type="text" id="sat-modelo" value="${equipo.modelo}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Estado:</label><input type="text" id="sat-estado" value="${equipo.estado}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        
+                        <div style="grid-column: span 2;"><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Cliente:</label><input type="text" id="sat-cliente" value="${equipo.cliente}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Fecha Activación:</label><input type="text" id="sat-fAct" value="${equipo.fechaAct}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Fecha Vencimiento:</label><input type="text" id="sat-fVen" value="${equipo.fechaVen}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #ffb74d; border-radius: 6px;"></div>
+                        
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Fecha Baja:</label><input type="text" id="sat-fBaja" value="${equipo.fechaBaja}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Meses Activo:</label><input type="text" id="sat-meses" value="${equipo.meses}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Renovaciones (Plan):</label><input type="text" id="sat-renovaciones" value="${equipo.renovaciones}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Prog. / Firmware:</label><input type="text" id="sat-firmware" value="${equipo.firmware}" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; gap: 15px; margin-top: 25px;">
+                        <button onclick="document.getElementById('modal-satelital').remove()" style="flex: 1; padding: 12px; background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; cursor: pointer; font-weight:bold;">Cancelar</button>
+                        <button id="btn-guardar-satelital" onclick="appSatelitales.guardarEdicion('${equipo.esn}')" style="flex: 1; padding: 12px; background: #ffb74d; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight:bold;">💾 Guardar Cambios</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    async guardarEdicion(esnOriginal) {
+        const btn = document.getElementById('btn-guardar-satelital');
+        btn.innerText = "Guardando... ⏳"; btn.disabled = true;
+        try {
+            const peticion = await fetch(this.urlAppsScript, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ 
+                    accion: "editar_satelital", 
+                    esnOriginal: esnOriginal,
+                    nuevoEsn: document.getElementById('sat-esn').value,
+                    nuevoAuth: document.getElementById('sat-auth').value,
+                    nuevoModelo: document.getElementById('sat-modelo').value,
+                    nuevoCliente: document.getElementById('sat-cliente').value,
+                    nuevaFechaAct: document.getElementById('sat-fAct').value,
+                    nuevaFechaVen: document.getElementById('sat-fVen').value,
+                    nuevaFechaBaja: document.getElementById('sat-fBaja').value,
+                    nuevosMeses: document.getElementById('sat-meses').value,
+                    nuevasRenovaciones: document.getElementById('sat-renovaciones').value,
+                    nuevoEstado: document.getElementById('sat-estado').value,
+                    nuevoFirmware: document.getElementById('sat-firmware').value
+                })
+            });
+            const respuesta = await peticion.json();
+            if (respuesta.success) {
+                document.getElementById('modal-satelital').remove();
+                this.cargarDatos(); 
+            } else {
+                alert("❌ Error: " + respuesta.error);
+                btn.innerText = "💾 Guardar Cambios"; btn.disabled = false;
+            }
+        } catch (error) {
+            alert("❌ Falla de red al intentar conectar.");
+            btn.innerText = "💾 Guardar Cambios"; btn.disabled = false;
+        }
+    }
+
+    // ==========================================
+    // MODAL PARA AGREGAR NUEVO EQUIPO SATELITAL
+    // ==========================================
+    abrirAgregar() {
+        if (document.getElementById('modal-satelital')) document.getElementById('modal-satelital').remove();
+
+        const modalHTML = `
+            <div id="modal-satelital" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center;">
+                <div style="background: #1e1e1e; border: 1px solid #00e676; border-radius: 12px; padding: 25px; width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); max-height: 90vh; overflow-y: auto;">
+                    <h2 style="color: #00e676; margin-top: 0; margin-bottom: 5px;">➕ Agregar Satelital</h2>
+                    <p style="color: #888; font-size: 0.85rem; margin-top: 0; margin-bottom: 20px;">Llene los datos básicos del equipo.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">ESN (IMEI):</label><input type="text" id="add-sat-esn" placeholder="Requerido" style="width: 100%; padding: 8px; background: #111; border: 1px solid #00e676; color: #00e676; font-weight: bold; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Código Autenticación:</label><input type="text" id="add-sat-auth" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Modelo:</label><input type="text" id="add-sat-modelo" placeholder="Ej. SMARTONE C" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        <div><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Estado:</label><input type="text" id="add-sat-estado" value="NUEVO" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                        
+                        <div style="grid-column: span 2;"><label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Cliente:</label><input type="text" id="add-sat-cliente" placeholder="Nombre o Sin Asignar" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;"></div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; gap: 15px; margin-top: 25px;">
+                        <button onclick="document.getElementById('modal-satelital').remove()" style="flex: 1; padding: 12px; background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; cursor: pointer; font-weight:bold;">Cancelar</button>
+                        <button id="btn-agregar-satelital" onclick="appSatelitales.guardarNuevoEquipo()" style="flex: 1; padding: 12px; background: #00e676; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight:bold;">➕ Agregar a Inventario</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    async guardarNuevoEquipo() {
+        const esnInput = document.getElementById('add-sat-esn').value.trim();
+        if (!esnInput) return alert("⚠️ El ESN (IMEI) es obligatorio.");
+
+        const btn = document.getElementById('btn-agregar-satelital');
+        btn.innerText = "Agregando... ⏳"; btn.disabled = true;
+        try {
+            // Nota: Aquí reciclamos la ruta "editar_satelital" en el backend 
+            // y agregaremos una regla allá para detectar si es un equipo nuevo
+            const peticion = await fetch(this.urlAppsScript, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ 
+                    accion: "agregar_satelital", 
+                    esn: esnInput,
+                    auth: document.getElementById('add-sat-auth').value,
+                    modelo: document.getElementById('add-sat-modelo').value,
+                    cliente: document.getElementById('add-sat-cliente').value,
+                    estado: document.getElementById('add-sat-estado').value
+                })
+            });
+            const respuesta = await peticion.json();
+            if (respuesta.success) {
+                document.getElementById('modal-satelital').remove();
+                this.cargarDatos(); 
+                alert("✅ Equipo Satelital agregado con éxito.");
+            } else {
+                alert("❌ Error: " + respuesta.error);
+                btn.innerText = "➕ Agregar a Inventario"; btn.disabled = false;
+            }
+        } catch (error) {
+            alert("❌ Falla de red al intentar conectar.");
+            btn.innerText = "➕ Agregar a Inventario"; btn.disabled = false;
+        }
     }
 }
 
