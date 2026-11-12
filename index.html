@@ -197,13 +197,17 @@
         <div id="vista-diagnostico" class="vista-oculta" style="flex-grow: 1; overflow-y: auto;">
         </div>
         
-        <!-- PESTAÑA 5: INVENTARIO SATELITAL -->
-        <div id="vista-satelitales" class="vista-oculta" style="display: flex; flex-direction: column; height: 100%; padding: 15px 25px;">
+       <!-- PESTAÑA 5: INVENTARIO SATELITAL -->
+        <div id="vista-satelitales" class="vista-oculta">
             <div class="satelitales-header">
                 <h1 class="satelitales-titulo">Inventario Satelital</h1>
                 <div class="satelitales-controles">
-                    <button class="btn-satelitales-primario" onclick="appSatelitales.cargarDatos()">
-                        🔄 Refrescar
+                    <button class="btn-satelitales-primario" onclick="appSatelitales.abrirAgregar()">
+                        ➕ Agregar Equipo
+                    </button>
+                    <!-- Eliminamos "Refrescar" y lo reemplazamos por el botón de selección (para futura expansión) -->
+                    <button class="btn-satelitales-primario" onclick="alert('Selección de Satelitales en construcción')">
+                        ☑️ Selección de Equipos
                     </button>
                 </div>
             </div>
