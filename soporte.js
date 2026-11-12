@@ -163,60 +163,16 @@ class SoporteTecnico {
     }
 
    cambiarVista(vistaDestino) {
-        // Ocultar todas las vistas primero
-        document.getElementById('vista-soporte').classList.add('vista-oculta');
-        document.getElementById('vista-soporte').classList.remove('vista-activa');
-        
-        document.getElementById('vista-monitores').classList.add('vista-oculta');
-        document.getElementById('vista-monitores').classList.remove('vista-activa');
-        
-        const vistaDiag = document.getElementById('vista-diagnostico');
-        if(vistaDiag) {
-            vistaDiag.classList.add('vista-oculta');
-            vistaDiag.classList.remove('vista-activa');
-        }
-
-        // AGREGAR ESTO PARA EL STOCK
-        const vistaStock = document.getElementById('vista-stock');
-        if(vistaStock) {
-            vistaStock.classList.add('vista-oculta');
-            vistaStock.classList.remove('vista-activa');
-        }
-
         const botones = document.querySelectorAll('.tab-btn');
         botones.forEach(btn => btn.classList.remove('activo'));
-
-        // Mostrar la vista destino con los índices correctos de tu HTML
-        if (vistaDestino === 'stock') {
-            if(vistaStock) {
-                vistaStock.classList.remove('vista-oculta');
-                vistaStock.classList.add('vista-activa');
-            }
-            if(botones[0]) botones[0].classList.add('activo'); // Stock es el 1er botón
-        }
-        else if (vistaDestino === 'soporte') {
-            document.getElementById('vista-soporte').classList.remove('vista-oculta');
-            document.getElementById('vista-soporte').classList.add('vista-activa');
-            if(botones[1]) botones[1].classList.add('activo'); // Soporte es el 2do botón
-            this.renderizar();
-        } 
-        else if (vistaDestino === 'monitores') {
-            document.getElementById('vista-monitores').classList.remove('vista-oculta');
-            document.getElementById('vista-monitores').classList.add('vista-activa');
-            if(botones[2]) botones[2].classList.add('activo'); // Monitores es el 3er botón
-        }
-        else if (vistaDestino === 'diagnostico') {
-            if(vistaDiag) {
-                vistaDiag.classList.remove('vista-oculta');
-                vistaDiag.classList.add('vista-activa');
-            }
-            if(botones[3]) botones[3].classList.add('activo'); // Diagnóstico es el 4to botón
-        }
 
         // Ocultar las 5 vistas
         ['vista-soporte', 'vista-monitores', 'vista-diagnostico', 'vista-stock', 'vista-satelitales'].forEach(id => {
             const el = document.getElementById(id);
-            if(el) { el.classList.add('vista-oculta'); el.classList.remove('vista-activa'); }
+            if(el) { 
+                el.classList.add('vista-oculta'); 
+                el.classList.remove('vista-activa'); 
+            }
         });
 
         // Mostrar la solicitada
@@ -229,7 +185,10 @@ class SoporteTecnico {
         // Índices: 0:Stock, 1:Satelitales, 2:Soporte, 3:Monitores, 4:Diagnostico
         if (vistaDestino === 'stock' && botones[0]) botones[0].classList.add('activo');
         if (vistaDestino === 'satelitales' && botones[1]) botones[1].classList.add('activo');
-        if (vistaDestino === 'soporte' && botones[2]) { botones[2].classList.add('activo'); this.renderizar(); }
+        if (vistaDestino === 'soporte' && botones[2]) { 
+            botones[2].classList.add('activo'); 
+            this.renderizar(); 
+        }
         if (vistaDestino === 'monitores' && botones[3]) botones[3].classList.add('activo');
         if (vistaDestino === 'diagnostico' && botones[4]) botones[4].classList.add('activo');
     }
