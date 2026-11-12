@@ -5,13 +5,14 @@
 
 #vista-soporte.vista-activa, 
 #vista-monitores.vista-activa, 
-#vista-diagnostico.vista-activa,
-#vista-satelitales.vista-activa { 
+#vista-diagnostico.vista-activa { 
     display: block !important; 
     height: 100%;
 }
 
-#vista-stock.vista-activa { 
+/* AQUÍ AUTORIZAMOS A SATELITALES A MOSTRARSE IGUAL QUE STOCK */
+#vista-stock.vista-activa,
+#vista-satelitales.vista-activa { 
     display: flex !important; 
     flex-direction: column; 
     height: 100%; 
