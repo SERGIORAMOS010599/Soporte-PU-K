@@ -37,6 +37,7 @@
             <div class="logo-app" style="color: #ffb74d; font-weight: bold; font-size: 1.2rem;">IDT TECNOLOGÍAS - PU-K</div>
             <div class="menu-tabs" style="display: flex; gap: 10px;">
                 <button class="tab-btn" onclick="appSoporte.cambiarVista('stock')">Inventario Stock</button>
+                <button class="tab-btn" onclick="appSoporte.cambiarVista('satelitales')">Equipos Satelitales</button>
                 <button class="tab-btn activo" onclick="appSoporte.cambiarVista('soporte')">Soporte Técnico</button>
                 <button class="tab-btn" onclick="appSoporte.cambiarVista('monitores')">Monitores Globales</button>
                 <button class="tab-btn" onclick="appSoporte.cambiarVista('diagnostico')">Diagnóstico en Vivo</button>
@@ -153,7 +154,45 @@
                 <button id="btn-enviar-salidas" class="btn-stock-exito oculto" onclick="appStock.enviarSeleccionadosASalidas()">
                     📦 Enviar equipos a salidas
                 </button>
+                <button id="btn-enviar-satelitales" class="btn-stock-primario oculto" onclick="appStock.enviarSeleccionadosASatelitales()" style="background: #1976d2; border-color: #1565c0;">
+                    🛰️ Enviar a Satelitales
+                </button>    
                 </div>
+                <!-- PESTAÑA 5: INVENTARIO SATELITAL -->
+        <div id="vista-satelitales" class="vista-oculta" style="display: flex; flex-direction: column; height: 100%; padding: 15px 25px;">
+            <div class="satelitales-header">
+                <h1 class="satelitales-titulo">Inventario Satelital</h1>
+                <div class="satelitales-controles">
+                    <button class="btn-satelitales-primario" onclick="appSatelitales.cargarDatos()">
+                        🔄 Refrescar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="satelitales-table-wrapper">
+                <table class="satelitales-table" id="tabla-satelitales-id">
+                    <thead>
+                        <tr>
+                            <th>ESN (IMEI)</th>
+                            <th>CÓDIGO AUTENTICACIÓN</th>
+                            <th>MODELO</th>
+                            <th>CLIENTE</th>
+                            <th>FECHA ACTIVACIÓN</th>
+                            <th>VENCIMIENTO (ALTA)</th>
+                            <th>FECHA BAJA</th>
+                            <th>MESES ACTIVO</th>
+                            <th>RENOVACIONES</th>
+                            <th>ESTADO</th>
+                            <th>TIPO PROG. / FIRMWARE</th>
+                            <th style="text-align: center;">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-satelitales">
+                        <!-- Inyección por JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
             </div>
             
             <div class="stock-table-wrapper">
