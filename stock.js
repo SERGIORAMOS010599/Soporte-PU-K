@@ -16,6 +16,7 @@ class ControlInventario {
         const btnActivar = document.getElementById('btn-activar-seleccion');
         const btnCancelar = document.getElementById('btn-cancelar-seleccion');
         const btnEnviar = document.getElementById('btn-enviar-salidas');
+        const btnEnviarSat = document.getElementById('btn-enviar-satelitales'); // <-- NUEVO
         const btnAgregar = document.getElementById('btn-agregar-equipo');
         const thCheck = document.querySelector('th.col-check');
         const tdChecks = document.querySelectorAll('td.col-check');
@@ -25,6 +26,7 @@ class ControlInventario {
             if(btnAgregar) btnAgregar.classList.add('oculto');
             btnCancelar.classList.remove('oculto');
             btnEnviar.classList.remove('oculto');
+            if(btnEnviarSat) btnEnviarSat.classList.remove('oculto'); // <-- NUEVO
             if (thCheck) thCheck.classList.remove('oculto');
             tdChecks.forEach(td => td.classList.remove('oculto'));
         } else {
@@ -32,6 +34,7 @@ class ControlInventario {
             if(btnAgregar) btnAgregar.classList.remove('oculto');
             btnCancelar.classList.add('oculto');
             btnEnviar.classList.add('oculto');
+            if(btnEnviarSat) btnEnviarSat.classList.add('oculto'); // <-- NUEVO
             if (thCheck) thCheck.classList.add('oculto');
             tdChecks.forEach(td => td.classList.add('oculto'));
             
@@ -39,6 +42,34 @@ class ControlInventario {
             if (checkAll) checkAll.checked = false;
             this.toggleTodos({checked: false});
         }
+    }
+
+    // AGREGA ESTA FUNCIÓN NUEVA EN stock.js
+    async enviarSeleccionadosASatelitales() {
+        const checkboxes = document.querySelectorAll('.check-item:checked');
+        if (checkboxes.length === 0) return alert("⚠️ Selecciona al menos un equipo satelital.");
+        const imeisSeleccionados = Array.from(checkboxes).map(cb => cb.value);
+        if (!confirm(`🛰️ ¿Mover ${imeisSeleccionados.length} equipo(s) a la pestaña Satelitales?`)) return;
+
+        const btn = document.getElementById('btn-enviar-satelitales');
+        btn.innerText = "⏳ Moviendo..."; btn.disabled = true;
+        try {
+            const peticion = await fetch(this.urlAppsScript, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ accion: "mover_a_satelitales", imeis: imeisSeleccionados })
+            });
+            const respuesta = await peticion.json();
+            if (respuesta.success) {
+                alert(`✅ ¡Éxito! ${respuesta.mensaje}`);
+                this.toggleModoSeleccion(); 
+                this.cargarDatos(); 
+                if (window.appSatelitales) window.appSatelitales.cargarDatos(); 
+            } else alert("❌ Error: " + respuesta.error);
+        } catch (error) {
+            alert("❌ Falla de red al intentar conectar.");
+        }
+        btn.innerHTML = "🛰️ Enviar a Satelitales"; btn.disabled = false;
     }
 
     toggleTodos(checkboxMaster) {
