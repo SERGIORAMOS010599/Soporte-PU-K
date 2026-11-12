@@ -407,5 +407,139 @@ class InventarioSatelital {
         document.getElementById(idVen).value = `${year}-${month}-${day}`;
     }
 }
+// ==========================================
+    // ORDENAMIENTO DE COLUMNAS (A-Z, Z-A)
+    // ==========================================
+    ordenarTabla(columna, thElement) {
+        if (this.sortCol === columna) {
+            this.sortAsc = !this.sortAsc; // Alternar entre asc y desc
+        } else {
+            this.sortCol = columna;
+            this.sortAsc = true; // Por defecto de A a Z
+        }
 
+        // Limpiar flechas de todos los encabezados
+        document.querySelectorAll('#tabla-satelitales-id th').forEach(th => {
+            th.classList.remove('asc', 'desc');
+        });
+        
+        // Poner la flecha al encabezado cliqueado
+        if (thElement) {
+            thElement.classList.add(this.sortAsc ? 'asc' : 'desc');
+        }
+
+        // Lógica de ordenamiento
+        this.inventario.sort((a, b) => {
+            let valA = String(a[columna] || '').toLowerCase();
+            let valB = String(b[columna] || '').toLowerCase();
+
+            // Detectar si es fecha DD/MM/YYYY y voltearla a YYYYMMDD para comparar bien
+            const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+            if (dateRegex.test(valA)) valA = valA.replace(dateRegex, '$3$2$1');
+            if (dateRegex.test(valB)) valB = valB.replace(dateRegex, '$3$2$1');
+
+            // Detectar si son números puros
+            if (!isNaN(valA) && !isNaN(valB) && valA !== '' && valB !== '') {
+                valA = parseFloat(valA);
+                valB = parseFloat(valB);
+            }
+
+            if (valA < valB) return this.sortAsc ? -1 : 1;
+            if (valA > valB) return this.sortAsc ? 1 : -1;
+            return 0;
+        });
+
+        this.renderizarTabla(this.inventario);
+    }
+
+    // ==========================================
+    // FILTROS AVANZADOS (CLIENTES, ESTADOS, FECHAS)
+    // ==========================================
+    abrirFiltrosAvanzados() {
+        if (document.getElementById('modal-filtros-sat')) document.getElementById('modal-filtros-sat').remove();
+        
+        // Extraer lista única de clientes actuales para llenar el combo box automáticamente
+        const clientes = [...new Set(this.inventario.map(e => e.cliente))].filter(c => c && c !== 'Sin Asignar').sort();
+        const opcionesCliente = clientes.map(c => `<option value="${c}">${c}</option>`).join('');
+
+        const modalHTML = `
+            <div id="modal-filtros-sat" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center;">
+                <div style="background: #1e1e1e; border: 1px solid #64b5f6; border-radius: 12px; padding: 25px; width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); animation: fadeIn 0.2s;">
+                    <h2 style="color: #64b5f6; margin-top: 0; margin-bottom: 5px;">🔎 Filtros Avanzados</h2>
+                    <p style="color: #888; font-size: 0.85rem; margin-top: 0; margin-bottom: 20px;">Filtre los equipos satelitales.</p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Cliente Específico:</label>
+                            <select id="filtro-cliente" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
+                                <option value="">-- Todos los Clientes --</option>
+                                ${opcionesCliente}
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Estado del Equipo:</label>
+                            <select id="filtro-estado" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px;">
+                                <option value="">-- Todos los Estados --</option>
+                                <option value="NUEVO">NUEVO</option>
+                                <option value="ACTIVO">ACTIVO</option>
+                                <option value="BAJA">BAJA</option>
+                                <option value="SUSPENDIDO">SUSPENDIDO</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 15px;">
+                            <div style="flex: 1;">
+                                <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Vencimiento Desde:</label>
+                                <input type="date" id="filtro-fecha-inicio" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px; color-scheme: dark;">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Vencimiento Hasta:</label>
+                                <input type="date" id="filtro-fecha-fin" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: #fff; border-radius: 6px; color-scheme: dark;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; gap: 15px; margin-top: 25px;">
+                        <button onclick="appSatelitales.limpiarFiltrosAvanzados()" style="flex: 1; padding: 12px; background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; cursor: pointer; font-weight:bold;">Limpiar y Cerrar</button>
+                        <button onclick="appSatelitales.aplicarFiltrosAvanzados()" style="flex: 1; padding: 12px; background: #64b5f6; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight:bold;">Aplicar Filtros</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+    
+    aplicarFiltrosAvanzados() {
+        const clienteFiltro = document.getElementById('filtro-cliente').value.toLowerCase();
+        const estadoFiltro = document.getElementById('filtro-estado').value.toLowerCase();
+        const fechaInicio = document.getElementById('filtro-fecha-inicio').value;
+        const fechaFin = document.getElementById('filtro-fecha-fin').value;
+        
+        let filtrados = this.inventario.filter(eq => {
+            let pasaCliente = clienteFiltro === "" || String(eq.cliente).toLowerCase() === clienteFiltro;
+            let pasaEstado = estadoFiltro === "" || String(eq.estado).toLowerCase() === estadoFiltro;
+            let pasaFecha = true;
+            
+            if (fechaInicio || fechaFin) {
+                // Convertir la fecha DD/MM/YYYY a YYYY-MM-DD para poder comparar matemáticamente
+                const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+                if (dateRegex.test(eq.fechaVen)) {
+                    let isoVen = eq.fechaVen.replace(dateRegex, '$3-$2-$1');
+                    if (fechaInicio && isoVen < fechaInicio) pasaFecha = false;
+                    if (fechaFin && isoVen > fechaFin) pasaFecha = false;
+                } else {
+                    pasaFecha = false; // Si no tiene fecha válida y el usuario filtró por fechas, lo ocultamos
+                }
+            }
+            
+            return pasaCliente && pasaEstado && pasaFecha;
+        });
+        
+        this.renderizarTabla(filtrados);
+        document.getElementById('modal-filtros-sat').remove();
+    }
+    
+    limpiarFiltrosAvanzados() {
+        this.renderizarTabla(this.inventario);
+        document.getElementById('modal-filtros-sat').remove();
+    }
 document.addEventListener('DOMContentLoaded', () => { window.appSatelitales = new InventarioSatelital(); });
