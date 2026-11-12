@@ -260,10 +260,9 @@ class SoporteTecnico {
 
         this.renderizar(); 
 
-        // ---> AGREGA ESTAS TRES LÍNEAS PARA FILTRAR EL STOCK <---
-        if (window.appStock) {
-            window.appStock.filtrarTabla(texto);
-        }
+        // Conectar con Stock y Satelitales
+        if (window.appStock) window.appStock.filtrarTabla(texto);
+        if (window.appSatelitales) window.appSatelitales.filtrarTabla(texto);
 
         const query = texto.toLowerCase().trim();
         const filasMapon = document.querySelectorAll('#mapon-tbody tr'); 
@@ -694,7 +693,38 @@ class SoporteTecnico {
             window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
         }
     }
-    
+    async devolverAStock() {
+        const eq = this.equipoSeleccionado;
+        if (!eq) return;
+        
+        if (!confirm(`📦 ¿Estás seguro de devolver el equipo con ID: ${eq.id} al Inventario de Stock?\n\nSu estado cambiará automáticamente a USADO y se registrará con la fecha de hoy.`)) return;
+
+        // Nota: Asegúrate de que esta URL sea la misma que usas en el resto de tu sistema
+        const urlAppsScript = 'https://script.google.com/macros/s/AKfycbxua3f3WK8cOQVV8NGFHaRJ4D7omCK7CptzXtDprnTpooGY-fZxw7m5XoHQgQOAMa2V/exec';
+
+        try {
+            const peticion = await fetch(urlAppsScript, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    accion: "devolver_salida_a_stock",
+                    idEquipo: eq.id
+                })
+            });
+            const respuesta = await peticion.json();
+
+            if (respuesta.success) {
+                alert(`✅ ¡Éxito! ${respuesta.mensaje}`);
+                this.cerrarDetalles();
+                this.iniciar(); // Recarga la pestaña de salidas
+                if (window.appStock) window.appStock.cargarDatos(); // Recarga el stock
+            } else {
+                alert("❌ Error: " + respuesta.error);
+            }
+        } catch (error) {
+            alert("❌ Falla de red al intentar devolver el equipo.");
+        }
+    }
     toggleChatPUK() {
         const panel = document.getElementById('puk-panel-chat');
         panel.classList.toggle('puk-oculto');
