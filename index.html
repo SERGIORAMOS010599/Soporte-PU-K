@@ -202,44 +202,48 @@
             <div class="satelitales-header">
                 <h1 class="satelitales-titulo">Inventario Satelital</h1>
                 <div class="satelitales-controles">
-                    <button id="btn-agregar-satelital" class="btn-satelitales-primario" onclick="appSatelitales.abrirAgregar()">
-                        ➕ Agregar Equipo
-                    </button>
-                    <button id="btn-activar-sat-seleccion" class="btn-satelitales-primario" onclick="appSatelitales.toggleModoSeleccion()">
-                        ☑️ Selección de Equipos
-                    </button>
-                    <button id="btn-cancelar-sat-seleccion" class="btn-satelitales-secundario oculto" onclick="appSatelitales.toggleModoSeleccion()">
-                        ✖ Cancelar
-                    </button>
-                   <!-- Reemplaza el botón btn-enviar-sat-salidas por este -->
-                    <button id="btn-enviar-sat-stock" class="btn-satelitales-exito oculto" onclick="appSatelitales.enviarSeleccionadosAStock()">
-                        📦 Enviar a Stock
-                    </button>
-                </div>
+                <!-- NUEVO BOTÓN DE FILTROS -->
+                <button class="btn-satelitales-secundario" onclick="appSatelitales.abrirFiltrosAvanzados()">
+                    🔎 Filtros Avanzados
+                </button>
+                <button id="btn-agregar-satelital" class="btn-satelitales-primario" onclick="appSatelitales.abrirAgregar()">
+                    ➕ Agregar Equipo
+                </button>
+                <button id="btn-activar-sat-seleccion" class="btn-satelitales-primario" onclick="appSatelitales.toggleModoSeleccion()">
+                    ☑️ Selección de Equipos
+                </button>
+                <button id="btn-cancelar-sat-seleccion" class="btn-satelitales-secundario oculto" onclick="appSatelitales.toggleModoSeleccion()">
+                    ✖ Cancelar
+                </button>
+                <button id="btn-enviar-sat-stock" class="btn-satelitales-exito oculto" onclick="appSatelitales.enviarSeleccionadosAStock()">
+                    📦 Enviar a Stock
+                </button>
             </div>
-            
-            <div class="satelitales-table-wrapper">
-                <table class="satelitales-table" id="tabla-satelitales-id">
-                    <thead>
-                        <tr>
-                            <th class="col-check-sat oculto" style="width: 40px; text-align: center;">
-                                <input type="checkbox" id="check-all-sat" class="stock-checkbox" onclick="appSatelitales.toggleTodos(this)">
-                            </th>
-                            <th>ESN (IMEI)</th>
-                            <th>CÓDIGO AUTENTICACIÓN</th>
-                            <th>MODELO</th>
-                            <th>CLIENTE</th>
-                            <th>FECHA ACTIVACIÓN</th>
-                            <th>VENCIMIENTO (ALTA)</th>
-                            <th>FECHA BAJA</th>
-                            <th>MESES ACTIVO</th>
-                            <th>RENOVACIONES</th>
-                            <th>ESTADO</th>
-                            <th>TIPO PROG. / FIRMWARE</th>
-                            <th style="text-align: center;">ACCIONES</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-satelitales">
+        </div>
+        
+        <div class="satelitales-table-wrapper">
+            <table class="satelitales-table" id="tabla-satelitales-id">
+                <thead>
+                    <tr>
+                        <th class="col-check-sat oculto" style="width: 40px; text-align: center;">
+                            <input type="checkbox" id="check-all-sat" class="stock-checkbox" onclick="appSatelitales.toggleTodos(this)">
+                        </th>
+                        <!-- TÍTULOS CON FUNCIÓN DE ORDENAR -->
+                        <th class="sortable" onclick="appSatelitales.ordenarTabla('esn', this)">ESN (IMEI)</th>
+                        <th class="sortable" onclick="appSatelitales.ordenarTabla('codigoAuth', this)">CÓDIGO AUTENTICACIÓN</th>
+                        <th class="sortable" onclick="appSatelitales.ordenarTabla('modelo', this)">MODELO</th>
+                        <th class="sortable" onclick="appSatelitales.ordenarTabla('cliente', this)">CLIENTE</th>
+                        <th class="sortable" onclick="appSatelitales.ordenarTabla('fechaAct', this)">FECHA ACTIVACIÓN</th>
+                        <th class="sortable" onclick="appSatelitales.ordenarTabla('fechaVen', this)">VENCIMIENTO (ALTA)</th>
+                        <th class="sortable" onclick="appSatelitales.ordenarTabla('fechaBaja', this)">FECHA BAJA</th>
+                        <th class="sortable" onclick="appSatelitales.ordenarTabla('meses', this)">MESES ACTIVO</th>
+                        <th class="sortable" onclick="appSatelitales.ordenarTabla('renovaciones', this)">RENOVACIONES</th>
+                        <th class="sortable" onclick="appSatelitales.ordenarTabla('estado', this)">ESTADO</th>
+                        <th class="sortable" onclick="appSatelitales.ordenarTabla('firmware', this)">TIPO PROG. / FIRMWARE</th>
+                        <th style="text-align: center;">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-satelitales">
                         <!-- Inyección por JS -->
                     </tbody>
                 </table>
