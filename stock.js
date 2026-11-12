@@ -391,7 +391,7 @@ class ControlInventario {
         }
     }
 }
-// ==========================================
+    // ==========================================
     // ORDENAMIENTO DE COLUMNAS STOCK (A-Z, Z-A)
     // ==========================================
     ordenarTabla(columna, thElement) {
@@ -485,4 +485,5 @@ class ControlInventario {
         this.renderizarTabla(this.inventario);
         document.getElementById('modal-filtros-stock').remove();
     }
+}
 document.addEventListener('DOMContentLoaded', () => { window.appStock = new ControlInventario(); });
