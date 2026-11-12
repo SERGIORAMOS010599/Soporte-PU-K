@@ -100,3 +100,11 @@
         height: calc(100vh - 200px) !important; 
     }
 }
+/* ==========================================
+   ORDENAMIENTO Y FILTROS EN TABLAS
+========================================== */
+th.sortable { cursor: pointer; position: relative; padding-right: 25px !important; user-select: none; transition: background 0.2s; }
+th.sortable:hover { background: #222 !important; color: #fff !important; }
+th.sortable::after { content: '↕'; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); opacity: 0.3; font-size: 0.9em; }
+th.sortable.asc::after { content: '↑'; opacity: 1; color: #00e676; }
+th.sortable.desc::after { content: '↓'; opacity: 1; color: #ffb74d; }
