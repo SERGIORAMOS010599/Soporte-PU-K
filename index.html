@@ -198,16 +198,21 @@
         </div>
         
        <!-- PESTAÑA 5: INVENTARIO SATELITAL -->
-        <div id="vista-satelitales" class="vista-oculta">
+        <div id="vista-satelitales" class="vista-oculta" style="display: flex; flex-direction: column; height: 100%; padding: 15px 25px;">
             <div class="satelitales-header">
                 <h1 class="satelitales-titulo">Inventario Satelital</h1>
                 <div class="satelitales-controles">
-                    <button class="btn-satelitales-primario" onclick="appSatelitales.abrirAgregar()">
+                    <button id="btn-agregar-satelital" class="btn-satelitales-primario" onclick="appSatelitales.abrirAgregar()">
                         ➕ Agregar Equipo
                     </button>
-                    <!-- Eliminamos "Refrescar" y lo reemplazamos por el botón de selección (para futura expansión) -->
-                    <button class="btn-satelitales-primario" onclick="alert('Selección de Satelitales en construcción')">
+                    <button id="btn-activar-sat-seleccion" class="btn-satelitales-primario" onclick="appSatelitales.toggleModoSeleccion()">
                         ☑️ Selección de Equipos
+                    </button>
+                    <button id="btn-cancelar-sat-seleccion" class="btn-satelitales-secundario oculto" onclick="appSatelitales.toggleModoSeleccion()">
+                        ✖ Cancelar
+                    </button>
+                    <button id="btn-enviar-sat-salidas" class="btn-satelitales-exito oculto" onclick="appSatelitales.enviarSeleccionadosASalidas()">
+                        📦 Enviar a Salidas
                     </button>
                 </div>
             </div>
@@ -216,6 +221,9 @@
                 <table class="satelitales-table" id="tabla-satelitales-id">
                     <thead>
                         <tr>
+                            <th class="col-check-sat oculto" style="width: 40px; text-align: center;">
+                                <input type="checkbox" id="check-all-sat" class="stock-checkbox" onclick="appSatelitales.toggleTodos(this)">
+                            </th>
                             <th>ESN (IMEI)</th>
                             <th>CÓDIGO AUTENTICACIÓN</th>
                             <th>MODELO</th>
