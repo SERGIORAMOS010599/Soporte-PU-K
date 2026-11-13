@@ -124,9 +124,9 @@ class SoporteTecnico {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({ 
-                    accion: "cambiar_estado_jasper", // <- AHORA COINCIDE CON APPS SCRIPT
+                    accion: "cambiar_estado_jasper", 
                     iccid: iccidUnidad,
-                    estado: nuevoEstado              // <- AHORA COINCIDE CON APPS SCRIPT
+                    estado: nuevoEstado              
                 })
             });
             
