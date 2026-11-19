@@ -4,24 +4,49 @@ class ChatFlotantePUK {
     constructor() {
         this.urlAppsScript = 'https://script.google.com/macros/s/AKfycbxua3f3WK8cOQVV8NGFHaRJ4D7omCK7CptzXtDprnTpooGY-fZxw7m5XoHQgQOAMa2V/exec';
         this.adjuntosPUK = [];
+        this.inicializarDragAndDrop();
     }
 
-    toggleChatPUK() {
+    inicializarDragAndDrop() {
         const panel = document.getElementById('puk-panel-chat');
-        if (panel) panel.classList.toggle('puk-oculto');
-    }
+        if (!panel) return;
 
-    manejarEnterChat(e) {
-        if (e.key === 'Enter') {
-            this.enviarMensajeChat();
-        }
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evento => {
+            panel.addEventListener(evento, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        panel.addEventListener('dragover', () => {
+            panel.style.outline = '2px dashed #ffb74d';
+            panel.style.outlineOffset = '-4px';
+        });
+
+        panel.addEventListener('dragleave', (e) => {
+            // Evita parpadeos al pasar sobre elementos internos del chat
+            if (!panel.contains(e.relatedTarget)) {
+                panel.style.outline = '';
+            }
+        });
+
+        panel.addEventListener('drop', (e) => {
+            panel.style.outline = '';
+            const archivos = Array.from(e.dataTransfer.files);
+            if (archivos.length > 0) {
+                this.procesarArchivos(archivos);
+            }
+        });
     }
 
     seleccionarAdjuntosPUK(input) {
         const archivos = Array.from(input.files);
-        if (archivos.length === 0) return;
+        if (archivos.length > 0) {
+            this.procesarArchivos(archivos);
+        }
+    }
 
-        this.adjuntosPUK = [];
+    procesarArchivos(archivos) {
         const preview = document.getElementById('puk-adjuntos-preview');
         const texto = document.getElementById('puk-adjuntos-texto');
 
