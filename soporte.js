@@ -483,8 +483,7 @@ class SoporteTecnico {
                     e.preventDefault();
                     const pregunta = inputBuscador.value.trim();
                     if (pregunta !== '') {
-                        const promptOculto = `El técnico solicita: "${pregunta}". NOTA INTERNA: El equipo en pantalla es Marca: ${eq.marca}, Modelo: ${eq.modelo}, ID: ${eq.id}. Usa esta información para armar el comando correcto en base a tus manuales y reemplaza el {ID}.`;
-                        this.consultarCerebroPUK(promptOculto);
+                    const promptOculto = `El técnico solicita: "${pregunta}". NOTA INTERNA: El equipo en pantalla es Marca: ${eq.marca}, Modelo: ${eq.modelo}, ID: ${eq.id}. Usa esta información para armar el comando correcto en base a tus manuales y reemplaza el {ID}. REGLA DE FORMATO: Cada comando SMS listo para enviar que incluyas en tu respuesta debes envolverlo estrictamente así: [SMS:comando_exacto] (sin espacio extra después de los dos puntos a menos que el comando del manual lleve espacios al inicio, como Teltonika o Ruptela, y sin comillas ni acentos invertidos adentro).`;                        this.consultarCerebroPUK(promptOculto);
                         inputBuscador.value = '';
                     }
                 }
@@ -543,6 +542,10 @@ class SoporteTecnico {
 
             if (respuesta.success) {
                 let textoHTML = respuesta.respuesta
+                    .replace(/`?\[SMS:([^\]]+)\]`?/g, (match, comando) => {
+                        const cmdCodificado = encodeURIComponent(comando).replace(/'/g, "%27");
+                        return `<a href="javascript:void(0)" onclick="appSoporte.enviarComandoDirectoSMS('${cmdCodificado}')" title="Clic para abrir en Mensajes SMS" style="display: inline-block; margin: 4px 2px; padding: 5px 10px; background: rgba(255, 183, 77, 0.15); border: 1px solid #ffb74d; border-radius: 6px; color: #ffb74d; font-family: monospace; font-weight: bold; text-decoration: none; cursor: pointer;">📩 ${comando}</a>`;
+                    })
                     .replace(/\n/g, '<br>')
                     .replace(/\*\*(.*?)\*\*/g, '<b style="color:#fff;">$1</b>');
                 
@@ -554,6 +557,20 @@ class SoporteTecnico {
             console.error(error);
             this.hablarPUK("¡Grrr! No pude conectarme con mi cerebro en la nube. Revisa tu conexión a internet.", "error");
         }
+    }
+
+    enviarComandoDirectoSMS(comandoCodificado) {
+        const eq = this.equipoSeleccionado;
+        if (!eq) return;
+
+        const numero = eq.linea;
+        if (!numero || numero === 'SIN NÚMERO') {
+            alert("No hay un número vinculado para este equipo.");
+            return;
+        }
+
+        const comando = decodeURIComponent(comandoCodificado);
+        window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
     }
 
     cerrarDetalles() { 
