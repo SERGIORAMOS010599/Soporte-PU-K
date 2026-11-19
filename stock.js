@@ -4,6 +4,7 @@ class ControlInventario {
     constructor() {
         this.tbody = document.getElementById('tbody-stock');
         this.inventarioGlobal = []; 
+        this.datosMostrados = [];
         this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM';
         this.urlAppsScript = 'https://script.google.com/macros/s/AKfycbxua3f3WK8cOQVV8NGFHaRJ4D7omCK7CptzXtDprnTpooGY-fZxw7m5XoHQgQOAMa2V/exec';
         
@@ -137,7 +138,8 @@ class ControlInventario {
                     if (equipo.imei && equipo.imei !== 'S/N') this.inventarioGlobal.push(equipo);
                 }
             });
-            this.renderizarTabla(this.inventarioGlobal);
+            this.datosMostrados = [...this.inventarioGlobal];
+            this.renderizarTabla(this.datosMostrados);
         } catch (error) {
             this.tbody.innerHTML = `<tr><td colspan="14" style="text-align:center; color:#ff4c4c; padding: 20px;">❌ Error al descargar datos.</td></tr>`;
         }
@@ -194,10 +196,12 @@ class ControlInventario {
         });
     }
 
-    filtrarTabla(texto) {
+filtrarTabla(texto) {
         const query = texto.toLowerCase().trim();
-        const filtrados = this.inventarioGlobal.filter(eq => Object.values(eq).some(valor => String(valor).toLowerCase().includes(query)));
-        this.renderizarTabla(filtrados);
+        this.datosMostrados = this.inventarioGlobal.filter(eq =>
+            Object.values(eq).some(valor => String(valor).toLowerCase().includes(query))
+        );
+        this.renderizarTabla(this.datosMostrados);
     }
 
     async sincronizarConJasper(btnObj, inputIccidId, inputLineaId, inputCompaniaId) {
@@ -393,18 +397,18 @@ class ControlInventario {
     // ==========================================
     // ORDENAMIENTO DE COLUMNAS STOCK (A-Z, Z-A)
     // ==========================================
-    ordenarTabla(columna, thElement) {
+ordenarTabla(columna, thElement) {
         if (this.sortCol === columna) {
-            this.sortAsc = !this.sortAsc; 
+            this.sortAsc = !this.sortAsc;
         } else {
             this.sortCol = columna;
-            this.sortAsc = true; 
+            this.sortAsc = true;
         }
 
         document.querySelectorAll('#tabla-stock-id th').forEach(th => th.classList.remove('asc', 'desc'));
         if (thElement) thElement.classList.add(this.sortAsc ? 'asc' : 'desc');
 
-        this.inventarioGlobal.sort((a, b) => {
+        this.datosMostrados.sort((a, b) => {
             let valA = String(a[columna] || '').toLowerCase();
             let valB = String(b[columna] || '').toLowerCase();
 
@@ -420,7 +424,7 @@ class ControlInventario {
             if (valA > valB) return this.sortAsc ? 1 : -1;
             return 0;
         });
-        this.renderizarTabla(this.inventarioGlobal);
+        this.renderizarTabla(this.datosMostrados);
     }
 
     // ==========================================
@@ -469,19 +473,20 @@ class ControlInventario {
         const marcaFiltro = document.getElementById('filtro-stock-marca').value.toLowerCase();
         const estadoFiltro = document.getElementById('filtro-stock-estado').value.toLowerCase();
         const ubiFiltro = document.getElementById('filtro-stock-ubi').value.toLowerCase();
-        
-        let filtrados = this.inventarioGlobal.filter(eq => {
+
+        this.datosMostrados = this.inventarioGlobal.filter(eq => {
             let pasaMarca = marcaFiltro === "" || String(eq.marca).toLowerCase() === marcaFiltro;
             let pasaEstado = estadoFiltro === "" || String(eq.estado).toLowerCase() === estadoFiltro;
             let pasaUbi = ubiFiltro === "" || String(eq.ubicacion).toLowerCase().includes(ubiFiltro);
             return pasaMarca && pasaEstado && pasaUbi;
         });
-        this.renderizarTabla(filtrados);
+        this.renderizarTabla(this.datosMostrados);
         document.getElementById('modal-filtros-stock').remove();
     }
 
     limpiarFiltrosAvanzados() {
-        this.renderizarTabla(this.inventarioGlobal);
+        this.datosMostrados = [...this.inventarioGlobal];
+        this.renderizarTabla(this.datosMostrados);
         document.getElementById('modal-filtros-stock').remove();
     }
 }
