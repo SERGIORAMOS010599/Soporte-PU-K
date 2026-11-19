@@ -1,4 +1,4 @@
-// js/puk-chat.js
+// puk-chat.js
 
 class ChatFlotantePUK {
     constructor() {
@@ -24,7 +24,6 @@ class ChatFlotantePUK {
         });
 
         panel.addEventListener('dragleave', (e) => {
-            // Evita parpadeos al pasar sobre elementos internos del chat
             if (!panel.contains(e.relatedTarget)) {
                 panel.style.outline = '';
             }
@@ -37,6 +36,17 @@ class ChatFlotantePUK {
                 this.procesarArchivos(archivos);
             }
         });
+    }
+
+    toggleChatPUK() {
+        const panel = document.getElementById('puk-panel-chat');
+        if (panel) panel.classList.toggle('puk-oculto');
+    }
+
+    manejarEnterChat(e) {
+        if (e.key === 'Enter') {
+            this.enviarMensajeChat();
+        }
     }
 
     seleccionarAdjuntosPUK(input) {
@@ -83,11 +93,9 @@ class ChatFlotantePUK {
         const mensajeUsuario = input.value.trim();
         if (!mensajeUsuario) return;
 
-        // Capturamos y limpiamos adjuntos solo cuando sí hay mensaje
         const adjuntosAEnviar = [...this.adjuntosPUK];
         this.limpiarAdjuntosPUK();
 
-        // Mostrar mensaje del usuario (y los nombres de archivos si adjuntó)
         let burbujaUsuario = mensajeUsuario;
         if (adjuntosAEnviar.length > 0) {
             const nombres = adjuntosAEnviar.map(a => a.nombre).join(', ');
@@ -101,7 +109,6 @@ class ChatFlotantePUK {
             : 'Olfateando el manual y revisando el equipo... 🐕';
         const idPensando = this.agregarBurbujaChat(textoEspera, 'puk-ia');
 
-        // Solo inyectamos contexto de Mapon si NO es una solicitud de correo a proveedor
         const msgLower = mensajeUsuario.toLowerCase();
         const esCorreoProveedor = msgLower.includes('telcel') || msgLower.includes('syscom');
         let contextoOculto = "";
