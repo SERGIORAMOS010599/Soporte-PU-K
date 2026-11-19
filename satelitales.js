@@ -535,5 +535,5 @@ class InventarioSatelital {
     }
 
     // INICIALIZACIÓN
-    document.addEventListener('DOMContentLoaded', () => { window.appSatelitales = new InventarioSatelital(); 
-    });
+    document.addEventListener('DOMContentLoaded', () => { window.appSatelitales = new InventarioSatelital(); }
+    );
