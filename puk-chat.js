@@ -4,6 +4,7 @@ class ChatFlotantePUK {
     constructor() {
         this.urlAppsScript = 'https://script.google.com/macros/s/AKfycbxua3f3WK8cOQVV8NGFHaRJ4D7omCK7CptzXtDprnTpooGY-fZxw7m5XoHQgQOAMa2V/exec';
         this.adjuntosPUK = [];
+        this.correoPendiente = null;
         this.inicializarDragAndDrop();
     }
 
