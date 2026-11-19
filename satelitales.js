@@ -528,12 +528,14 @@ class InventarioSatelital {
         document.getElementById('modal-filtros-sat').remove();
     }
     
-    limpiarFiltrosAvanzados() {
+limpiarFiltrosAvanzados() {
         this.datosMostrados = [...this.inventario];
         this.renderizarTabla(this.datosMostrados);
         document.getElementById('modal-filtros-sat').remove();
-    }
+    } 
+}    
 
-    // INICIALIZACIÓN
-    document.addEventListener('DOMContentLoaded', () => { window.appSatelitales = new InventarioSatelital(); }
-    );
+// INICIALIZACIÓN
+document.addEventListener('DOMContentLoaded', () => {
+    window.appSatelitales = new InventarioSatelital();
+});
