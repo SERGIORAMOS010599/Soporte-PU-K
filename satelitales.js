@@ -4,6 +4,7 @@ class InventarioSatelital {
     constructor() {
         this.tbody = document.getElementById('tbody-satelitales');
         this.inventario = []; 
+        this.datosMostrados = [];
         this.sheetId = '1JpRyU-cFuGpmZpfuTil7FicbyFUrX3GS_nMUZLSUKKM';
         this.urlAppsScript = 'https://script.google.com/macros/s/AKfycbxua3f3WK8cOQVV8NGFHaRJ4D7omCK7CptzXtDprnTpooGY-fZxw7m5XoHQgQOAMa2V/exec';
         
@@ -86,7 +87,8 @@ class InventarioSatelital {
                 }
             });
             
-            this.renderizarTabla(this.inventario);
+            this.datosMostrados = [...this.inventario];
+            this.renderizarTabla(this.datosMostrados);
         } catch (error) {
             console.error(error);
             this.tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; color:#ff4c4c; padding: 20px;">❌ Error al descargar datos.</td></tr>`;
@@ -136,8 +138,10 @@ class InventarioSatelital {
 
     filtrarTabla(texto) {
         const query = texto.toLowerCase().trim();
-        const filtrados = this.inventario.filter(eq => Object.values(eq).some(valor => String(valor).toLowerCase().includes(query)));
-        this.renderizarTabla(filtrados);
+        this.datosMostrados = this.inventario.filter(eq =>
+            Object.values(eq).some(valor => String(valor).toLowerCase().includes(query))
+        );
+        this.renderizarTabla(this.datosMostrados);
     }
 
     // --- ACCIÓN DE ENVIAR A STOCK ---
@@ -408,21 +412,18 @@ class InventarioSatelital {
     // ==========================================
     ordenarTabla(columna, thElement) {
         if (this.sortCol === columna) {
-            this.sortAsc = !this.sortAsc; 
+            this.sortAsc = !this.sortAsc;
         } else {
             this.sortCol = columna;
-            this.sortAsc = true; 
+            this.sortAsc = true;
         }
 
         document.querySelectorAll('#tabla-satelitales-id th').forEach(th => {
             th.classList.remove('asc', 'desc');
         });
-        
-        if (thElement) {
-            thElement.classList.add(this.sortAsc ? 'asc' : 'desc');
-        }
+        if (thElement) thElement.classList.add(this.sortAsc ? 'asc' : 'desc');
 
-        this.inventario.sort((a, b) => {
+        this.datosMostrados.sort((a, b) => {
             let valA = String(a[columna] || '').toLowerCase();
             let valB = String(b[columna] || '').toLowerCase();
 
@@ -440,7 +441,7 @@ class InventarioSatelital {
             return 0;
         });
 
-        this.renderizarTabla(this.inventario);
+        this.renderizarTabla(this.datosMostrados);
     }
 
     // ==========================================
@@ -503,12 +504,12 @@ class InventarioSatelital {
         const estadoFiltro = document.getElementById('filtro-estado').value.toLowerCase();
         const fechaInicio = document.getElementById('filtro-fecha-inicio').value;
         const fechaFin = document.getElementById('filtro-fecha-fin').value;
-        
-        let filtrados = this.inventario.filter(eq => {
+
+        this.datosMostrados = this.inventario.filter(eq => {
             let pasaCliente = clienteFiltro === "" || String(eq.cliente).toLowerCase() === clienteFiltro;
             let pasaEstado = estadoFiltro === "" || String(eq.estado).toLowerCase() === estadoFiltro;
             let pasaFecha = true;
-            
+
             if (fechaInicio || fechaFin) {
                 const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
                 if (dateRegex.test(eq.fechaVen)) {
@@ -516,22 +517,22 @@ class InventarioSatelital {
                     if (fechaInicio && isoVen < fechaInicio) pasaFecha = false;
                     if (fechaFin && isoVen > fechaFin) pasaFecha = false;
                 } else {
-                    pasaFecha = false; 
+                    pasaFecha = false;
                 }
             }
-            
+
             return pasaCliente && pasaEstado && pasaFecha;
         });
-        
-        this.renderizarTabla(filtrados);
+
+        this.renderizarTabla(this.datosMostrados);
         document.getElementById('modal-filtros-sat').remove();
     }
     
     limpiarFiltrosAvanzados() {
-        this.renderizarTabla(this.inventario);
+        this.datosMostrados = [...this.inventario];
+        this.renderizarTabla(this.datosMostrados);
         document.getElementById('modal-filtros-sat').remove();
     }
-}
 
 // INICIALIZACIÓN
 document.addEventListener('DOMContentLoaded', () => { window.appSatelitales = new InventarioSatelital(); });
