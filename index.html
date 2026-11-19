@@ -268,7 +268,13 @@
         <div id="puk-mensajes">
             <div class="puk-mensaje puk-ia">¡Guau! Hola, soy PU-K. ¿En qué te ayudo con los equipos de telemetría hoy?</div>
         </div>
+       <div id="puk-adjuntos-preview" style="display: none; padding: 6px 12px; background: #1a1a1a; border-top: 1px solid #333; font-size: 0.78rem; color: #ffb74d; justify-content: space-between; align-items: center;">
+            <span id="puk-adjuntos-texto" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+            <span onclick="appSoporte.limpiarAdjuntosPUK()" style="cursor: pointer; color: #ff5252; font-weight: bold; margin-left: 10px;" title="Quitar archivos">✖</span>
+        </div>
         <div class="puk-input-area">
+            <input type="file" id="puk-archivo-input" multiple accept=".pdf,.xml,.jpg,.jpeg,.png" style="display: none;" onchange="appSoporte.seleccionarAdjuntosPUK(this)">
+            <button type="button" onclick="document.getElementById('puk-archivo-input').click()" title="Adjuntar factura (PDF/XML)" style="background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; padding: 0 10px; cursor: pointer; font-size: 1.1rem;">📎</button>
             <input type="text" id="puk-input-chat" placeholder="Pregunta algo al manual..." onkeypress="appSoporte.manejarEnterChat(event)">
             <button onclick="appSoporte.enviarMensajeChat()">Enviar</button>
         </div>
