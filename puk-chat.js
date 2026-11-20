@@ -1,4 +1,4 @@
-// puk-chat.js
+// js/puk-chat.js
 
 class ChatFlotantePUK {
     constructor() {
@@ -106,7 +106,7 @@ class ChatFlotantePUK {
         input.value = '';
 
         const textoEspera = adjuntosAEnviar.length > 0
-            ? 'Procesando solicitud y adjuntando facturas... 🐕'
+            ? 'Procesando solicitud y preparando correo... 🐕'
             : 'Olfateando el manual y revisando el equipo... 🐕';
         const idPensando = this.agregarBurbujaChat(textoEspera, 'puk-ia');
 
@@ -163,7 +163,33 @@ class ChatFlotantePUK {
                     .replace(/\n/g, '<br>')
                     .replace(/\*\*(.*?)\*\*/g, '<b style="color:#ffb74d;">$1</b>');
 
-                this.agregarBurbujaChat(textoHTML, 'puk-ia');
+                if (respuesta.requiereConfirmacion && respuesta.datosCorreo) {
+                    this.correoPendiente = {
+                        ...respuesta.datosCorreo,
+                        adjuntos: adjuntosAEnviar
+                    };
+
+                    const nombresAdjuntos = adjuntosAEnviar.length > 0
+                        ? adjuntosAEnviar.map(a => a.nombre).join(', ')
+                        : '<span style="color:#ff5252;">Ninguno (sin factura adjunta)</span>';
+
+                    const tarjetaConfirmacion = `
+                        ${textoHTML}
+                        <div style="margin-top: 10px; background: #161616; border: 1px solid #444; border-radius: 8px; padding: 10px; font-size: 0.8rem; color: #ddd;">
+                            <div style="margin-bottom: 4px;"><b style="color:#ffb74d;">Para:</b> ${respuesta.datosCorreo.destinatarios}</div>
+                            <div style="margin-bottom: 4px;"><b style="color:#ffb74d;">Asunto:</b> ${respuesta.datosCorreo.asunto}</div>
+                            <div style="margin-bottom: 8px;"><b style="color:#ffb74d;">Adjuntos:</b> 📎 ${nombresAdjuntos}</div>
+                            <div style="background: #1f1f1f; border-left: 3px solid #ffb74d; padding: 8px; border-radius: 4px; white-space: pre-wrap; font-size: 0.78rem; color: #ccc; max-height: 180px; overflow-y: auto;">${respuesta.datosCorreo.cuerpo}</div>
+                            <div class="puk-acciones-correo" style="display: flex; gap: 8px; margin-top: 10px;">
+                                <button onclick="appPukChat.confirmarEnvioCorreo(this)" style="flex: 1; background: #00c853; color: #fff; border: none; padding: 7px; border-radius: 6px; cursor: pointer; font-weight: bold;">✅ Confirmar y Enviar</button>
+                                <button onclick="appPukChat.cancelarEnvioCorreo(this)" style="flex: 1; background: #444; color: #fff; border: none; padding: 7px; border-radius: 6px; cursor: pointer; font-weight: bold;">❌ Cancelar</button>
+                            </div>
+                        </div>
+                    `;
+                    this.agregarBurbujaChat(tarjetaConfirmacion, 'puk-ia');
+                } else {
+                    this.agregarBurbujaChat(textoHTML, 'puk-ia');
+                }
             } else {
                 this.agregarBurbujaChat("¡Grrr! Hubo un error al pensar: " + respuesta.error, 'puk-ia');
             }
@@ -173,6 +199,55 @@ class ChatFlotantePUK {
             this.agregarBurbujaChat("¡Grrr! No pude conectarme con mi cerebro en la nube.", 'puk-ia');
             console.error(error);
         }
+    }
+
+    async confirmarEnvioCorreo(btn) {
+        if (!this.correoPendiente) return;
+
+        const datosAEnviar = { ...this.correoPendiente };
+        this.correoPendiente = null;
+
+        const cajaBotones = btn.parentElement;
+        if (cajaBotones) {
+            cajaBotones.innerHTML = '<span style="color: #ffb74d; font-size: 0.8rem;">⏳ Enviando correo con adjuntos...</span>';
+        }
+
+        try {
+            const peticion = await fetch(this.urlAppsScript, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    accion: 'enviar_correo_confirmado',
+                    destinatarios: datosAEnviar.destinatarios,
+                    asunto: datosAEnviar.asunto,
+                    cuerpo: datosAEnviar.cuerpo,
+                    adjuntos: datosAEnviar.adjuntos
+                })
+            });
+            const respuesta = await peticion.json();
+
+            if (respuesta.success) {
+                if (cajaBotones) cajaBotones.innerHTML = '<span style="color: #00e676; font-weight: bold;">✅ Enviado</span>';
+                const textoHTML = respuesta.mensaje.replace(/\*\*(.*?)\*\*/g, '<b style="color:#ffb74d;">$1</b>');
+                this.agregarBurbujaChat(textoHTML, 'puk-ia');
+            } else {
+                if (cajaBotones) cajaBotones.innerHTML = '<span style="color: #ff5252;">❌ Error al enviar</span>';
+                this.agregarBurbujaChat("¡Grrr! No se pudo enviar el correo: " + respuesta.error, 'puk-ia');
+            }
+        } catch (error) {
+            if (cajaBotones) cajaBotones.innerHTML = '<span style="color: #ff5252;">❌ Error de red</span>';
+            this.agregarBurbujaChat("¡Grrr! Falló la conexión al intentar enviar el correo.", 'puk-ia');
+            console.error(error);
+        }
+    }
+
+    cancelarEnvioCorreo(btn) {
+        this.correoPendiente = null;
+        const cajaBotones = btn.parentElement;
+        if (cajaBotones) {
+            cajaBotones.innerHTML = '<span style="color: #999; font-style: italic;">❌ Envío cancelado</span>';
+        }
+        this.agregarBurbujaChat("Entendido, cancelé el envío. No se mandó ningún correo. 🐾", 'puk-ia');
     }
 
     agregarBurbujaChat(texto, clase) {
