@@ -438,26 +438,6 @@ class SoporteTecnico {
 
         const esSuntech = modeloUpper.includes('SUNTECH') || /\bST\s*-?\s*\d/.test(modeloUpper);
         if (esSuntech && cajaBotonesRedondos) {
-            const protocoloAuto = this.detectarProtocoloSuntech(eq.modelo);
-            this.protocoloSuntechActivo = protocoloAuto;
-
-            const barraProto = document.createElement('div');
-            barraProto.id = 'contenedor-protocolo-suntech';
-            barraProto.style.cssText = "width: 100%; margin: 10px 0 4px 0; padding: 8px 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 11px; color: #ccc; box-sizing: border-box;";
-            barraProto.innerHTML = `
-                <span>⚙️ <b style="color:#ffb74d;">Protocolo Suntech:</b></span>
-                <select id="select-protocolo-suntech" onchange="appSoporte.protocoloSuntechActivo = this.value" style="background: #222; color: #fff; border: 1px solid #555; border-radius: 5px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;">
-                    <option value="UNIVERSAL" ${protocoloAuto === 'UNIVERSAL' ? 'selected' : ''}>Universal (CMD;...)</option>
-                    <option value="ST600CMD" ${protocoloAuto === 'ST600CMD' ? 'selected' : ''}>Legacy ST600 (ST600CMD)</option>
-                    <option value="ST300CMD" ${protocoloAuto === 'ST300CMD' ? 'selected' : ''}>Legacy ST300 (ST300CMD)</option>
-                    <option value="SA200CMD" ${protocoloAuto === 'SA200CMD' ? 'selected' : ''}>Legacy ST200 (SA200CMD)</option>
-                    <option value="DESCONOCIDO" ${protocoloAuto === 'DESCONOCIDO' ? 'selected' : ''}>⚠️ No reconocido (elegir)</option>
-                </select>
-            `;
-            cajaBotonesRedondos.parentNode.insertBefore(barraProto, cajaBotonesRedondos.nextSibling);
-        } else {
-            this.protocoloSuntechActivo = null;
-        }
         }
 
         // INYECCIÓN SIEMPRE VISIBLE DEL BOTÓN DE JASPER 
