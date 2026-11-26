@@ -432,6 +432,32 @@ class SoporteTecnico {
             
             cajaBotonesRedondos.appendChild(btnWeb);
             cajaBotonesRedondos.appendChild(btnComando);
+            // SELECTOR AUTOMÁTICO / MANUAL DE PROTOCOLO SUNTECH
+        const selectorViejo = document.getElementById('contenedor-protocolo-suntech');
+        if (selectorViejo) selectorViejo.remove();
+
+        const esSuntech = modeloUpper.includes('SUNTECH') || /\bST\s*-?\s*\d/.test(modeloUpper);
+        if (esSuntech && cajaBotonesRedondos) {
+            const protocoloAuto = this.detectarProtocoloSuntech(eq.modelo);
+            this.protocoloSuntechActivo = protocoloAuto;
+
+            const barraProto = document.createElement('div');
+            barraProto.id = 'contenedor-protocolo-suntech';
+            barraProto.style.cssText = "width: 100%; margin: 10px 0 4px 0; padding: 8px 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 11px; color: #ccc; box-sizing: border-box;";
+            barraProto.innerHTML = `
+                <span>⚙️ <b style="color:#ffb74d;">Protocolo Suntech:</b></span>
+                <select id="select-protocolo-suntech" onchange="appSoporte.protocoloSuntechActivo = this.value" style="background: #222; color: #fff; border: 1px solid #555; border-radius: 5px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;">
+                    <option value="UNIVERSAL" ${protocoloAuto === 'UNIVERSAL' ? 'selected' : ''}>Universal (CMD;...)</option>
+                    <option value="ST600CMD" ${protocoloAuto === 'ST600CMD' ? 'selected' : ''}>Legacy ST600 (ST600CMD)</option>
+                    <option value="ST300CMD" ${protocoloAuto === 'ST300CMD' ? 'selected' : ''}>Legacy ST300 (ST300CMD)</option>
+                    <option value="SA200CMD" ${protocoloAuto === 'SA200CMD' ? 'selected' : ''}>Legacy ST200 (SA200CMD)</option>
+                    <option value="DESCONOCIDO" ${protocoloAuto === 'DESCONOCIDO' ? 'selected' : ''}>⚠️ No reconocido (elegir)</option>
+                </select>
+            `;
+            cajaBotonesRedondos.parentNode.insertBefore(barraProto, cajaBotonesRedondos.nextSibling);
+        } else {
+            this.protocoloSuntechActivo = null;
+        }
         }
 
         // INYECCIÓN SIEMPRE VISIBLE DEL BOTÓN DE JASPER 
@@ -645,6 +671,22 @@ class SoporteTecnico {
         }
     }
 
+    detectarProtocoloSuntech(modeloRaw) {
+        // Normaliza: quita espacios, guiones y pasa a mayúsculas ("ST-4315 " -> "ST4315")
+        const m = String(modeloRaw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+        // Generación Universal: ST33xx, toda la serie ST4xxx y toda la serie ST8xxx
+        if (m.startsWith('ST33') || m.startsWith('ST4') || m.startsWith('ST8')) {
+            return 'UNIVERSAL';
+        }
+        // Generación Pasada (Legacy)
+        if (m.startsWith('ST6')) return 'ST600CMD';
+        if (m.startsWith('ST3')) return 'ST300CMD';
+        if (m.startsWith('ST2')) return 'SA200CMD';
+
+        return 'DESCONOCIDO';
+    }
+
     enviarSMS(accion, eqIdDesdeTarjeta = null) {
         let eq = eqIdDesdeTarjeta 
             ? this.equipos.find(e => String(e.id) === String(eqIdDesdeTarjeta)) 
@@ -658,56 +700,100 @@ class SoporteTecnico {
             return;
         }
 
-        const marca = eq.marca.toUpperCase().trim();
-        const modelo = eq.modelo.toUpperCase().trim();
-        const id = String(eq.id).trim(); 
+        const marca = String(eq.marca || '').toUpperCase().trim();
+        const modelo = String(eq.modelo || '').toUpperCase().trim();
+        const id = String(eq.id).trim();
+        const esSuntech = marca.includes("SUNTECH") || /^ST\s*-?\s*\d/.test(modelo);
+
+        // Usa el protocolo del selector si está abierto ese equipo, o lo detecta automáticamente
+        let protoSuntech = null;
+        if (esSuntech) {
+            protoSuntech = (this.equipoSeleccionado && String(this.equipoSeleccionado.id) === id && this.protocoloSuntechActivo)
+                ? this.protocoloSuntechActivo
+                : this.detectarProtocoloSuntech(modelo);
+
+            if (protoSuntech === 'DESCONOCIDO') {
+                alert(`⚠️ Modelo Suntech no reconocido (${eq.modelo}).\nSelecciona el protocolo (Universal o Legacy) en el menú de Protocolo Suntech antes de enviar el comando.`);
+                return;
+            }
+        }
+
         let comando = "";
 
         if (accion === 'apagar') {
-            if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Enable1`;
-            else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Enable1`;
-            else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Enable1`;
-            else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;01`;
-            else if (marca === "TELTONIKA") comando = "  setdigout 1 0"; 
+            if (esSuntech) {
+                comando = (protoSuntech === 'UNIVERSAL')
+                    ? `CMD;${id};04;01`
+                    : `${protoSuntech};${id};02;Enable1`;
+            } else if (marca.includes("TELTONIKA")) {
+                comando = "  setdigout 1 0";
+            }
         }
         else if (accion === 'encender') {
-            if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;Disable1`;
-            else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;Disable1`;
-            else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;Disable1`;
-            else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};04;02`;
-            else if (marca === "TELTONIKA") comando = "  setdigout 0 0";
+            if (esSuntech) {
+                comando = (protoSuntech === 'UNIVERSAL')
+                    ? `CMD;${id};04;02`
+                    : `${protoSuntech};${id};02;Disable1`;
+            } else if (marca.includes("TELTONIKA")) {
+                comando = "  setdigout 0 0";
+            }
         } 
         else if (accion === 'reiniciar') {
-            if (marca === "SUNTECH") comando = `CMD;${id};03;03`;
-            else if (marca === "TELTONIKA") comando = "  cpureset";
-            else if (marca === "RUPTELA") comando = " reset";
-            else if (marca === "CONCOX" || marca === "JIMIIOT") comando = "REBOOT#";
+            if (esSuntech) {
+                comando = (protoSuntech === 'UNIVERSAL')
+                    ? `CMD;${id};03;03`
+                    : `${protoSuntech};${id};02;Reboot`;
+            } else if (marca.includes("TELTONIKA")) {
+                comando = "  cpureset";
+            } else if (marca.includes("RUPTELA")) {
+                comando = " reset";
+            } else if (marca.includes("CONCOX") || marca.includes("JIMIIOT")) {
+                comando = "REBOOT#";
+            }
         }
         else if (accion === 'configuracion') {
-            if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;PresetA`;
-            else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;PresetA`;
-            else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;PresetA`;
-            else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};03;05`;
-            else if (marca.startsWith("TELTONIKA")) comando = "  getparam 2001:;2002:;2003:;2004:;2005:;2006:;1004:";
-            else if (marca.startsWith("RUPTELA")) comando = " getapn";
-            else if (marca.startsWith("CONCOX" ) || marca.startsWith("JIMIIOT")) comando = "GPRSSET#";
+            if (esSuntech) {
+                comando = (protoSuntech === 'UNIVERSAL')
+                    ? `CMD;${id};03;05`
+                    : `${protoSuntech};${id};02;PresetA`;
+            } else if (marca.includes("TELTONIKA")) {
+                comando = "  getparam 2001:;2002:;2003:;2004:;2005:;2006:;1004:";
+            } else if (marca.includes("RUPTELA")) {
+                comando = " getapn";
+            } else if (marca.includes("CONCOX") || marca.includes("JIMIIOT")) {
+                comando = "GPRSSET#";
+            }
         }
         else if (accion === 'borrar') {
-            if (modelo.startsWith("ST6")) comando = `ST600CMD;${id};02;EraseAll`;
-            else if (modelo.startsWith("ST30") || modelo.startsWith("ST34")) comando = `ST300CMD;${id};02;EraseAll`;
-            else if (modelo.startsWith("ST2")) comando = `SA200CMD;${id};02;EraseAll`;
-            else if (modelo.startsWith("ST33") || modelo.startsWith("ST43") || modelo.startsWith("ST82")) comando = `CMD;${id};05;02`;
-            else if (marca.startsWith("RUPTELA")) comando = " delrecords";
-            else if (marca.startsWith("TELTONIKA")) comando = "  deleterecords";
+            if (esSuntech) {
+                comando = (protoSuntech === 'UNIVERSAL')
+                    ? `CMD;${id};05;02`
+                    : `${protoSuntech};${id};02;EraseAll`;
+            } else if (marca.includes("RUPTELA")) {
+                comando = " delrecords";
+            } else if (marca.includes("TELTONIKA")) {
+                comando = "  deleterecords";
+            }
         }
         else if (accion === 'comando_plataforma') {
-            if (marca === "SUNTECH") comando = `CMD;${id};01;01`;
-            else if (marca === "TELTONIKA") comando = "  web_connect";
-            else if (marca === "RUPTELA") comando = " dmpfconnect";
+            if (esSuntech) {
+                if (protoSuntech === 'UNIVERSAL') {
+                    comando = `CMD;${id};01;01`;
+                } else {
+                    alert(`ℹ️ El protocolo ${protoSuntech} (generación pasada) no usa el comando SCUTI Universal. Si este equipo tiene firmware universal, cambia el selector a "Universal".`);
+                    return;
+                }
+            } else if (marca.includes("TELTONIKA")) {
+                comando = "  web_connect";
+            } else if (marca.includes("RUPTELA")) {
+                comando = " dmpfconnect";
+            }
         }
 
         if (comando) {
             window.open(`sms:${numero}?body=${encodeURIComponent(comando)}`, '_self');
+        } else {
+            alert(`⚠️ No hay un comando "${accion}" configurado para ${eq.marca} ${eq.modelo}.`);
         }
     }
     async devolverAStock() {
