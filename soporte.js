@@ -672,17 +672,17 @@ class SoporteTecnico {
     }
 
     detectarProtocoloSuntech(modeloRaw) {
-        // Normaliza: quita espacios, guiones y pasa a mayúsculas ("ST-4315 " -> "ST4315")
+        // Limpia espacios y guiones: "ST-4315 W" -> "ST4315W"
         const m = String(modeloRaw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 
-        // Generación Universal: ST33xx, toda la serie ST4xxx y toda la serie ST8xxx
-        if (m.startsWith('ST33') || m.startsWith('ST4') || m.startsWith('ST8')) {
+        // Generación Universal: ST4xxx (ST4315, ST4305, etc.), ST8xxx (ST8000, ST8200, ST8310...) y ST3xxx de 4 dígitos (ST3000, ST3310...)
+        if (/ST4\d/.test(m) || /ST8\d/.test(m) || /ST3\d{3}/.test(m)) {
             return 'UNIVERSAL';
         }
-        // Generación Pasada (Legacy)
-        if (m.startsWith('ST6')) return 'ST600CMD';
-        if (m.startsWith('ST3')) return 'ST300CMD';
-        if (m.startsWith('ST2')) return 'SA200CMD';
+        // Generación Pasada (Legacy): ST6xx, ST3xx (3 dígitos) y ST2xx
+        if (/ST6\d/.test(m)) return 'ST600CMD';
+        if (/ST3\d{2}(?!\d)/.test(m)) return 'ST300CMD';
+        if (/ST2\d/.test(m)) return 'SA200CMD';
 
         return 'DESCONOCIDO';
     }
@@ -703,17 +703,13 @@ class SoporteTecnico {
         const marca = String(eq.marca || '').toUpperCase().trim();
         const modelo = String(eq.modelo || '').toUpperCase().trim();
         const id = String(eq.id).trim();
-        const esSuntech = marca.includes("SUNTECH") || /^ST\s*-?\s*\d/.test(modelo);
+        const esSuntech = marca.includes("SUNTECH") || /ST\s*-?\s*\d/.test(modelo);
 
-        // Usa el protocolo del selector si está abierto ese equipo, o lo detecta automáticamente
         let protoSuntech = null;
         if (esSuntech) {
-            protoSuntech = (this.equipoSeleccionado && String(this.equipoSeleccionado.id) === id && this.protocoloSuntechActivo)
-                ? this.protocoloSuntechActivo
-                : this.detectarProtocoloSuntech(modelo);
-
+            protoSuntech = this.detectarProtocoloSuntech(modelo);
             if (protoSuntech === 'DESCONOCIDO') {
-                alert(`⚠️ Modelo Suntech no reconocido (${eq.modelo}).\nSelecciona el protocolo (Universal o Legacy) en el menú de Protocolo Suntech antes de enviar el comando.`);
+                alert(`⚠️ Modelo Suntech no reconocido (${eq.modelo}). Revisa el nombre del modelo en el inventario.`);
                 return;
             }
         }
@@ -780,7 +776,7 @@ class SoporteTecnico {
                 if (protoSuntech === 'UNIVERSAL') {
                     comando = `CMD;${id};01;01`;
                 } else {
-                    alert(`ℹ️ El protocolo ${protoSuntech} (generación pasada) no usa el comando SCUTI Universal. Si este equipo tiene firmware universal, cambia el selector a "Universal".`);
+                    alert(`ℹ️ El modelo ${eq.modelo} (${protoSuntech}) es generación pasada y no soporta el comando SCUTI Universal.`);
                     return;
                 }
             } else if (marca.includes("TELTONIKA")) {
